@@ -1,0 +1,121 @@
+# Copyright 2021 The Pigweed Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
+import("//build_overrides/pigweed.gni")
+
+import("$dir_pw_arduino_build/arduino.gni")
+import("$dir_pw_build/python.gni")
+import("$dir_pw_tokenizer/database.gni")
+import("$dir_pw_unit_test/test.gni")
+
+# Lists all the targets build by default with e.g. `ninja -C out`.
+group("default") {
+  deps = [
+    ":applications",
+    ":arduino",
+    ":host",
+    ":python.lint",
+    ":python.tests",
+  ]
+}
+
+# Group all targets that run on host only, e.g. tests, utils.
+group("host") {
+  deps = [ ":host_tests(//targets/host:host_debug_tests)" ]
+}
+
+# Arduino specific targets.
+group("arduino") {
+  if (pw_arduino_build_CORE_PATH != "") {
+    deps = [ ":arduino_tests(//targets/arduino:arduino_debug_tests)" ]
+
+    if (pw_arduino_build_CORE_NAME == "teensy") {
+      deps += []
+    }
+  }
+}
+
+# stm32f429i_disc1 specific targets.
+group("stm32f429i_disc1") {
+  _default_toolchain = "//targets/stm32f429i-disc1:stm32f429i_disc1_debug"
+  _testing_toolchain = "${_default_toolchain}_tests"
+  deps = [
+    # ":app(${_default_toolchain})",
+    ":tests(${_testing_toolchain})",
+  ]
+}
+
+# Python packages are built using the host toolchain.
+pw_python_group("python") {
+  # This depends on the 'tools' target in //tools/BUILD.gn
+  python_deps = [
+    "tools",
+    "//third_party/pigweed/pw_env_setup:python",
+    "//third_party/pigweed/pw_env_setup:target_support_packages",
+  ]
+}
+
+group("applications") {
+  deps = []
+
+  # Teensy 3.0/4.0 applications steps.
+  if (pw_arduino_build_CORE_PATH != "") {
+    deps += [
+      ":applications_tests(//targets/arduino:arduino_debug_tests)",
+      "//applications/rpc:all(//targets/arduino:arduino_debug)",
+      "//applications/strings:all(//targets/arduino:arduino_debug)",
+    ]
+  }
+
+  # STMicroelectronics STM32F429I-DISC1 applications steps.
+  deps += [
+    ":applications_tests(//targets/stm32f429i-disc1:stm32f429i_disc1_debug_tests)",
+    "//applications/rpc:all(//targets/stm32f429i-disc1:stm32f429i_disc1_debug)",
+    "//applications/strings:all(//targets/stm32f429i-disc1:stm32f429i_disc1_debug)",
+  ]
+
+  # Host applications steps.
+  deps += [
+    ":applications_tests(//targets/host:host_debug_tests)",
+    "//applications/strings:all(//targets/host:host_debug)",
+  ]
+}
+
+# Group the different modules tests together.
+pw_test_group("tests") {
+  group_deps = [ "//applications/strings:tests" ]
+
+  if (pw_arduino_build_CORE_NAME == "teensy") {
+    group_deps += []
+  }
+}
+
+# Test groups for each platform that will build and optionally run the tests.
+foreach(test_group,
+        [
+          "arduino",
+          "host",
+          "applications",
+        ]) {
+  group("${test_group}_tests") {
+    deps = []
+    if (pw_unit_test_AUTOMATIC_RUNNER == "") {
+      # Without a test runner defined, build the tests but don't run them.
+      deps += [ ":tests" ]
+    } else {
+      # With a test runner, build and run tests.
+      deps += [ ":tests_run" ]
+    }
+  }
+}
