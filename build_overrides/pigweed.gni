@@ -22,19 +22,16 @@ import("$dir_pigweed/modules.gni")
 
 # Experimental modules.
 declare_args() {
-  dir_pw_board_led = get_path_info("//modules/pw_board_led", "abspath")
-  dir_pw_board_led_arduino =
-      get_path_info("//modules/pw_board_led_arduino", "abspath")
-  dir_pw_board_led_host =
-      get_path_info("//modules/pw_board_led_host", "abspath")
+  dir_pw_board_led = get_path_info("//pw_board_led", "abspath")
+  dir_pw_board_led_arduino = get_path_info("//pw_board_led_arduino", "abspath")
+  dir_pw_board_led_host = get_path_info("//pw_board_led_host", "abspath")
   dir_pw_board_led_stm32f429i_disc1 =
-      get_path_info("//modules/pw_board_led_stm32f429i_disc1", "abspath")
-  dir_pw_console = get_path_info("//modules/pw_console", "abspath")
-  dir_pw_spin_delay = get_path_info("//modules/pw_spin_delay", "abspath")
+      get_path_info("//pw_board_led_stm32f429i_disc1", "abspath")
+  dir_pw_console = get_path_info("//pw_console", "abspath")
+  dir_pw_spin_delay = get_path_info("//pw_spin_delay", "abspath")
   dir_pw_spin_delay_arduino =
-      get_path_info("//modules/pw_spin_delay_arduino", "abspath")
-  dir_pw_spin_delay_host =
-      get_path_info("//modules/pw_spin_delay_host", "abspath")
+      get_path_info("//pw_spin_delay_arduino", "abspath")
+  dir_pw_spin_delay_host = get_path_info("//pw_spin_delay_host", "abspath")
   dir_pw_spin_delay_stm32f429i_disc1 =
-      get_path_info("//modules/pw_spin_delay_stm32f429i_disc1", "abspath")
+      get_path_info("//pw_spin_delay_stm32f429i_disc1", "abspath")
 }
