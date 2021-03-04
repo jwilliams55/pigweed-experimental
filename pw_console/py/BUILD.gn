@@ -30,5 +30,8 @@ pw_python_package("py") {
     "pw_console/search_widget.py",
     "pw_console/title_line_box.py",
   ]
-  python_deps = [ "$dir_pw_cli/py" ]
+  python_deps = [
+    "$dir_pw_cli/py",
+    "$dir_pw_tokenizer/py",
+  ]
 }
