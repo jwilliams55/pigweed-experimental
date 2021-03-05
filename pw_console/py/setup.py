@@ -22,9 +22,9 @@ setuptools.setup(
     author_email='pigweed-developers@googlegroups.com',
     description='Pigweed interactive console',
     packages=setuptools.find_packages(),
-    package_data={'pw_consoler': ['py.typed']},
+    package_data={'pw_console': ['py.typed']},
     zip_safe=False,
     entry_points={'console_scripts': [
-        'pw-console = pw_cli.__main__:main',
+        'pw-console = pw_console.__main__:main',
     ]},
-    install_requires=["urwid", "pw_cli", "pw_tokenizer"])
+    install_requires=["attrs", "urwid", "prompt_toolkit", "ptpython", "pw_cli", "pw_tokenizer"])

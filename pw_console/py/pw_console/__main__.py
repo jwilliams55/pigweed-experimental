@@ -13,6 +13,7 @@
 # the License.
 """Pigweed console main entry point."""
 
+import asyncio
 import argparse
 import logging
 import os
@@ -29,7 +30,6 @@ from pw_console.key_bindings import KeyBindings
 
 import pw_cli.log
 from pw_tokenizer.database import LoadTokenDatabases
-
 _LOG = logging.getLogger(__name__)
 
 _pretty_print = pprint.PrettyPrinter(indent=1, width=120).pprint
@@ -108,7 +108,6 @@ def load_config_file(args):
 
     return cfg
 
-
 def main() -> int:
     """Pigweed Console."""
 
@@ -129,14 +128,13 @@ def main() -> int:
     color_scheme = ColorScheme(
         dict(cfg.items('settings')).get('colorscheme', 'default'), cfg)
     console_app = ConsoleApp(args.device_logfile,
-                             key_bindings,
-                             color_scheme,
-                             terminal_args=args.terminal_args,
-                             token_databases=args.tokenizer_databases)
-    console_app.run()
-
+                             # key_bindings,
+                             # color_scheme,
+                             token_databases=args.tokenizer_databases,
+                             terminal_args=args.terminal_args)
+    async_debug = True if args.loglevel == logging.DEBUG else False
+    asyncio.run(console_app.run(), debug=async_debug)
     return 0
-
 
 if __name__ == '__main__':
     sys.exit(main())
