@@ -13,3 +13,8 @@
 # the License.
 
 buildconfig = "//BUILDCONFIG.gn"
+
+default_args = {
+  # Set the nanopb directory for protobuf generation.
+  dir_pw_third_party_nanopb = "//third_party/nanopb"
+}
