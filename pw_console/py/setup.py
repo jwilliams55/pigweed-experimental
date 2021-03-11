@@ -15,16 +15,20 @@
 
 import setuptools  # type: ignore
 
-setuptools.setup(
-    name='pw_console',
-    version='0.0.1',
-    author='Pigweed Authors',
-    author_email='pigweed-developers@googlegroups.com',
-    description='Pigweed interactive console',
-    packages=setuptools.find_packages(),
-    package_data={'pw_console': ['py.typed']},
-    zip_safe=False,
-    entry_points={'console_scripts': [
-        'pw-console = pw_console.__main__:main',
-    ]},
-    install_requires=["attrs", "urwid", "prompt_toolkit", "ptpython", "pw_cli", "pw_tokenizer"])
+setuptools.setup(name='pw_console',
+                 version='0.0.1',
+                 author='Pigweed Authors',
+                 author_email='pigweed-developers@googlegroups.com',
+                 description='Pigweed interactive console',
+                 packages=setuptools.find_packages(),
+                 package_data={'pw_console': ['py.typed']},
+                 zip_safe=False,
+                 entry_points={
+                     'console_scripts': [
+                         'pw-console = pw_console.__main__:main',
+                     ]
+                 },
+                 install_requires=[
+                     "attrs", "urwid", "prompt_toolkit", "ptpython", "pw_cli",
+                     "pw_tokenizer"
+                 ])

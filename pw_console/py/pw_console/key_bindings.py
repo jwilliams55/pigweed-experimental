@@ -11,14 +11,17 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
+# pylint: skip-file
 """Console key bindings."""
+
+# from dataclasses import dataclass, field
+# from typing import List, Dict
 
 
 class KeyBindings:
-    user_keys = []
-    key_bindings = {}
-
+    """Console key bindings."""
     def __init__(self, user_keys={}):
+        self.key_bindings = {}
         self.user_keys = user_keys
         self.fillWithDefault()
         self.fillWithUserKeys(user_keys)

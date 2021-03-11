@@ -4,7 +4,7 @@ out/
 compile_commands.json
 
 # Environment
-.environment
+.environment/
 
 # Editors
 .idea/
@@ -14,6 +14,7 @@ compile_commands.json
 .clangd/
 *.swp
 *.swo
+.#*
 
 # Python
 python*-env/

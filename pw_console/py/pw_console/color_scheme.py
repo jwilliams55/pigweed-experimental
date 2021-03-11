@@ -11,15 +11,16 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
+# pylint: skip-file
 """Console color schemes."""
 
 import os
-import sys
 
 from configparser import ConfigParser
 
 
 class ColorScheme:
+    """Console color schemes."""
     def __init__(self, name="default", user_config=None):
         self.built_in_colors_directory = os.path.realpath(
             os.path.expanduser(os.path.dirname(__file__) + '/colors'))
@@ -27,6 +28,8 @@ class ColorScheme:
         self.load_colors(name)
 
     def load_colors(self, name):
+        """Load color schemes using ConfigParser."""
+
         self.colors = {}
         self.focus_map = {}
         self.dialog_focus_map = {}

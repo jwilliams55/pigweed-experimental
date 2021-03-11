@@ -24,12 +24,13 @@ from configparser import ConfigParser
 from datetime import datetime
 from pathlib import Path
 
+import pw_cli.log
+from pw_tokenizer.database import LoadTokenDatabases
+
 from pw_console.color_scheme import ColorScheme
 from pw_console.console_app import ConsoleApp
 from pw_console.key_bindings import KeyBindings
 
-import pw_cli.log
-from pw_tokenizer.database import LoadTokenDatabases
 _LOG = logging.getLogger(__name__)
 
 _pretty_print = pprint.PrettyPrinter(indent=1, width=120).pprint
@@ -41,9 +42,9 @@ def build_argument_parser():
     def log_level(arg: str) -> int:
         try:
             return getattr(logging, arg.upper())
-        except AttributeError:
+        except AttributeError as err:
             raise argparse.ArgumentTypeError(
-                f"{arg.upper()} is not a valid log level")
+                f"{arg.upper()} is not a valid log level") from err
 
     parser = argparse.ArgumentParser(description=__doc__)
 
@@ -93,20 +94,25 @@ def build_argument_parser():
 def load_config_file(args):
     """Load config file."""
     cfg = ConfigParser(allow_no_value=True)
+
     cfg.add_section('keys')
 
     if args.show_default_keybinds:
-        d = {k: ", ".join(v) for k, v in KeyBindings({}).key_bindings.items()}
-        cfg._sections['keys'] = OrderedDict(
-            sorted(d.items(), key=lambda t: t[0]))
+        binds = {
+            k: ", ".join(v)
+            for k, v in KeyBindings({}).key_bindings.items()
+        }
+        cfg['keys'] = OrderedDict(sorted(binds.items(), key=lambda t: t[0]))
         cfg.write(sys.stdout)
-        return 0
+        return cfg
 
     cfg.add_section('settings')
+
     if args.config_file:
         cfg.read(Path(args.config_file).as_posix())
 
     return cfg
+
 
 def main() -> int:
     """Pigweed Console."""
@@ -122,19 +128,32 @@ def main() -> int:
     _LOG.debug(_pretty_format(args))
     _LOG.debug(_pretty_format(unused_extra_args))
 
+    if args.show_default_keybinds:
+        cfg = ConfigParser(allow_no_value=True)
+        cfg.add_section('keys')
+        binds = {
+            k: ", ".join(v)
+            for k, v in KeyBindings({}).key_bindings.items()
+        }
+        cfg['keys'] = OrderedDict(sorted(binds.items(), key=lambda t: t[0]))
+        cfg.write(sys.stdout)
+        return 0
+
     cfg = load_config_file(args)
 
-    key_bindings = KeyBindings(dict(cfg.items('keys')))
-    color_scheme = ColorScheme(
+    unused_key_bindings = KeyBindings(dict(cfg.items('keys')))
+    unused_color_scheme = ColorScheme(
         dict(cfg.items('settings')).get('colorscheme', 'default'), cfg)
-    console_app = ConsoleApp(args.device_logfile,
-                             # key_bindings,
-                             # color_scheme,
-                             token_databases=args.tokenizer_databases,
-                             terminal_args=args.terminal_args)
-    async_debug = True if args.loglevel == logging.DEBUG else False
+    console_app = ConsoleApp(
+        args.device_logfile,
+        # keys=key_bindings,
+        # colors=color_scheme,
+        token_databases=args.tokenizer_databases,
+        terminal_args=args.terminal_args)
+    async_debug = args.loglevel == logging.DEBUG
     asyncio.run(console_app.run(), debug=async_debug)
     return 0
+
 
 if __name__ == '__main__':
     sys.exit(main())

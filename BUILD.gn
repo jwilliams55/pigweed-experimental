@@ -27,7 +27,7 @@ group("default") {
     ":host",
 
     # TODO(tonymd): pw_console fails linting
-    # ":python.lint",
+    ":python.lint",
     ":python.tests",
   ]
 }
