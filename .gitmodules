@@ -4,3 +4,15 @@
 [submodule "third_party/nanopb"]
 	path = third_party/nanopb
 	url = https://pigweed.googlesource.com/third_party/github/nanopb/nanopb
+[submodule "third_party/boringssl/src"]
+	path = third_party/boringssl/src
+	url = https://boringssl.googlesource.com/boringssl
+	branch = master
+[submodule "third_party/mbedtls/src"]
+	path = third_party/mbedtls/src
+	url = https://github.com/ARMmbed/mbedtls.git
+	branch = development
+[submodule "third_party/picotls/src"]
+	path = third_party/picotls/src
+	url = https://github.com/h2o/picotls.git
+	branch = master
