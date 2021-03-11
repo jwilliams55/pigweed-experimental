@@ -14,9 +14,37 @@
 
 import("//build_overrides/pigweed.gni")
 import("$dir_pw_build/target_types.gni")
+import("teensy_library_source_set.gni")
 
 pw_source_set("teensy_ethernet") {
   sources = [ "teensy_ethernet.cc" ]
   include_dirs = [ "//applications/tls_example/backends" ]
-  deps = [ "$dir_pw_log" ]
+  deps = [
+    ":native_ethernet",
+    "$dir_pw_log",
+  ]
+}
+
+teensy_library_source_set("fnet") {
+  library_name = "FNET"
+  public_configs = [ ":warnings_to_suppress" ]
+}
+
+teensy_library_source_set("native_ethernet") {
+  library_name = "NativeEthernet"
+  public_deps = [ ":fnet" ]
+}
+
+# Many of the warnings are in the header files, which affects the target
+# that depends on it. Thus we introduce this public config.
+config("warnings_to_suppress") {
+  cflags = [
+    "-Wno-error=old-style-declaration",
+    "-Wno-error=unused-parameter",
+    "-Wno-error=undef",
+    "-Wno-error=implicit-fallthrough=",
+    "-Wno-error=sign-compare",
+    "-Wno-error=non-virtual-dtor",
+    "-Wno-error=cast-qual",
+  ]
 }
