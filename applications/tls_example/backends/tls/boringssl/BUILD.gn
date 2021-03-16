@@ -18,5 +18,8 @@ import("$dir_pw_build/target_types.gni")
 pw_source_set("boringssl") {
   sources = [ "boringssl_backend.cc" ]
   include_dirs = [ "//applications/tls_example/backends" ]
-  deps = [ "$dir_pw_log" ]
+  deps = [
+      "//third_party/boringssl:boringssl_baremetal",
+      "$dir_pw_log"
+  ]
 }

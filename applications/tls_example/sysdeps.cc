@@ -18,6 +18,8 @@
 #include <string.h>
 #include <sys/time.h>
 
+#include "pw_log/log.h"
+
 extern "C" {
 // libraries such as boringssl, picotls, wolfssl use time() to get current
 // date/time for certificate time check. For demo purpose, the following fakes
@@ -32,7 +34,8 @@ extern "C" {
 //
 // The above gives the seconds since epoch for 05/21/2021 00:00
 #ifndef TLS_EXAMPLE_TIME
-#define TLS_EXAMPLE_TIME 1621580400  // 2021-05-21 00:00:00
+// The CRL used in the example is only valid before 2021 March.
+#define TLS_EXAMPLE_TIME 1614240000  // 2021-02-25 00:00:00
 #endif
 
 time_t time(time_t* timer) {
@@ -44,7 +47,7 @@ time_t time(time_t* timer) {
 // For demo purpose, we fake these file io functions.
 
 int open(const char* file, int, ...) {
-  if (strcmp(file, "dev/urandom") == 0) {
+  if (strcmp(file, "/dev/urandom") == 0) {
     return 1;
   }
   return -1;
@@ -52,7 +55,7 @@ int open(const char* file, int, ...) {
 
 int fcntl(int, int, ...) { return 0; }
 
-extern "C" ssize_t read(int, void*, size_t len) {
+ssize_t read(int, void*, size_t len) {
   return static_cast<ssize_t>(len);
 }
 
@@ -61,7 +64,7 @@ int close(int) { return 0; }
 int _stat(const char*, struct _stat*) { return 0; }
 
 int _open(const char* file, int, int) {
-  if (strcmp(file, "dev/urandom") == 0) {
+  if (strcmp(file, "/dev/urandom") == 0) {
     return 1;
   }
   return -1;
@@ -72,4 +75,7 @@ int _gettimeofday(struct timeval* tp, void*) {
   tp->tv_usec = 0;
   return 0;
 }
+
+void perror(const char* __s) { PW_LOG_INFO("%s", __s); }
+
 }
