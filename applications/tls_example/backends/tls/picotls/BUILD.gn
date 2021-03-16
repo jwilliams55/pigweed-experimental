@@ -14,19 +14,12 @@
 
 import("//build_overrides/pigweed.gni")
 import("$dir_pw_build/target_types.gni")
-import("tls_client_example.gni")
 
-tls_client_example("boringssl_teensy_ethernet") {
-  tls_backend = "backends/tls/boringssl"
-  transport_backend = "backends/transport/teensy_ethernet"
-}
-
-tls_client_example("picotls_teensy_ethernet") {
-  tls_backend = "backends/tls/picotls"
-  transport_backend = "backends/transport/teensy_ethernet"
-}
-
-tls_client_example("mbedtls_teensy_ethernet") {
-  tls_backend = "backends/tls/mbedtls"
-  transport_backend = "backends/transport/teensy_ethernet"
+pw_source_set("picotls") {
+    sources = [ "picotls_backend.cc" ]
+    include_dirs = [ "//applications/tls_example/backends" ]
+    deps = [
+       "//third_party/picotls:picotls_lib_baremetal",
+       "$dir_pw_log"
+    ]
 }

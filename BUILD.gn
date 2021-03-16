@@ -79,7 +79,8 @@ group("applications") {
       "//applications/rpc:all(//targets/arduino:arduino_debug)",
       "//applications/strings:all(//targets/arduino:arduino_debug)",
       "//applications/tls_example:boringssl_teensy_ethernet(//targets/arduino:arduino_debug)",
-      "//applications/tls_example:mbedtls_teensy_ethernet(//targets/arduino:arduino_debug)"
+      "//applications/tls_example:mbedtls_teensy_ethernet(//targets/arduino:arduino_debug)",
+      "//applications/tls_example:picotls_teensy_ethernet(//targets/arduino:arduino_debug)"
     ]
   }
 
