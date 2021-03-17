@@ -1,0 +1,52 @@
+# Copyright 2021 The Pigweed Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
+import("//build_overrides/pigweed.gni")
+import("$dir_pw_build/target_types.gni")
+
+pw_source_set("picotls_lib_baremetal") {
+  # The target uses boringssl for cryptography algorithms. Thus, only
+  # sources for the picotls core are needed.
+  sources = [
+    "src/lib/openssl.c",
+    "src/lib/picotls.c",
+  ]
+
+  # picotls.c include arpa/inet.h for inet_pton() API. It uses
+  # it to test if the provided target host name is an ip address,
+  # in which case it will decide not to send the SNI extension.
+  # We don't use this feature thus we fake an empty header.
+  # The SNI extension will always be sent.
+  include_dirs = [ "./sysdeps_baremetal" ]
+  public_configs = [ ":picotls_lib_config" ]
+  public_deps = [ "//third_party/boringssl:crypto_lib_baremetal" ]
+  configs = [ ":picotls_internal_config" ]
+}
+
+config("picotls_lib_config") {
+  include_dirs = [ "src/include" ]
+  cflags = [
+    "-Wno-error=missing-field-initializers",
+    "-Wno-error=undef",
+  ]
+}
+
+config("picotls_internal_config") {
+  cflags = [
+    "-Wno-error=unused-parameter",
+    "-Wno-error=sign-compare",
+    "-Wno-error=implicit-function-declaration",
+    "-Wno-error=int-conversion",
+  ]
+}

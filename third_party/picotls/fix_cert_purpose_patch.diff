@@ -1,0 +1,13 @@
+diff --git a/lib/openssl.c b/lib/openssl.c
+index 3221a7e..0333fdf 100644
+--- a/lib/openssl.c
++++ b/lib/openssl.c
+@@ -1141,7 +1141,7 @@ static int verify_cert_chain(X509_STORE *store, X509 *cert, STACK_OF(X509) * cha
+         ret = PTLS_ERROR_LIBRARY;
+         goto Exit;
+     }
+-    X509_STORE_CTX_set_purpose(verify_ctx, is_server ? X509_PURPOSE_SSL_SERVER : X509_PURPOSE_SSL_CLIENT);
++    X509_STORE_CTX_set_purpose(verify_ctx, !is_server ? X509_PURPOSE_SSL_SERVER : X509_PURPOSE_SSL_CLIENT);
+     if (X509_verify_cert(verify_ctx) != 1) {
+         int x509_err = X509_STORE_CTX_get_error(verify_ctx);
+         switch (x509_err) {
