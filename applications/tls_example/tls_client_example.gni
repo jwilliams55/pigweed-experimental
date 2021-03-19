@@ -13,6 +13,7 @@
 # the License.
 
 import("//build_overrides/pigweed.gni")
+import("$dir_pw_bloat/bloat.gni")
 import("$dir_pw_build/target_types.gni")
 
 # A convenient template for generating example applications with different
@@ -22,17 +23,77 @@ template("tls_client_example") {
          "must provide a tls backend")
   assert(defined(invoker.transport_backend) && invoker.transport_backend != "",
          "must provide a transport backend")
-  pw_executable(target_name) {
-    sources = [
+
+  example_binary_target_name = target_name + "_binary"
+  size_report_target_name = target_name + "_tls_size_report"
+
+  group(target_name) {
+    deps = [
+      ":$example_binary_target_name",
+      ":$size_report_target_name",
+    ]
+  }
+
+  executable_exclude_vars = [
+    "tls_backend",
+    "transport_backend",
+    "no_bloaty",
+    "bloaty_config",
+  ]
+
+  executable_common_vars = {
+    forward_variables_from(invoker, "*", executable_exclude_vars)
+    if (!defined(sources)) {
+      sources = []
+    }
+    sources += [
       "sysdeps.cc",
       "tls_client_example.cc",
     ]
-    deps = [
+
+    if (!defined(deps)) {
+      deps = []
+    }
+    deps += [
       "$dir_pw_log",
       "$dir_pw_spin_delay",
       "$dir_pw_sys_io",
-      invoker.tls_backend,
       invoker.transport_backend,
     ]
+  }
+
+  # Runnable target
+  pw_executable(example_binary_target_name) {
+    forward_variables_from(executable_common_vars, "*")
+    deps += [ invoker.tls_backend ]
+  }
+
+  # Size report target.
+  if (!defined(invoker.no_bloaty) || !invoker.no_bloaty) {
+    # A similar target but with a noop tls backend for size comparison
+    base_target_name = example_binary_target_name + "_without_tls"
+    pw_executable(base_target_name) {
+      forward_variables_from(executable_common_vars, "*")
+      deps += [ "//applications/tls_example/backends/tls/dummy:dummy" ]
+    }
+
+    # Bloaty size report.
+    pw_size_report(size_report_target_name) {
+      title = size_report_target_name
+      base = ":$base_target_name"
+      full_report = true
+      binaries = [
+        {
+          target = ":$example_binary_target_name"
+          label = "$example_binary_target_name"
+          if (defined(invoker.bloaty_config)) {
+            bloaty_config = invoker.bloaty_config
+          }
+        },
+      ]
+    }
+  } else {
+    group(size_report_target_name) {
+    }
   }
 }
