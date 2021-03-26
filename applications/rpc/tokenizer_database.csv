@@ -5,6 +5,7 @@
 1ea870fb,          ,"Blink Low!"
 2bc3cb0f,          ,"          The current allocated heap memory is %u bytes."
 39b2c339,          ,"Failed to decode packet on interface %s"
+3dfbffed,          ,"Got packet with no destination; address: %llu"
 3f774ea7,          ,"Unable to handle packet of type %u"
 5a592684,          ,"          malloc() is called %u times. (realloc()/calloc() counted as one time)"
 6271ad9a,          ,"Got complete packet!"
