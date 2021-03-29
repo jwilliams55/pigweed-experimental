@@ -21,28 +21,6 @@
 #include "pw_log/log.h"
 
 extern "C" {
-// libraries such as boringssl, picotls, wolfssl use time() to get current
-// date/time for certificate time check. For demo purpose, the following fakes
-// this function and provides a pre-set date.
-//
-// TLS_EXAMPLE_TIME specifies the current time in seconds since epoch. One easy
-// way to figure out this value for a certain date is to use a one-line python
-// code:
-//
-// import datetime
-// datetime.datetime(2021,5,21,0,0).timestamp()
-//
-// The above gives the seconds since epoch for 05/21/2021 00:00
-#ifndef TLS_EXAMPLE_TIME
-// The CRL used in the example is only valid before 2021 March.
-#define TLS_EXAMPLE_TIME 1614240000  // 2021-02-25 00:00:00
-#endif
-
-time_t time(time_t* timer) {
-  time_t ret = TLS_EXAMPLE_TIME;
-  return timer ? *timer = ret : ret;
-}
-
 // boringssl reads from file "dev/urandom" for generating randome bytes.
 // For demo purpose, we fake these file io functions.
 

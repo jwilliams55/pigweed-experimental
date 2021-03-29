@@ -38,10 +38,19 @@ void MyAbort() {
 // PEM format certificate.
 const char kCACertChain[] = {GLOBAL_SIGN_CA_CRT GTS_CA_101_CRT};
 
-// The following CRLs are downloaded previously from the above CAs and for
-// demo purpose only. In practice, CRLs should be downloaded from CA at
-// run-time.
+#ifdef CRL_CHECK
+// The following are CRLs previously downloaded from the above CAs and they
+// are likely to be expired when application is compiled. To perform CRL
+// check, make sure that you download the latest CRL from CA into folder
+// applications/tls_example/trust_store and re-run
+// applications/tls_example/trust_store/generate_cert_crl_header_file.py
+// to update the header. See applications/tls_example/trust_store/README.md
+// for more detail.
+//
+// TODO(zyecheng): Alternatively, consider build time CRL download and
+// injection for demo purpose.
 const char kCrls[] = {GLOBAL_SIGN_CA_CRL GTS_CA_101_CRL};
+#endif
 
 void TlsClientExample() {
   TlsInterface* tls = CreateTls();
@@ -73,11 +82,13 @@ void TlsClientExample() {
     MyAbort();
   }
 
+#ifdef CRL_CHECK
   // Loads CRLs.
   if (int status = tls->LoadCrl(kCrls, sizeof(kCrls)); status < 0) {
     PW_LOG_INFO("Failed to load crls, %d", status);
     MyAbort();
   }
+#endif
 
   // Performs TLS handshake.
   PW_LOG_INFO("Performing handshake...");

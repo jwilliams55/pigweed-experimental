@@ -14,10 +14,26 @@
 
 import("//build_overrides/pigweed.gni")
 import("$dir_pw_bloat/bloat.gni")
+import("$dir_pw_build/python_action.gni")
 import("$dir_pw_build/target_types.gni")
 
 # A convenient template for generating example applications with different
 # tls/transport backends.
+#
+# The template accepts the following arguments:
+#
+#   tls_backend         Required. A target specifying the tls library.
+#
+#   transport_backend:  Required. A target specifying the transport implementation.
+#
+#   no_bloaty:          Whether to generate bloaty size report. Default
+#                       to true
+#
+#   bloaty_config:      An optional config file for bloaty report
+#
+#   time:               An optional date string to inject as time. If not spedified,
+#                       build time will be used. Must be format
+#                       month/day/year hour:minute:second
 template("tls_client_example") {
   assert(defined(invoker.tls_backend) && invoker.tls_backend != "",
          "must provide a tls backend")
@@ -34,6 +50,20 @@ template("tls_client_example") {
     ]
   }
 
+  time_injection_target_name = target_name + "_time_injection"
+  time_source_code_output = "$target_gen_dir/$target_name/injected_time.c"
+  pw_python_action(time_injection_target_name) {
+    script = "//applications/tls_example/time_injection/generate_time_code.py"
+    outputs = [ time_source_code_output ]
+    args = [ rebase_path(time_source_code_output) ]
+    if (defined(invoker.time)) {
+      args += [
+        "-t",
+        invoker.time,
+      ]
+    }
+  }
+
   executable_exclude_vars = [
     "tls_backend",
     "transport_backend",
@@ -46,15 +76,18 @@ template("tls_client_example") {
     if (!defined(sources)) {
       sources = []
     }
+    time_source_file = get_target_outputs(":$time_injection_target_name")
     sources += [
       "sysdeps.cc",
       "tls_client_example.cc",
+      time_source_file[0],
     ]
 
     if (!defined(deps)) {
       deps = []
     }
     deps += [
+      ":$time_injection_target_name",
       "$dir_pw_log",
       "$dir_pw_spin_delay",
       "$dir_pw_sys_io",

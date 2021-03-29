@@ -22,6 +22,11 @@ tls_client_example("boringssl_teensy_ethernet") {
   tls_backend = "backends/tls/boringssl"
   transport_backend = "backends/transport/teensy_ethernet"
   bloaty_config = teensy_bloaty_config
+
+  # Build time will be used as the time source for certificate expiration check
+  # by default. To use a different specified time. Add the following argument:
+  #
+  # time = "03/29/2021 12:00:00:00"
 }
 
 tls_client_example("picotls_teensy_ethernet") {
