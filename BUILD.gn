@@ -76,6 +76,7 @@ group("applications") {
   if (pw_arduino_build_CORE_PATH != "") {
     deps += [
       ":applications_tests(//targets/arduino:arduino_debug_tests)",
+      "//applications/blinky:blinky(//targets/arduino:arduino_debug)",
       "//applications/rpc:all(//targets/arduino:arduino_debug)",
       "//applications/strings:all(//targets/arduino:arduino_debug)",
       "//applications/tls_example:boringssl_teensy_ethernet(//targets/arduino:arduino_debug)",
@@ -87,6 +88,7 @@ group("applications") {
   # STMicroelectronics STM32F429I-DISC1 applications steps.
   deps += [
     ":applications_tests(//targets/stm32f429i-disc1:stm32f429i_disc1_debug_tests)",
+    "//applications/blinky:blinky(//targets/stm32f429i-disc1:stm32f429i_disc1_debug)",
     "//applications/rpc:all(//targets/stm32f429i-disc1:stm32f429i_disc1_debug)",
     "//applications/strings:all(//targets/stm32f429i-disc1:stm32f429i_disc1_debug)",
   ]
