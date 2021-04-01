@@ -19,7 +19,7 @@ pw_source_set("boringssl") {
   sources = [ "boringssl_backend.cc" ]
   include_dirs = [ "//applications/tls_example/backends" ]
   deps = [
-      "//third_party/boringssl:boringssl_baremetal",
-      "$dir_pw_log"
+    "$dir_pw_log",
+    "//third_party/boringssl:boringssl_baremetal",
   ]
 }

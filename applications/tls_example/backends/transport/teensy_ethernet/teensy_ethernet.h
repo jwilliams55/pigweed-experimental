@@ -19,12 +19,13 @@
 #include "backend_interface.h"
 
 class TeensyEthernetTransport final : public TransportInterface {
-public:
+ public:
   TeensyEthernetTransport();
   const char* Name() override { return "teensy-ethernet"; };
   int Connect(const char* ip, int port) override;
   int Write(const void* buffer, size_t size) override;
   int Read(void* buffer, size_t size) override;
-private:
+
+ private:
   EthernetClient client_;
 };

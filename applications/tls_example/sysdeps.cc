@@ -33,9 +33,7 @@ int open(const char* file, int, ...) {
 
 int fcntl(int, int, ...) { return 0; }
 
-ssize_t read(int, void*, size_t len) {
-  return static_cast<ssize_t>(len);
-}
+ssize_t read(int, void*, size_t len) { return static_cast<ssize_t>(len); }
 
 int close(int) { return 0; }
 
@@ -55,5 +53,4 @@ int _gettimeofday(struct timeval* tp, void*) {
 }
 
 void perror(const char* __s) { PW_LOG_INFO("%s", __s); }
-
 }

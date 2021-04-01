@@ -16,10 +16,10 @@ import("//build_overrides/pigweed.gni")
 import("$dir_pw_build/target_types.gni")
 
 pw_source_set("picotls") {
-    sources = [ "picotls_backend.cc" ]
-    include_dirs = [ "//applications/tls_example/backends" ]
-    deps = [
-       "//third_party/picotls:picotls_lib_baremetal",
-       "$dir_pw_log"
-    ]
+  sources = [ "picotls_backend.cc" ]
+  include_dirs = [ "//applications/tls_example/backends" ]
+  deps = [
+    "$dir_pw_log",
+    "//third_party/picotls:picotls_lib_baremetal",
+  ]
 }
