@@ -15,7 +15,6 @@
 #pragma once
 
 #include "backend_interface.h"
-
 #include "mbedtls/certs.h"
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/debug.h"
@@ -24,24 +23,28 @@
 #include "mbedtls/ssl.h"
 
 class MbedtlsBackend final : public TlsInterface {
-public:
+ public:
   MbedtlsBackend();
   const char* Name() override { return "mbedtls"; }
-  int SetHostName(const char *host) override;
+  int SetHostName(const char* host) override;
   int Handshake(TransportInterface* transport) override;
-  int Write(const void* buffer, size_t size, TransportInterface* transport) override;
+  int Write(const void* buffer,
+            size_t size,
+            TransportInterface* transport) override;
   int Read(void* buffer, size_t size, TransportInterface* transport) override;
-  int LoadCACert(const void* buffer, size_t size) override;
-  int LoadCrl(const void* buffer, size_t size) override;
+  int LoadCACert(const void* buffer,
+                 size_t size,
+                 X509LoadFormat format) override;
+  int LoadCrl(const void* buffer, size_t size, X509LoadFormat format) override;
 
-private:
+ private:
   mbedtls_entropy_context entropy_;
   mbedtls_ctr_drbg_context ctr_drbg_;
   mbedtls_ssl_context ssl_;
   mbedtls_ssl_config conf_;
   mbedtls_x509_crt cacert_;
   mbedtls_x509_crl cacrl_;
-  TransportInterface *mbedtls_io_ctx_ = nullptr;
+  TransportInterface* mbedtls_io_ctx_ = nullptr;
 
   int Setup();
 };

@@ -17,10 +17,10 @@
 #include <span>
 
 #include "backends/backend_interface.h"
-#include "trust_store/ca_certificates_crls.h"
 #include "pw_log/log.h"
 #include "pw_spin_delay/delay.h"
 #include "pw_sys_io/sys_io.h"
+#include "trust_store/ca_certificates_crls.h"
 
 #define GOOGLE_IP_ADDRESS "172.217.7.228"
 #define GOOGLE_SERVER_NAME "www.google.com"

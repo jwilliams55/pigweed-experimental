@@ -15,23 +15,27 @@
 #pragma once
 
 #include <openssl/bio.h>
-#include <openssl/ssl.h>
 #include <openssl/pem.h>
+#include <openssl/ssl.h>
 
 #include "backend_interface.h"
 
 class BoringsslBackend final : public TlsInterface {
-public:
+ public:
   BoringsslBackend();
   const char* Name() override { return "boringssl"; }
-  int SetHostName(const char *host) override;
+  int SetHostName(const char* host) override;
   int Handshake(TransportInterface* transport) override;
-  int Write(const void* buffer, size_t size, TransportInterface* transport) override;
+  int Write(const void* buffer,
+            size_t size,
+            TransportInterface* transport) override;
   int Read(void* buffer, size_t size, TransportInterface* transport) override;
-  int LoadCACert(const void* buffer, size_t size) override;
-  int LoadCrl(const void* buffer, size_t size) override;
+  int LoadCACert(const void* buffer,
+                 size_t size,
+                 X509LoadFormat format) override;
+  int LoadCrl(const void* buffer, size_t size, X509LoadFormat format) override;
 
-private:
+ private:
   bssl::UniquePtr<SSL_CTX> ctx_;
   bssl::UniquePtr<SSL> ssl_;
   bssl::UniquePtr<BIO> bio_;

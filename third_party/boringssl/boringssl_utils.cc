@@ -13,25 +13,48 @@
 // the License.
 
 #include <openssl/bio.h>
-#include <openssl/ssl.h>
 #include <openssl/pem.h>
+#include <openssl/ssl.h>
 
-int LoadCACertCrls(const void* buffer, size_t size, X509_STORE *store) {
-  BIO * ca_crt_bio = BIO_new_mem_buf(buffer, size);
-  STACK_OF(X509_INFO) *inf = PEM_X509_INFO_read_bio(ca_crt_bio, NULL, NULL, NULL);
-  BIO_free(ca_crt_bio);
+int LoadCACertCrlsPEMFormat(const void* buffer,
+                            size_t size,
+                            X509_STORE* store) {
+  BIO* bio = BIO_new_mem_buf(buffer, size);
+  if (!bio) {
+    return -1;
+  }
+  STACK_OF(X509_INFO)* inf = PEM_X509_INFO_read_bio(bio, NULL, NULL, NULL);
+  BIO_free(bio);
   if (!inf) {
     return -1;
   }
+  int num = sk_X509_INFO_num(inf);
   for (size_t i = 0; i < sk_X509_INFO_num(inf); i++) {
-      X509_INFO *itmp = sk_X509_INFO_value(inf, i);
-      if (itmp->x509 && !X509_STORE_add_cert(store, itmp->x509)) {
-          return -1;
-      }
-      if (itmp->crl && !X509_STORE_add_crl(store, itmp->crl)) {
-          return -1;
-      }
+    X509_INFO* itmp = sk_X509_INFO_value(inf, i);
+    if (itmp->x509 && !X509_STORE_add_cert(store, itmp->x509)) {
+      return -1;
+    }
+    if (itmp->crl && !X509_STORE_add_crl(store, itmp->crl)) {
+      return -1;
+    }
   }
   sk_X509_INFO_pop_free(inf, X509_INFO_free);
+  return num;
+}
+
+int LoadCACertCrlDERFormat(const void* buffer, size_t size, X509_STORE* store) {
+  BIO* bio = BIO_new_mem_buf(buffer, size);
+  if (!bio) {
+    return -1;
+  }
+  X509* x509 = d2i_X509_bio(bio, NULL);
+  if (x509 == NULL) {
+    return -1;
+  }
+  if (!X509_STORE_add_cert(store, x509)) {
+    return -1;
+  }
+  BIO_free(bio);
+  X509_free(x509);
   return 0;
 }

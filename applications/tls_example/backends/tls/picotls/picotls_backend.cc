@@ -63,8 +63,8 @@ int PicotlsBackend::Handshake(TransportInterface* transport) {
 
   recv_available_ = 0;
   while (true) {
-    int read =
-        transport->Read(recv_buffer_ + recv_available_, sizeof(recv_buffer_) - recv_available_);
+    int read = transport->Read(recv_buffer_ + recv_available_,
+                               sizeof(recv_buffer_) - recv_available_);
     if (read < 0) {
       PW_LOG_INFO("Failed to read from transport %d", read);
       return -1;
@@ -156,7 +156,9 @@ int PicotlsBackend::Read(void* buffer,
   return -1;
 }
 
-int PicotlsBackend::LoadCACert(const void* buffer, size_t size) {
+int PicotlsBackend::LoadCACert(const void* buffer,
+                               size_t size,
+                               X509LoadFormat format) {
   // picotls certificate validation is based on boringssl/opensl X509
   if (!trusted_store_ && (trusted_store_ = X509_STORE_new()) == NULL) {
     PW_LOG_INFO("Failed to create cert store");
@@ -166,16 +168,32 @@ int PicotlsBackend::LoadCACert(const void* buffer, size_t size) {
   // to obtain date time.
   X509_VERIFY_PARAM_clear_flags(trusted_store_->param,
                                 X509_V_FLAG_USE_CHECK_TIME);
-  if (int status = LoadCACertCrls(buffer, size, trusted_store_); status < 0) {
-    PW_LOG_INFO("Failed to load CA cert. %d", status);
-    return -1;
+  if (format == X509LoadFormat::kPEM || format == X509LoadFormat::kTryAll) {
+    int ret = LoadCACertCrlsPEMFormat(buffer, size, trusted_store_);
+    if (ret == 0) {
+      return 0;
+    } else if (format == X509LoadFormat::kPEM) {
+      PW_LOG_INFO("Failed to load CA cert as PEM. %d", ret);
+      return ret;
+    }
   }
-  return 0;
+  if (format == X509LoadFormat::kDER || format == X509LoadFormat::kTryAll) {
+    int ret = LoadCACertCrlDERFormat(buffer, size, trusted_store_);
+    if (ret == 0) {
+      return 0;
+    } else if (format == X509LoadFormat::kDER) {
+      PW_LOG_INFO("Failed to load CA cert as DER. %d", ret);
+      return ret;
+    }
+  }
+  return -1;
 }
 
-int PicotlsBackend::LoadCrl(const void* buffer, size_t size) {
+int PicotlsBackend::LoadCrl(const void* buffer,
+                            size_t size,
+                            X509LoadFormat format) {
   X509_VERIFY_PARAM_set_flags(trusted_store_->param, X509_V_FLAG_CRL_CHECK);
-  return LoadCACert(buffer, size);
+  return LoadCACert(buffer, size, format);
 }
 
 TlsInterface* CreateTls() { return new PicotlsBackend(); }

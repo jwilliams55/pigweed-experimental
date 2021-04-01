@@ -19,8 +19,17 @@
  *
  * @buffer: buffer containing the certificates/crls
  * @size: size of |buffer|
- * @store: Pointer of a X509_STORE object for storing the loaded certificates/crls.
+ * @store: Pointer of a X509_STORE object for storing the loaded
+ * certificates/crls.
  *
- * Returns 0 on successs, other values on failure.
+ * Returns the number of cert/crls loaded on successs, negative values on
+ * failure.
  */
-int LoadCACertCrls(const void* buffer, size_t size, X509_STORE *store);
+int LoadCACertCrlsPEMFormat(const void* buffer, size_t size, X509_STORE* store);
+
+/**
+ * Similar to |LoadCACertCrlsPEMFormat| but loads DER format.
+ *
+ * Returns 0 on success, negative values on failure.
+ */
+int LoadCACertCrlDERFormat(const void* buffer, size_t size, X509_STORE* store);

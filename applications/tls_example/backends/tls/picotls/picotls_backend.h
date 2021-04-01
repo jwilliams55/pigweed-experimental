@@ -15,29 +15,32 @@
 #pragma once
 
 #include "backend_interface.h"
-
 #include "picotls.h"
 #include "picotls/openssl.h"
 
 class PicotlsBackend final : public TlsInterface {
-public:
+ public:
   PicotlsBackend();
   ~PicotlsBackend();
   const char* Name() override { return "picotls"; }
-  int SetHostName(const char *host) override;
+  int SetHostName(const char* host) override;
   int Handshake(TransportInterface* transport) override;
-  int Write(const void* buffer, size_t size, TransportInterface* transport) override;
+  int Write(const void* buffer,
+            size_t size,
+            TransportInterface* transport) override;
   int Read(void* buffer, size_t size, TransportInterface* transport) override;
-  int LoadCACert(const void* buffer, size_t size) override;
-  int LoadCrl(const void* buffer, size_t size) override;
+  int LoadCACert(const void* buffer,
+                 size_t size,
+                 X509LoadFormat format) override;
+  int LoadCrl(const void* buffer, size_t size, X509LoadFormat format) override;
 
-private:
+ private:
   ptls_buffer_t read_buffer_;
   ptls_buffer_t encode_buffer_;
   ptls_context_t ctx_;
   ptls_handshake_properties_t hsprop_;
-  ptls_t *tls_ = nullptr;
-  X509_STORE *trusted_store_ = nullptr;
+  ptls_t* tls_ = nullptr;
+  X509_STORE* trusted_store_ = nullptr;
   ptls_openssl_verify_certificate_t vc_;
   // Temporaray receive buffer for raw packet.
   char recv_buffer_[4096];

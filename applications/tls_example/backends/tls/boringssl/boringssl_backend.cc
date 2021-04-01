@@ -120,22 +120,40 @@ int BoringsslBackend::Read(void* buffer,
   }
 }
 
-int BoringsslBackend::LoadCACert(const void* buffer, size_t size) {
+int BoringsslBackend::LoadCACert(const void* buffer,
+                                 size_t size,
+                                 X509LoadFormat format) {
   auto store = SSL_CTX_get_cert_store(ctx_.get());
   // We don't provide a fixed check time. Thus make sure that time(0) is used
   // to obtain date time.
   X509_VERIFY_PARAM_clear_flags(store->param, X509_V_FLAG_USE_CHECK_TIME);
-  if (int status = LoadCACertCrls(buffer, size, store); status < 0) {
-    PW_LOG_INFO("Failed to load CA cert. %d", status);
-    return -1;
+  if (format == X509LoadFormat::kPEM || format == X509LoadFormat::kTryAll) {
+    int ret = LoadCACertCrlsPEMFormat(buffer, size, store);
+    if (ret > 0) {
+      return 0;
+    } else if (format == X509LoadFormat::kPEM) {
+      PW_LOG_INFO("Failed to load CA cert as PEM. %d", ret);
+      return ret;
+    }
   }
-  return 0;
+  if (format == X509LoadFormat::kDER || format == X509LoadFormat::kTryAll) {
+    int ret = LoadCACertCrlDERFormat(buffer, size, store);
+    if (ret == 0) {
+      return 0;
+    } else if (format == X509LoadFormat::kDER) {
+      PW_LOG_INFO("Failed to load CA cert as DER. %d", ret);
+      return ret;
+    }
+  }
+  return -1;
 }
 
-int BoringsslBackend::LoadCrl(const void* buffer, size_t size) {
+int BoringsslBackend::LoadCrl(const void* buffer,
+                              size_t size,
+                              X509LoadFormat format) {
   auto store = SSL_CTX_get_cert_store(ctx_.get());
   X509_VERIFY_PARAM_set_flags(store->param, X509_V_FLAG_CRL_CHECK);
-  return LoadCACert(buffer, size);
+  return LoadCACert(buffer, size, format);
 }
 
 TlsInterface* CreateTls() { return new BoringsslBackend(); }

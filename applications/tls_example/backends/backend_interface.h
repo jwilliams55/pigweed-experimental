@@ -31,6 +31,11 @@ class TransportInterface {
 
 class TlsInterface {
  public:
+  enum class X509LoadFormat {
+    kPEM,
+    kDER,
+    kTryAll,
+  };
   virtual ~TlsInterface() = default;
   // A name to identify the implementation.
   virtual const char* Name() = 0;
@@ -47,9 +52,13 @@ class TlsInterface {
                    size_t size,
                    TransportInterface* transport) = 0;
   // Returns negative value on failure, other values on success.
-  virtual int LoadCACert(const void* buffer, size_t size) = 0;
+  virtual int LoadCACert(const void* buffer,
+                         size_t size,
+                         X509LoadFormat format = X509LoadFormat::kTryAll) = 0;
   // Returns negative value on failure, other values on success.
-  virtual int LoadCrl(const void* buffer, size_t size) = 0;
+  virtual int LoadCrl(const void* buffer,
+                      size_t size,
+                      X509LoadFormat format = X509LoadFormat::kTryAll) = 0;
 };
 
 // The following methods shall be implemented by selected backends.

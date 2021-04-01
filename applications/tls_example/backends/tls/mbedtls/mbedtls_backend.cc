@@ -159,27 +159,62 @@ int MbedtlsBackend::Read(void* buffer,
   }
 }
 
-int MbedtlsBackend::LoadCACert(const void* buffer, size_t size) {
-  int ret = mbedtls_x509_crt_parse(
-      &cacert_, static_cast<const unsigned char*>(buffer), size);
-  if (ret < 0) {
-    PW_LOG_INFO("Failed to load CA certificate. -0x%x",
-                static_cast<unsigned int>(-ret));
-    return ret;
+int MbedtlsBackend::LoadCACert(const void* buffer,
+                               size_t size,
+                               X509LoadFormat format) {
+  const unsigned char* data = static_cast<const unsigned char*>(buffer);
+  if (format == X509LoadFormat::kPEM || format == X509LoadFormat::kTryAll) {
+    int ret = mbedtls_x509_crt_parse(&cacert_, data, size);
+    if (ret == 0) {
+      return 0;
+    } else if (format == X509LoadFormat::kPEM) {
+      PW_LOG_INFO("Failed to load CA certificate as PEM. -0x%x",
+                  static_cast<unsigned int>(-ret));
+      return ret;
+    }
   }
-  return 0;
+  if (format == X509LoadFormat::kDER || format == X509LoadFormat::kTryAll) {
+    int ret = mbedtls_x509_crt_parse_der(&cacert_, data, size);
+    if (ret == 0) {
+      return 0;
+    } else if (format == X509LoadFormat::kDER) {
+      PW_LOG_INFO("Failed to load CA certificate as DER. -0x%x",
+                  static_cast<unsigned int>(-ret));
+      return ret;
+    }
+  }
+  return -1;
 }
 
-int MbedtlsBackend::LoadCrl(const void* buffer, size_t size) {
-  int ret = mbedtls_x509_crl_parse(
-      &cacrl_, static_cast<const unsigned char*>(buffer), size);
-  if (ret < 0) {
-    PW_LOG_INFO("Failed to load crls. -0x%x. Not treated as fatal error.",
-                static_cast<unsigned int>(-ret));
-    // mbedtls can't handle certain tags in crl, i.e. ASN1 tag.
-    // Bail out and continue if it fails.
+int MbedtlsBackend::LoadCrl(const void* buffer,
+                            size_t size,
+                            X509LoadFormat format) {
+  const unsigned char* data = static_cast<const unsigned char*>(buffer);
+  // TODO(zyecheng) mbedtls can't handle any critical extension tag in CRL.
+  // However, there is one "X509v3 Issuing Distribution Point" for
+  // google CRLs in GTS CA 101. We'll need to find a way to bypass it.
+  // For context, see https://github.com/ARMmbed/mbedtls/pull/3564
+  if (format == X509LoadFormat::kPEM || format == X509LoadFormat::kTryAll) {
+    int ret = mbedtls_x509_crl_parse(&cacrl_, data, size);
+    if (ret == 0) {
+      return 0;
+    } else if (format == X509LoadFormat::kPEM) {
+      PW_LOG_INFO("Failed to load crl as PEM. -0x%x",
+                  static_cast<unsigned int>(-ret));
+      return ret;
+    }
   }
-  return 0;
+  if (format == X509LoadFormat::kDER || format == X509LoadFormat::kTryAll) {
+    int ret = mbedtls_x509_crl_parse_der(&cacrl_, data, size);
+    if (ret == 0) {
+      return 0;
+    } else if (format == X509LoadFormat::kDER) {
+      PW_LOG_INFO("Failed to load crlas DER. -0x%x",
+                  static_cast<unsigned int>(-ret));
+      return ret;
+    }
+  }
+  return -1;
 }
 
 TlsInterface* CreateTls() { return new MbedtlsBackend(); }

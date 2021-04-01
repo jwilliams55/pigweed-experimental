@@ -17,13 +17,13 @@
 #include "backend_interface.h"
 
 class DummyTls final : public TlsInterface {
-public:
-  DummyTls()  {}
+ public:
+  DummyTls() {}
   const char* Name() override { return ""; }
-  int SetHostName(const char *) override { return 0; }
-  int Handshake(TransportInterface* ) override { return 0; }
-  int Write(const void* , size_t , TransportInterface* ) override { return 0; }
-  int Read(void* , size_t , TransportInterface* ) override { return 0; }
-  int LoadCACert(const void* , size_t ) override { return 0; }
-  int LoadCrl(const void* , size_t ) override { return 0; }
+  int SetHostName(const char*) override { return 0; }
+  int Handshake(TransportInterface*) override { return 0; }
+  int Write(const void*, size_t, TransportInterface*) override { return 0; }
+  int Read(void*, size_t, TransportInterface*) override { return 0; }
+  int LoadCACert(const void*, size_t, X509LoadFormat) override { return 0; }
+  int LoadCrl(const void*, size_t, X509LoadFormat) override { return 0; }
 };
