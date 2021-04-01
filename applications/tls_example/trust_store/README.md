@@ -8,8 +8,3 @@ following 2 CA certificates during handhsake:
 
 The certificates and the corresponding crls can be downloaded from
 https://pki.goog/repository/
-
-generate_cert_crl_header_file.py is a reference python script for converting
-downloaded PEM format certificate/CRL files into C macros in a C header file.
-The macro can be used in embedded code for loading root CAs and CRLs to tls
-libraries.

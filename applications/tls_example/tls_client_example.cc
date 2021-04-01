@@ -35,9 +35,6 @@ void MyAbort() {
     ;
 }
 
-// PEM format certificate.
-const char kCACertChain[] = {GLOBAL_SIGN_CA_CRT GTS_CA_101_CRT};
-
 #ifdef CRL_CHECK
 // The following are CRLs previously downloaded from the above CAs and they
 // are likely to be expired when application is compiled. To perform CRL
@@ -76,10 +73,14 @@ void TlsClientExample() {
   }
 
   // Loads trusted CA certificates.
-  if (int status = tls->LoadCACert(kCACertChain, sizeof(kCACertChain));
-      status < 0) {
-    PW_LOG_INFO("Failed to load trusted CA certificates, %d", status);
-    MyAbort();
+  auto builtin_certs = GetBuiltInRootCert();
+  PW_LOG_INFO("Found %zu built-in CA certificates", builtin_certs.size());
+  for (auto cert : builtin_certs) {
+    PW_LOG_INFO("loading cert");
+    if (int status = tls->LoadCACert(cert.data(), cert.size()); status < 0) {
+      PW_LOG_INFO("Failed to load trusted CA certificates, %d", status);
+      MyAbort();
+    }
   }
 
 #ifdef CRL_CHECK

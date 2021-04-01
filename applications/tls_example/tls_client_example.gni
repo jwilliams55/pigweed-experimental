@@ -50,6 +50,7 @@ template("tls_client_example") {
     ]
   }
 
+  # Target that implements time(time_t*) to provide an injected time.
   time_injection_target_name = target_name + "_time_injection"
   time_source_code_output = "$target_gen_dir/$target_name/injected_time.c"
   pw_python_action(time_injection_target_name) {
@@ -62,6 +63,29 @@ template("tls_client_example") {
         invoker.time,
       ]
     }
+  }
+
+  # Target that provides a set of hardcoded root certificates.
+  root_certificates = []
+  if (defined(invoker.root_certificates)) {
+    root_certificates += invoker.root_certificates
+  }
+
+  trust_store_target = target_name + "_trust_store"
+  trust_store_code_output = "$target_gen_dir/$target_name/trust_store.cc"
+  trust_store_code_path = rebase_path(trust_store_code_output)
+  pw_python_action(trust_store_target) {
+    script = "//applications/tls_example/trust_store/py" +
+             "/trust_store_generation/generate_trust_store.py"
+    outputs = [ trust_store_code_output ]
+    args = [ trust_store_code_path ]
+    foreach(cert, root_certificates) {
+      args += [
+        "-r",
+        rebase_path(cert),
+      ]
+    }
+    python_deps = [ "//applications/tls_example/trust_store/py" ]
   }
 
   executable_exclude_vars = [
@@ -81,6 +105,7 @@ template("tls_client_example") {
       "sysdeps.cc",
       "tls_client_example.cc",
       time_source_file[0],
+      trust_store_code_path,
     ]
 
     if (!defined(deps)) {
@@ -88,6 +113,7 @@ template("tls_client_example") {
     }
     deps += [
       ":$time_injection_target_name",
+      ":$trust_store_target",
       "$dir_pw_log",
       "$dir_pw_spin_delay",
       "$dir_pw_sys_io",

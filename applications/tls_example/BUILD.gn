@@ -18,10 +18,16 @@ import("tls_client_example.gni")
 
 teensy_bloaty_config = rebase_path("./teensy41_bloaty_config.bloaty")
 
+root_ca_certificates = [
+  "//applications/tls_example/trust_store/global_sign_r2.pem",
+  "//applications/tls_example/trust_store/gts_ca_101.pem",
+]
+
 tls_client_example("boringssl_teensy_ethernet") {
   tls_backend = "backends/tls/boringssl"
   transport_backend = "backends/transport/teensy_ethernet"
   bloaty_config = teensy_bloaty_config
+  root_certificates = root_ca_certificates
 
   # Build time will be used as the time source for certificate expiration check
   # by default. To use a different specified time. Add the following argument:
@@ -33,10 +39,12 @@ tls_client_example("picotls_teensy_ethernet") {
   tls_backend = "backends/tls/picotls"
   transport_backend = "backends/transport/teensy_ethernet"
   bloaty_config = teensy_bloaty_config
+  root_certificates = root_ca_certificates
 }
 
 tls_client_example("mbedtls_teensy_ethernet") {
   tls_backend = "backends/tls/mbedtls"
   transport_backend = "backends/transport/teensy_ethernet"
   bloaty_config = teensy_bloaty_config
+  root_certificates = root_ca_certificates
 }
