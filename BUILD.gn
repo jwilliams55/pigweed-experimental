@@ -99,6 +99,12 @@ group("applications") {
     "//applications/blinky:blinky(//targets/stm32f429i-disc1-stm32cube:stm32f429i_disc1_stm32cube_debug)",
   ]
 
+  # STMicroelectronics STM32F439ZI-Nucleo applications steps.
+  deps += [
+    ":applications_tests(//targets/stm32f439zi-nucleo:stm32f439zi_nucleo_debug)",
+    "//applications/blinky:blinky(//targets/stm32f439zi-nucleo:stm32f439zi_nucleo_debug)",
+  ]
+
   # Host applications steps.
   deps += [
     ":applications_tests(//targets/host:host_debug_tests)",
