@@ -47,7 +47,7 @@ pw_source_set("pw_sys_io_stm32cubef4") {
   public = []
   public_deps = [
     "$dir_pw_status",
-    "//third_party/stm32cubef4:stm32f4xx_hal",
+    "$dir_pw_third_party_stm32cubef4:stm32f4xx_hal",
   ]
   deps = [
     "$dir_pw_sys_io:default_putget_bytes",

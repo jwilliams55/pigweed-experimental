@@ -40,7 +40,7 @@ if (current_toolchain != default_toolchain) {
     deps = [
       "$dir_pw_malloc",
       "$dir_pw_preprocessor",
-      "//third_party/stm32cubef4:stm32f4xx_hal",
+      "$dir_pw_third_party_stm32cubef4:stm32f4xx_hal",
     ]
     sources = [
       "boot.cc",

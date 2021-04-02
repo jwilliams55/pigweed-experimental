@@ -16,13 +16,7 @@ import("//build_overrides/pigweed.gni")
 
 import("$dir_pw_build/target_types.gni")
 
-declare_args() {
-  # Product (ex. "STM32F429xx")
-  pw_third_party_stm32cubef4_product = ""
-
-  # External clock frequency (ex. "8000000" for 8Mhz)
-  pw_third_party_stm32cubef4_hse_hz = ""
-}
+import("$dir_pw_third_party_stm32cubef4/stm32cubef4.gni")
 
 config("flags") {
   cflags = [

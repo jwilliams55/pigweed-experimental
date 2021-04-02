@@ -12,14 +12,13 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-import("//build_overrides/pigweed.gni")
+declare_args() {
+  # Enable stm32cubef4. Requires all 3 submodules to be checked out. (ex. "yes")
+  pw_third_party_stm32cubef4_enabled = ""
 
-import("$dir_pw_build/target_types.gni")
+  # Product (ex. "STM32F429xx")
+  pw_third_party_stm32cubef4_product = ""
 
-pw_source_set("pw_spin_delay_stm32cubef4") {
-  deps = [
-    "$dir_pw_spin_delay:pw_spin_delay.facade",
-    "$dir_pw_third_party_stm32cubef4:stm32f4xx_hal",
-  ]
-  sources = [ "delay.cc" ]
+  # External clock frequency (ex. "8000000" for 8Mhz)
+  pw_third_party_stm32cubef4_hse_hz = ""
 }

@@ -37,7 +37,7 @@ if (pw_board_led_stm32cubef4_gpio_port != "" &&
     public_configs = [ ":flags" ]
     deps = [
       "$dir_pw_board_led:pw_board_led.facade",
-      "//third_party/stm32cubef4:stm32f4xx_hal",
+      "$dir_pw_third_party_stm32cubef4:stm32f4xx_hal",
     ]
     sources = [ "led.cc" ]
   }

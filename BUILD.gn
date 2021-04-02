@@ -16,6 +16,7 @@ import("//build_overrides/pigweed.gni")
 
 import("$dir_pw_arduino_build/arduino.gni")
 import("$dir_pw_build/python.gni")
+import("$dir_pw_third_party_stm32cubef4/stm32cubef4.gni")
 import("$dir_pw_tokenizer/database.gni")
 import("$dir_pw_unit_test/test.gni")
 
@@ -93,17 +94,19 @@ group("applications") {
     "//applications/strings:all(//targets/stm32f429i-disc1:stm32f429i_disc1_debug)",
   ]
 
-  # STMicroelectronics STM32F429I-DISC1 STM32Cube applications steps.
-  deps += [
-    ":applications_tests(//targets/stm32f429i-disc1-stm32cube:stm32f429i_disc1_stm32cube_debug)",
-    "//applications/blinky:blinky(//targets/stm32f429i-disc1-stm32cube:stm32f429i_disc1_stm32cube_debug)",
-  ]
+  if (pw_third_party_stm32cubef4_enabled != "") {
+    # STMicroelectronics STM32F429I-DISC1 STM32Cube applications steps.
+    deps += [
+      ":applications_tests(//targets/stm32f429i-disc1-stm32cube:stm32f429i_disc1_stm32cube_debug)",
+      "//applications/blinky:blinky(//targets/stm32f429i-disc1-stm32cube:stm32f429i_disc1_stm32cube_debug)",
+    ]
 
-  # STMicroelectronics STM32F439ZI-Nucleo applications steps.
-  deps += [
-    ":applications_tests(//targets/stm32f439zi-nucleo:stm32f439zi_nucleo_debug)",
-    "//applications/blinky:blinky(//targets/stm32f439zi-nucleo:stm32f439zi_nucleo_debug)",
-  ]
+    # STMicroelectronics STM32F439ZI-Nucleo applications steps.
+    deps += [
+      ":applications_tests(//targets/stm32f439zi-nucleo:stm32f439zi_nucleo_debug)",
+      "//applications/blinky:blinky(//targets/stm32f439zi-nucleo:stm32f439zi_nucleo_debug)",
+    ]
+  }
 
   # Host applications steps.
   deps += [
