@@ -11,9 +11,7 @@
 // WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 // License for the specific language governing permissions and limitations under
 // the License.
-
-#ifndef CA_CERTIFICATE_CRLS_H
-#define CA_CERTIFICATE_CRLS_H
+#pragma once
 
 #define GLOBAL_SIGN_CA_CRL                                               \
   "-----BEGIN X509 CRL-----\r\n"                                         \
@@ -70,5 +68,3 @@
   "-----END X509 CRL-----\r\n"
 
 std::span<const std::span<const unsigned char>> GetBuiltInRootCert();
-
-#endif  // CA_CERTIFICATE_CRLS_H

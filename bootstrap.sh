@@ -120,7 +120,7 @@ if [ "$(basename "$_BOOTSTRAP_PATH")" = "bootstrap.sh" ] || \
 # This is where pw_bootstrap is called. Most small projects will include
 # --use-pigweed-defaults.
 ######### BEGIN PROJECT-SPECIFIC CODE #########
-  pw_bootstrap --shell-file "$SETUP_SH" --install-dir "$_PW_ACTUAL_ENVIRONMENT_ROOT" --use-pigweed-defaults --virtualenv-gn-target "$PW_PROJECT_ROOT#:python.install" --virtualenv-gn-out-dir "$PW_PROJECT_ROOT/out"
+  pw_bootstrap --shell-file "$SETUP_SH" --install-dir "$_PW_ACTUAL_ENVIRONMENT_ROOT" --virtualenv-gn-out-dir "$PW_PROJECT_ROOT/out" --config-file "$PW_PROJECT_ROOT/env_setup.json"
 ########## END PROJECT-SPECIFIC CODE ##########
   pw_finalize bootstrap "$SETUP_SH"
 else
