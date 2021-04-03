@@ -13,8 +13,8 @@
 # the License.
 """Trusts tore synthesis
 
-The script generates source code for implementing built-in certificates. The code
-template is:
+The script generates source code for implementing built-in certificates. The
+code template is:
 
 namespace {
 const unsigned char kRootCACert_0[] = {...};
@@ -41,10 +41,9 @@ synthesis_trust_store <output> -r <cert0> -r <cert1> .....
 """
 
 import argparse
-import os
 import subprocess
 import sys
-from OpenSSL import crypto
+from OpenSSL import crypto  # type: ignore
 
 LICENSE_HEADER = """// Copyright 2021 The Pigweed Authors
 //
@@ -70,6 +69,7 @@ std::span<const std::span<const unsigned char>> GetBuiltInRootCert() {
 
 
 def parse_args():
+    """Setup argparse."""
     parser = argparse.ArgumentParser()
     parser.add_argument("out", help="output header")
     parser.add_argument("--root_cert",
@@ -99,11 +99,15 @@ def load_certificate_file(file):
 
 
 def generate_der_c_array_for_cert(file, var_name):
+    """Load cert file and return a generated c array declaration."""
+
     data = load_certificate_file(file)
     return generate_c_array_declaration(data, var_name)
 
 
 def main():
+    """Generate Trust Store Main."""
+
     args = parse_args()
     print(args)
     with open(args.out, "w") as header:
@@ -136,7 +140,7 @@ def main():
         "clang-format",
         "-i",
         args.out,
-    ])
+    ], check=True)
 
 
 if __name__ == "__main__":

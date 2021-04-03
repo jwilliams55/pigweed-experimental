@@ -28,9 +28,7 @@ Usage:
     inject specified time: genearte_time_code <output> -t "03/29/2021 12:00:00"
     inject current time: genearte_time_code <output>
 """
-import datetime
 from datetime import datetime
-import time
 import argparse
 import subprocess
 
@@ -66,6 +64,7 @@ time_t time(time_t* t) {
 
 
 def parse_args():
+    """Setup argparse."""
     parser = argparse.ArgumentParser()
     parser.add_argument("out", help="path for output header file")
     parser.add_argument("--time", "-t", help="time to inject")
@@ -93,4 +92,4 @@ if __name__ == "__main__":
         "clang-format",
         "-i",
         args.out,
-    ])
+    ], check=True)
