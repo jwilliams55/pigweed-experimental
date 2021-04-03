@@ -26,8 +26,6 @@ group("default") {
     ":applications",
     ":arduino",
     ":host",
-
-    # TODO(tonymd): pw_console fails linting
     ":python.lint",
     ":python.tests",
   ]
@@ -65,7 +63,6 @@ pw_python_group("python") {
   python_deps = [
     "tools",
     "//applications/tls_example/trust_store/py",
-    "//pw_console/py",
     "//third_party/pigweed/pw_env_setup:python",
     "//third_party/pigweed/pw_env_setup:target_support_packages",
   ]
