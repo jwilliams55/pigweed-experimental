@@ -25,3 +25,9 @@
 [submodule "third_party/stm32cubef4/stm32f4xx_hal_driver"]
 	path = third_party/stm32cubef4/stm32f4xx_hal_driver
 	url = https://github.com/STMicroelectronics/stm32f4xx_hal_driver.git
+[submodule "third_party/stm32cubef4/lwip"]
+	path = third_party/stm32cubef4/lwip
+	url = https://github.com/STMicroelectronics/stm32_mw_lwip.git
+[submodule "third_party/stm32cubef4/freertos"]
+	path = third_party/stm32cubef4/freertos
+	url = https://github.com/STMicroelectronics/stm32_mw_freertos.git
