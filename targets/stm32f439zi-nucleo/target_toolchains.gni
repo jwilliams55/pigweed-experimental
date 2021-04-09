@@ -90,6 +90,11 @@ _target_config = {
 
   # stm32f439zi-nucleo has an 8Mhz external clock fed by the st-link
   pw_third_party_stm32cubef4_hse_hz = "8000000"
+
+  dir_pw_third_party_freertos = "//third_party/freertos"
+  pw_third_party_freertos_CONFIG =
+      "//targets/stm32f439zi-nucleo:freertos_config"
+  pw_third_party_freertos_PORT = "//third_party/freertos:arm_cm4f_freertos_port"
 }
 
 _toolchain_properties = {

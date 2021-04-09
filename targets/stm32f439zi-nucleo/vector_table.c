@@ -43,6 +43,12 @@ typedef void (*InterruptHandler)(void);
 // template.
 void TIM6_DAC_IRQHandler(void);
 
+// FreeRTOS interrupt handlers.
+//  Defined in GCC/ARM_CM4F/port.c
+void xPortPendSVHandler(void);
+void xPortSysTickHandler(void);
+void vPortSVCHandler(void);
+
 PW_KEEP_IN_SECTION(".vector_table")
 const InterruptHandler vector_table[] = {
     // The starting location of the stack pointer.
@@ -59,6 +65,11 @@ const InterruptHandler vector_table[] = {
     [2] = DefaultFaultHandler,
     // HardFault handler.
     [3] = DefaultFaultHandler,
+
+    // FreeRTOS handlers.
+    [SVCall_IRQn + 16] = vPortSVCHandler,
+    [PendSV_IRQn + 16] = xPortPendSVHandler,
+    [SysTick_IRQn + 16] = xPortSysTickHandler,
 
     // stm32f4xx_hal sys-tick handler.
     [TIM6_DAC_IRQn + 16] = TIM6_DAC_IRQHandler,

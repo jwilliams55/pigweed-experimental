@@ -31,3 +31,6 @@
 [submodule "third_party/stm32cubef4/freertos"]
 	path = third_party/stm32cubef4/freertos
 	url = https://github.com/STMicroelectronics/stm32_mw_freertos.git
+[submodule "third_party/freertos/Source"]
+	path = third_party/freertos/Source
+	url = https://github.com/FreeRTOS/FreeRTOS-Kernel.git

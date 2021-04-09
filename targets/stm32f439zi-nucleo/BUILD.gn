@@ -17,6 +17,7 @@ import("//build_overrides/pigweed.gni")
 import("$dir_pw_build/target_types.gni")
 import("$dir_pw_docgen/docs.gni")
 import("$dir_pw_malloc/backend.gni")
+import("$dir_pw_third_party/freertos/freertos.gni")
 import("$dir_pw_toolchain/generate_toolchain.gni")
 import("target_toolchains.gni")
 
@@ -40,12 +41,22 @@ if (current_toolchain != default_toolchain) {
     deps = [
       "$dir_pw_malloc",
       "$dir_pw_preprocessor",
+      "$dir_pw_third_party/freertos",
       "$dir_pw_third_party_stm32cubef4:stm32f4xx_hal",
     ]
     sources = [
       "boot.cc",
       "vector_table.c",
     ]
+  }
+
+  config("freertos_config_includes") {
+    include_dirs = [ "." ]
+  }
+
+  pw_source_set("freertos_config") {
+    public_configs = [ ":freertos_config_includes" ]
+    public = [ "FreeRTOSConfig.h" ]
   }
 }
 
