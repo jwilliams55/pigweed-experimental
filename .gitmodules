@@ -1,17 +1,19 @@
 [submodule "third_party/pigweed"]
 	path = third_party/pigweed
 	url = https://pigweed.googlesource.com/pigweed/pigweed
+	branch = master
 [submodule "third_party/nanopb"]
 	path = third_party/nanopb
 	url = https://pigweed.googlesource.com/third_party/github/nanopb/nanopb
+	branch = main
 [submodule "third_party/boringssl/src"]
 	path = third_party/boringssl/src
 	url = https://pigweed.googlesource.com/third_party/boringssl/boringssl
-	branch = master
+	branch = main
 [submodule "third_party/mbedtls/src"]
 	path = third_party/mbedtls/src
 	url = https://pigweed.googlesource.com/third_party/github/ARMmbed/mbedtls
-	branch = master
+	branch = main
 [submodule "third_party/picotls/src"]
 	path = third_party/picotls/src
 	url = https://github.com/h2o/picotls.git
