@@ -20,19 +20,25 @@
 	branch = master
 [submodule "third_party/stm32cubef4/cmsis_device_f4"]
 	path = third_party/stm32cubef4/cmsis_device_f4
-	url = https://github.com/STMicroelectronics/cmsis_device_f4.git
+	url = https://pigweed.googlesource.com/third_party/github/STMicroelectronics/cmsis_device_f4.git
+	branch = main
 [submodule "third_party/stm32cubef4/cmsis_core_cm4"]
 	path = third_party/stm32cubef4/cmsis_core_cm4
-	url = https://github.com/STMicroelectronics/cmsis_core.git
+	url = https://pigweed.googlesource.com/third_party/github/STMicroelectronics/cmsis_core.git
+	branch = main
 [submodule "third_party/stm32cubef4/stm32f4xx_hal_driver"]
 	path = third_party/stm32cubef4/stm32f4xx_hal_driver
-	url = https://github.com/STMicroelectronics/stm32f4xx_hal_driver.git
+	url = https://pigweed.googlesource.com/third_party/github/STMicroelectronics/stm32f4xx_hal_driver.git
+	branch = main
 [submodule "third_party/stm32cubef4/lwip"]
 	path = third_party/stm32cubef4/lwip
-	url = https://github.com/STMicroelectronics/stm32_mw_lwip.git
+	url = https://pigweed.googlesource.com/third_party/github/STMicroelectronics/stm32_mw_lwip.git
+	branch = main
 [submodule "third_party/stm32cubef4/freertos"]
 	path = third_party/stm32cubef4/freertos
-	url = https://github.com/STMicroelectronics/stm32_mw_freertos.git
+	url = https://pigweed.googlesource.com/third_party/github/STMicroelectronics/stm32_mw_freertos.git
+	branch = main
 [submodule "third_party/freertos/Source"]
 	path = third_party/freertos/Source
-	url = https://github.com/FreeRTOS/FreeRTOS-Kernel.git
+	url = https://pigweed.googlesource.com/third_party/github/FreeRTOS/FreeRTOS-Kernel.git
+	branch = main
