@@ -16,8 +16,8 @@
 	branch = main
 [submodule "third_party/picotls/src"]
 	path = third_party/picotls/src
-	url = https://github.com/h2o/picotls.git
-	branch = master
+	url = https://pigweed.googlesource.com/third_party/github/h2o/picotls.git
+	branch = main
 [submodule "third_party/stm32cubef4/cmsis_device_f4"]
 	path = third_party/stm32cubef4/cmsis_device_f4
 	url = https://pigweed.googlesource.com/third_party/github/STMicroelectronics/cmsis_device_f4.git
