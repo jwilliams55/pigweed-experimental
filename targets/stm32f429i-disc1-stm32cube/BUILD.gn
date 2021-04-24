@@ -47,6 +47,15 @@ if (current_toolchain != default_toolchain) {
       "vector_table.c",
     ]
   }
+
+  config("config_includes") {
+    include_dirs = [ "config" ]
+  }
+
+  pw_source_set("stm32f4xx_hal_config") {
+    public_configs = [ ":config_includes" ]
+    public = [ "config/stm32f4xx_hal_conf.h" ]
+  }
 }
 
 pw_doc_group("target_docs") {

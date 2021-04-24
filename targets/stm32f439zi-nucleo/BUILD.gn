@@ -50,13 +50,18 @@ if (current_toolchain != default_toolchain) {
     ]
   }
 
-  config("freertos_config_includes") {
-    include_dirs = [ "." ]
+  config("config_includes") {
+    include_dirs = [ "config" ]
   }
 
   pw_source_set("freertos_config") {
-    public_configs = [ ":freertos_config_includes" ]
-    public = [ "FreeRTOSConfig.h" ]
+    public_configs = [ ":config_includes" ]
+    public = [ "config/FreeRTOSConfig.h" ]
+  }
+
+  pw_source_set("stm32f4xx_hal_config") {
+    public_configs = [ ":config_includes" ]
+    public = [ "config/stm32f4xx_hal_conf.h" ]
   }
 }
 

@@ -86,10 +86,15 @@ _target_config = {
 
   pw_spin_delay_BACKEND = dir_pw_spin_delay_stm32cubef4
 
-  pw_third_party_stm32cubef4_product = "STM32F439xx"
-
-  # stm32f439zi-nucleo has an 8Mhz external clock fed by the st-link
-  pw_third_party_stm32cubef4_hse_hz = "8000000"
+  pw_third_party_stm32cubef4_PRODUCT = "STM32F439xx"
+  pw_third_party_stm32cubef4_CONFIG =
+      "//targets/stm32f439zi-nucleo:stm32f4xx_hal_config"
+  dir_pw_third_party_stm32cubef4_cmsis_core =
+      "//third_party/stm32cubef4/cmsis_core_cm4"
+  dir_pw_third_party_stm32cubef4_cmsis_device =
+      "//third_party/stm32cubef4/cmsis_device_f4"
+  dir_pw_third_party_stm32cubef4_stm32f4xx_hal =
+      "//third_party/stm32cubef4/stm32f4xx_hal_driver"
 
   dir_pw_third_party_freertos = "//third_party/freertos"
   pw_third_party_freertos_CONFIG =

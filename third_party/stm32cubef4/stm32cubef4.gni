@@ -16,9 +16,18 @@ declare_args() {
   # Enable stm32cubef4. Requires all 3 submodules to be checked out. (ex. "yes")
   pw_third_party_stm32cubef4_enabled = ""
 
-  # Product (ex. "STM32F429xx")
-  pw_third_party_stm32cubef4_product = ""
+  # CMSIS core directory. Upstream repo (https://github.com/STMicroelectronics/cmsis_core/tree/v5.6.0_cm4)
+  dir_pw_third_party_stm32cubef4_cmsis_core = ""
 
-  # External clock frequency (ex. "8000000" for 8Mhz)
-  pw_third_party_stm32cubef4_hse_hz = ""
+  # CMSIS device directory. Upstream repo (https://github.com/STMicroelectronics/cmsis_device_f4)
+  dir_pw_third_party_stm32cubef4_cmsis_device = ""
+
+  # stm32f4xx_hal directory. Upstream repo (https://github.com/STMicroelectronics/stm32f4xx_hal_driver)
+  dir_pw_third_party_stm32cubef4_stm32f4xx_hal = ""
+
+  # pw_source_set with `stm32f4xx_hal_conf.h`
+  pw_third_party_stm32cubef4_CONFIG = ""
+
+  # Product (ex. "STM32F429xx")
+  pw_third_party_stm32cubef4_PRODUCT = ""
 }
