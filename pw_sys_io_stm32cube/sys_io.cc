@@ -17,7 +17,7 @@
 #include <cinttypes>
 
 #include "pw_status/status.h"
-#include "stm32f4xx.h"
+#include "stm32cube/stm32cube.h"
 
 #define _CAT(A, B, C) A##B##C
 #define CAT(A, B, C) _CAT(A, B, C)

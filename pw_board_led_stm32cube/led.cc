@@ -16,7 +16,7 @@
 
 #include <cinttypes>
 
-#include "stm32f4xx.h"
+#include "stm32cube/stm32cube.h"
 
 namespace pw::board_led {
 

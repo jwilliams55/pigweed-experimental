@@ -16,7 +16,7 @@
 
 #include "pw_malloc/malloc.h"
 #include "pw_preprocessor/compiler.h"
-#include "pw_sys_io_stm32cubef4/init.h"
+#include "pw_sys_io_stm32cube/init.h"
 #include "stm32f4xx.h"
 
 void pw_boot_PreStaticMemoryInit() { SystemInit(); }

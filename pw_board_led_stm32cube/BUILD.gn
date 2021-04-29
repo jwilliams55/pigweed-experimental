@@ -18,26 +18,26 @@ import("$dir_pw_build/target_types.gni")
 
 declare_args() {
   # GPIO Port of LED (ex. "G")
-  pw_board_led_stm32cubef4_gpio_port = ""
+  pw_board_led_stm32cube_gpio_port = ""
 
   # GPIO Pin of LED (ex. "13")
-  pw_board_led_stm32cubef4_gpio_pin = ""
+  pw_board_led_stm32cube_gpio_pin = ""
 }
 
 config("flags") {
   cflags = [
-    "-DLED_PORT_CHAR=" + pw_board_led_stm32cubef4_gpio_port,
-    "-DLED_PIN_NUM=" + pw_board_led_stm32cubef4_gpio_pin,
+    "-DLED_PORT_CHAR=" + pw_board_led_stm32cube_gpio_port,
+    "-DLED_PIN_NUM=" + pw_board_led_stm32cube_gpio_pin,
   ]
 }
 
-if (pw_board_led_stm32cubef4_gpio_port != "" &&
-    pw_board_led_stm32cubef4_gpio_pin != "") {
-  pw_source_set("pw_board_led_stm32cubef4") {
+if (pw_board_led_stm32cube_gpio_port != "" &&
+    pw_board_led_stm32cube_gpio_pin != "") {
+  pw_source_set("pw_board_led_stm32cube") {
     public_configs = [ ":flags" ]
     deps = [
       "$dir_pw_board_led:pw_board_led.facade",
-      "$dir_pw_third_party_stm32cubef4:stm32f4xx_hal",
+      "$dir_pw_third_party/stm32cube",
     ]
     sources = [ "led.cc" ]
   }

@@ -11,13 +11,13 @@
 // WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 // License for the specific language governing permissions and limitations under
 // the License.
-#pragma once
 
-#include "pw_preprocessor/util.h"
+#include "pw_sys_io_stm32cube/init.h"
 
-PW_EXTERN_C_START
+#include "stm32cube/init.h"
+#include "stm32cube/stm32cube.h"
 
-// The actual implement of PreMainInit() in sys_io_BACKEND.
-void pw_sys_io_Init();
-
-PW_EXTERN_C_END
+void pw_stm32cube_Init(void) {
+  HAL_Init();
+  pw_sys_io_Init();
+}

@@ -34,20 +34,13 @@ config("pw_malloc_active") {
 if (current_toolchain != default_toolchain) {
   pw_source_set("pre_init") {
     configs = [ ":pw_malloc_active" ]
-    public_deps = [
-      "$dir_pw_boot_armv7m",
-      "$dir_pw_sys_io_stm32cubef4",
-    ]
+    public_deps = [ "$dir_pw_sys_io_stm32cube" ]
     deps = [
-      "$dir_pw_malloc",
       "$dir_pw_preprocessor",
       "$dir_pw_third_party/freertos",
-      "$dir_pw_third_party_stm32cubef4:stm32f4xx_hal",
+      "$dir_pw_third_party/stm32cube",
     ]
-    sources = [
-      "boot.cc",
-      "vector_table.c",
-    ]
+    sources = [ "init.c" ]
   }
 
   config("config_includes") {

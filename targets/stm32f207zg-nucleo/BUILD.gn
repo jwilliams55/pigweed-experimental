@@ -21,38 +21,21 @@ import("$dir_pw_toolchain/generate_toolchain.gni")
 import("target_toolchains.gni")
 
 generate_toolchains("target_toolchains") {
-  toolchains = pw_target_toolchain_stm32f429i_disc1_list
-}
-
-config("pw_malloc_active") {
-  if (pw_malloc_BACKEND != "") {
-    defines = [ "PW_MALLOC_ACTIVE=1" ]
-  }
+  toolchains = pw_target_toolchain_stm32f207zg_nucleo_list
 }
 
 if (current_toolchain != default_toolchain) {
   pw_source_set("pre_init") {
-    configs = [ ":pw_malloc_active" ]
-    public_deps = [
-      "$dir_pw_boot_armv7m",
-      "$dir_pw_sys_io_stm32cube",
-    ]
-    deps = [
-      "$dir_pw_malloc",
-      "$dir_pw_preprocessor",
-      "$dir_pw_third_party/stm32cube",
-    ]
-    sources = [
-      "boot.cc",
-      "vector_table.c",
-    ]
+    public_deps = [ "$dir_pw_sys_io_stm32cube" ]
+    deps = [ "$dir_pw_third_party/stm32cube" ]
+    sources = [ "init.c" ]
   }
 
   config("config_includes") {
     include_dirs = [ "config" ]
   }
 
-  pw_source_set("stm32f4xx_hal_config") {
+  pw_source_set("config") {
     public_configs = [ ":config_includes" ]
     public = [ "config/stm32f4xx_hal_conf.h" ]
   }

@@ -15,11 +15,19 @@
 import("//build_overrides/pigweed.gni")
 
 import("$dir_pw_build/target_types.gni")
+import("$dir_pw_docgen/docs.gni")
+import("$dir_pw_malloc/backend.gni")
+import("$dir_pw_toolchain/generate_toolchain.gni")
+import("target_toolchains.gni")
 
-pw_source_set("pw_spin_delay_stm32cubef4") {
-  deps = [
-    "$dir_pw_spin_delay:pw_spin_delay.facade",
-    "$dir_pw_third_party_stm32cubef4:stm32f4xx_hal",
-  ]
-  sources = [ "delay.cc" ]
+generate_toolchains("target_toolchains") {
+  toolchains = pw_target_toolchain_stm32l552ze_nucleo_list
+}
+
+if (current_toolchain != default_toolchain) {
+  pw_source_set("pre_init") {
+    public_deps = [ "$dir_pw_sys_io_stm32cube" ]
+    deps = [ "$dir_pw_third_party/stm32cube" ]
+    sources = [ "init.c" ]
+  }
 }

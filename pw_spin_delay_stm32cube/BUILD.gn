@@ -13,21 +13,13 @@
 # the License.
 
 import("//build_overrides/pigweed.gni")
-import("$dir_pw_malloc/backend.gni")
 
-# Executable wrapper that includes some baremetal startup code.
-template("stm32f439zi_executable") {
-  target("executable", target_name) {
-    forward_variables_from(invoker, "*")
-    if (!defined(deps)) {
-      deps = []
-    }
-    deps += [ "//targets/stm32f439zi_nucleo:pre_init" ]
-    if (pw_malloc_BACKEND != "") {
-      if (!defined(configs)) {
-        configs = []
-      }
-      configs += [ "$dir_pw_malloc:pw_malloc_wrapper_config" ]
-    }
-  }
+import("$dir_pw_build/target_types.gni")
+
+pw_source_set("pw_spin_delay_stm32cube") {
+  deps = [
+    "$dir_pw_spin_delay:pw_spin_delay.facade",
+    "$dir_pw_third_party/stm32cube",
+  ]
+  sources = [ "delay.cc" ]
 }

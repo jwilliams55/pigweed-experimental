@@ -16,6 +16,7 @@ import("//build_overrides/pigweed.gni")
 
 import("$dir_pw_rpc/system_server/backend.gni")
 import("$dir_pw_sys_io/backend.gni")
+import("$dir_pw_third_party/stm32cube/stm32cube.gni")
 import("$dir_pw_toolchain/arm_gcc/toolchains.gni")
 
 _target_config = {
@@ -51,11 +52,11 @@ _target_config = {
   pw_sync_INTERRUPT_SPIN_LOCK_BACKEND =
       "$dir_pw_sync_baremetal:interrupt_spin_lock"
   pw_log_BACKEND = dir_pw_log_basic
-  pw_sys_io_BACKEND = dir_pw_sys_io_stm32cubef4
-  pw_sys_io_stm32cubef4_usart_num = "1"
-  pw_sys_io_stm32cubef4_gpio_port = "A"
-  pw_sys_io_stm32cubef4_gpio_tx_pin = "9"
-  pw_sys_io_stm32cubef4_gpio_rx_pin = "10"
+  pw_sys_io_BACKEND = dir_pw_sys_io_stm32cube
+  pw_sys_io_stm32cube_usart_num = "1"
+  pw_sys_io_stm32cube_gpio_port = "A"
+  pw_sys_io_stm32cube_gpio_tx_pin = "9"
+  pw_sys_io_stm32cube_gpio_rx_pin = "10"
 
   #TODO: remove dependency on stm32f429i-disc1 rpc server.
   pw_rpc_system_server_BACKEND =
@@ -77,24 +78,25 @@ _target_config = {
     "PW_BOOT_VECTOR_TABLE_SIZE=512",
   ]
 
+  pw_build_LINK_DEPS = [
+    "$dir_pw_assert:impl",
+    "$dir_pw_log:impl",
+  ]
+
   current_cpu = "arm"
   current_os = ""
 
-  pw_board_led_BACKEND = dir_pw_board_led_stm32cubef4
-  pw_board_led_stm32cubef4_gpio_port = "G"
-  pw_board_led_stm32cubef4_gpio_pin = "13"
+  pw_board_led_BACKEND = dir_pw_board_led_stm32cube
+  pw_board_led_stm32cube_gpio_port = "G"
+  pw_board_led_stm32cube_gpio_pin = "13"
 
-  pw_spin_delay_BACKEND = dir_pw_spin_delay_stm32cubef4
+  pw_spin_delay_BACKEND = dir_pw_spin_delay_stm32cube
 
-  pw_third_party_stm32cubef4_PRODUCT = "STM32F429xx"
-  pw_third_party_stm32cubef4_CONFIG =
+  dir_pw_third_party_stm32cube = dir_pw_third_party_stm32cube_f4
+  pw_third_party_stm32cube_PRODUCT = "STM32F429xx"
+  pw_third_party_stm32cube_CONFIG =
       "//targets/stm32f429i_disc1_stm32cube:stm32f4xx_hal_config"
-  dir_pw_third_party_stm32cubef4_cmsis_core =
-      "//third_party/stm32cubef4/cmsis_core_cm4"
-  dir_pw_third_party_stm32cubef4_cmsis_device =
-      "//third_party/stm32cubef4/cmsis_device_f4"
-  dir_pw_third_party_stm32cubef4_stm32f4xx_hal =
-      "//third_party/stm32cubef4/stm32f4xx_hal_driver"
+  pw_third_party_stm32cube_CORE_INIT = ""
 }
 
 _toolchain_properties = {

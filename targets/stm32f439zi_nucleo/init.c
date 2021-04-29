@@ -13,6 +13,7 @@
 // the License.
 
 #include "pw_sys_io_stm32cube/init.h"
+
 #include "stm32cube/init.h"
 #include "stm32cube/stm32cube.h"
 

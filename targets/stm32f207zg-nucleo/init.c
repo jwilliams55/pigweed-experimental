@@ -12,14 +12,12 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-#include "pw_spin_delay/delay.h"
+#include "pw_sys_io_stm32cube/init.h"
 
-#include "stm32f4xx.h"
+#include "stm32cube/init.h"
+#include "stm32cube/stm32cube.h"
 
-namespace pw::spin_delay {
-
-void WaitMillis(size_t delay_ms) { HAL_Delay(delay_ms); }
-
-uint32_t Millis() { return HAL_GetTick(); }
-
-}  // namespace pw::spin_delay
+void pw_stm32cube_Init(void) {
+  HAL_Init();
+  pw_sys_io_Init();
+}
