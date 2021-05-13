@@ -53,7 +53,7 @@ target_toolchain_stm32f429i_disc1 = {
 
       # Force tests to use basic log backend to avoid generating and loading its
       # own tokenized database.
-      pw_log_BACKEND = "$dir_pw_log_basic"
+      pw_log_BACKEND = dir_pw_log_basic
     }
   }
 }
