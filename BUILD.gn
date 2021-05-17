@@ -49,7 +49,7 @@ group("arduino") {
 
 # stm32f429i_disc1 specific targets.
 group("stm32f429i_disc1") {
-  _default_toolchain = "//targets/stm32f429i-disc1:stm32f429i_disc1_debug"
+  _default_toolchain = "//targets/stm32f429i_disc1:stm32f429i_disc1_debug"
   _testing_toolchain = "${_default_toolchain}_tests"
   deps = [
     # ":app(${_default_toolchain})",
@@ -86,23 +86,23 @@ group("applications") {
 
   # STMicroelectronics STM32F429I-DISC1 applications steps.
   deps += [
-    ":applications_tests(//targets/stm32f429i-disc1:stm32f429i_disc1_debug_tests)",
-    "//applications/blinky:blinky(//targets/stm32f429i-disc1:stm32f429i_disc1_debug)",
-    "//applications/rpc:all(//targets/stm32f429i-disc1:stm32f429i_disc1_debug)",
-    "//applications/strings:all(//targets/stm32f429i-disc1:stm32f429i_disc1_debug)",
+    ":applications_tests(//targets/stm32f429i_disc1:stm32f429i_disc1_debug_tests)",
+    "//applications/blinky:blinky(//targets/stm32f429i_disc1:stm32f429i_disc1_debug)",
+    "//applications/rpc:all(//targets/stm32f429i_disc1:stm32f429i_disc1_debug)",
+    "//applications/strings:all(//targets/stm32f429i_disc1:stm32f429i_disc1_debug)",
   ]
 
   if (pw_third_party_stm32cubef4_enabled != "") {
     # STMicroelectronics STM32F429I-DISC1 STM32Cube applications steps.
     deps += [
-      ":applications_tests(//targets/stm32f429i-disc1-stm32cube:stm32f429i_disc1_stm32cube_debug)",
-      "//applications/blinky:blinky(//targets/stm32f429i-disc1-stm32cube:stm32f429i_disc1_stm32cube_debug)",
+      ":applications_tests(//targets/stm32f429i_disc1_stm32cube:stm32f429i_disc1_stm32cube_debug)",
+      "//applications/blinky:blinky(//targets/stm32f429i_disc1_stm32cube:stm32f429i_disc1_stm32cube_debug)",
     ]
 
     # STMicroelectronics STM32F439ZI-Nucleo applications steps.
     deps += [
       ":applications_tests(//targets/stm32f439zi-nucleo:stm32f439zi_nucleo_debug)",
-      "//applications/blinky:blinky(//targets/stm32f439zi-nucleo:stm32f439zi_nucleo_debug)",
+      "//applications/blinky:blinky(//targets/stm32f439zi_nucleo:stm32f439zi_nucleo_debug)",
     ]
   }
 

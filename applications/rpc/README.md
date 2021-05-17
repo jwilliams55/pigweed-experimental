@@ -60,7 +60,7 @@ but passing in a different `.elf`.
    **stm32f429i_disc1**
 
    ```sh
-   openocd -s ${PW_PIGWEED_CIPD_INSTALL_DIR}/share/openocd/scripts -f ${PW_ROOT}/targets/stm32f429i-disc1/py/stm32f429i_disc1_utils/openocd_stm32f4xx.cfg -c "program out/arduino_debug/obj/workshop/03-rpc/bin/rpc.elf reset exit"
+   openocd -s ${PW_PIGWEED_CIPD_INSTALL_DIR}/share/openocd/scripts -f ${PW_ROOT}/targets/stm32f429i_disc1/py/stm32f429i_disc1_utils/openocd_stm32f4xx.cfg -c "program out/arduino_debug/obj/workshop/03-rpc/bin/rpc.elf reset exit"
    ```
 
 ## View HDLC Encoded Log Output
