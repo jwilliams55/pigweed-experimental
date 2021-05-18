@@ -29,7 +29,7 @@ except ImportError:
     sys.exit(2)
 
 import pw_presubmit
-from pw_presubmit import build, cli, environment, format_code, git_repo
+from pw_presubmit import build, cli, format_code, git_repo
 from pw_presubmit import python_checks, filter_paths, PresubmitContext
 from pw_presubmit.install_hook import install_hook
 
@@ -51,27 +51,6 @@ REPOS = (
     PIGWEED_ROOT,
     PROJECT_ROOT / 'third_party' / 'nanopb',
 )
-
-
-#
-# Initialization
-#
-def init_cipd(ctx: PresubmitContext):
-    """Initialize CIPD for project dependencies."""
-    environment.init_cipd(PIGWEED_ROOT, ctx.output_dir)
-
-
-def init_virtualenv(ctx: PresubmitContext):
-    """Initialize a virtual environment to run presubmits."""
-    environment.init_virtualenv(
-        PIGWEED_ROOT,
-        ctx.output_dir,
-        gn_targets=(
-            f'{ctx.root}#:python.install',
-            f'{ctx.root}/third_party/pigweed#:python.install',
-            f'{ctx.root}/third_party/pigweed#:target_support_packages.install',
-        ))
-
 
 # Rerun the build if files with these extensions change.
 _BUILD_EXTENSIONS = frozenset(
@@ -125,9 +104,6 @@ QUICK = (
     format_code.presubmit_checks(exclude=PATH_EXCLUSIONS),
 )
 FULL = (
-    # Initialize an environment for running presubmit checks.
-    init_cipd,
-    init_virtualenv,
     pragma_once,
     QUICK,  # Add all checks from the 'quick' program
     # Use the upstream Python checks, with custom path filters applied.
