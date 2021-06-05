@@ -1,7 +1,7 @@
 [submodule "third_party/pigweed"]
 	path = third_party/pigweed
 	url = https://pigweed.googlesource.com/pigweed/pigweed
-	branch = master
+	branch = main
 [submodule "third_party/nanopb"]
 	path = third_party/nanopb
 	url = https://pigweed.googlesource.com/third_party/github/nanopb/nanopb
