@@ -114,6 +114,10 @@ group("applications") {
     deps += [ "//applications/blinky:blinky(//targets/stm32l552ze-nucleo:stm32l552ze_nucleo_debug)" ]
   }
 
+  if (dir_pw_third_party_stm32cube_h7 != "") {
+    deps += [ "//applications/blinky:blinky(//targets/stm32h753zi-nucleo:stm32h753zi_nucleo_debug)" ]
+  }
+
   # Host applications steps.
   deps += [
     ":applications_tests(//targets/host:host_debug_tests)",
