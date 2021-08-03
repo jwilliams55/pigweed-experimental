@@ -113,6 +113,13 @@ QUICK = (
     format_code.presubmit_checks(exclude=PATH_EXCLUSIONS),
 )
 
+LINTFORMAT = (
+    # Use the upstream formatting checks, with custom path filters applied.
+    format_code.presubmit_checks(exclude=PATH_EXCLUSIONS),
+    python_checks.lint_checks(exclude=PATH_EXCLUSIONS),
+    pragma_once,
+)
+
 FULL = (
     pragma_once,
     QUICK,  # Add all checks from the 'quick' program
@@ -123,6 +130,7 @@ FULL = (
 PROGRAMS = pw_presubmit.Programs(
     quick=QUICK,
     full=FULL,
+    lintformat=LINTFORMAT,
     other_checks=OTHER_CHECKS,
 )
 
