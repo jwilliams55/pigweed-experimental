@@ -12,8 +12,9 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-#include "pw_boot_armv7m/boot.h"
+#include "pw_boot/boot.h"
 
+#include "pw_boot_cortex_m/boot.h"
 #include "pw_malloc/malloc.h"
 #include "pw_preprocessor/compiler.h"
 #include "pw_sys_io_stm32cube/init.h"
@@ -23,7 +24,7 @@ void pw_boot_PreStaticMemoryInit() { SystemInit(); }
 
 void pw_boot_PreStaticConstructorInit() {
 #if PW_MALLOC_ACTIVE
-  pw_MallocInit();
+  pw_MallocInit(&pw_boot_heap_low_addr, &pw_boot_heap_high_addr);
 #endif  // PW_MALLOC_ACTIVE
 }
 

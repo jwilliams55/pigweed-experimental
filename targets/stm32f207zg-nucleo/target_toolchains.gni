@@ -30,7 +30,7 @@ _target_config = {
       get_path_info("stm32f207zg_executable.gni", "abspath")
 
   # Path to the bloaty config file for the output binaries.
-  # pw_bloat_BLOATY_CONFIG = "$dir_pw_boot_armv7m/bloaty_config.bloaty"
+  # pw_bloat_BLOATY_CONFIG = "$dir_pw_boot_cortex_m/bloaty_config.bloaty"
 
   #TODO: Fix test server: likely have to fork stm32cube-disc1 implementation
   # if (pw_use_test_server) {
@@ -42,7 +42,7 @@ _target_config = {
   # Facade backends
   pw_assert_BACKEND = dir_pw_assert_basic
 
-  # pw_boot_BACKEND = dir_pw_boot_armv7m
+  # pw_boot_BACKEND = "$dir_pw_boot_cortex_m:armv7m"
 
   pw_build_LINK_DEPS = [
     "$dir_pw_assert:impl",
