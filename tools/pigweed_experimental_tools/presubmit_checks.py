@@ -29,10 +29,17 @@ except ImportError:
     sys.exit(2)
 
 import pw_presubmit
-import pw_presubmit.inclusive_language
-from pw_presubmit import build, cli, format_code, git_repo
-from pw_presubmit import python_checks, filter_paths, PresubmitContext
-from pw_presubmit.install_hook import install_hook
+from pw_presubmit import (
+    build,
+    cli,
+    cpp_checks,
+    format_code,
+    git_repo,
+    inclusive_language,
+    install_hook,
+    python_checks,
+    PresubmitContext,
+)
 
 _LOG = logging.getLogger(__name__)
 
@@ -86,25 +93,13 @@ PATH_EXCLUSIONS = (
     re.compile(r'^vendor/'),
 )
 
-
-# Use the upstream pragma_once check, but apply a different set of path
-# filters with @filter_paths.
-@filter_paths(endswith='.h', exclude=PATH_EXCLUSIONS)
-def pragma_once(ctx: PresubmitContext):
-    """Presubmit check that ensures all header files contain '#pragma once'."""
-    pw_presubmit.pragma_once(ctx)
-
-
-@filter_paths(exclude=PATH_EXCLUSIONS)
-def inclusive_language(ctx: PresubmitContext):
-    """Inclusive language check."""
-    pw_presubmit.inclusive_language.inclusive_language(ctx)
-
-
 #
 # Presubmit check programs
 #
-OTHER_CHECKS = (inclusive_language, )
+OTHER_CHECKS = (
+    build.gn_gen_check,
+    inclusive_language.inclusive_language.with_filter(exclude=PATH_EXCLUSIONS),
+)
 
 QUICK = (
     # List some presubmit checks to run
@@ -117,11 +112,11 @@ LINTFORMAT = (
     # Use the upstream formatting checks, with custom path filters applied.
     format_code.presubmit_checks(exclude=PATH_EXCLUSIONS),
     python_checks.gn_python_lint.with_filter(exclude=PATH_EXCLUSIONS),
-    pragma_once,
+    cpp_checks.pragma_once.with_filter(endswith='.h', exclude=PATH_EXCLUSIONS),
 )
 
 FULL = (
-    pragma_once,
+    cpp_checks.pragma_once.with_filter(endswith='.h', exclude=PATH_EXCLUSIONS),
     QUICK,  # Add all checks from the 'quick' program
     # Use the upstream Python checks, with custom path filters applied.
     python_checks.gn_python_check.with_filter(exclude=PATH_EXCLUSIONS),
@@ -140,8 +135,8 @@ def run(install: bool, **presubmit_args) -> int:
 
     # Install the presubmit Git pre-push hook, if requested.
     if install:
-        install_hook(__file__, 'pre-push', ['--base', 'HEAD~'],
-                     git_repo.root())
+        install_hook.install_hook(__file__, 'pre-push', ['--base', 'HEAD~'],
+                                  git_repo.root())
         return 0
 
     return cli.run(root=PROJECT_ROOT, **presubmit_args)
