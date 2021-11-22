@@ -1,4 +1,4 @@
-# Copyright 2020 The Pigweed Authors
+# Copyright 2022 The Pigweed Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -89,6 +89,11 @@ _target_config = {
   pw_board_led_stm32cube_gpio_pin = "13"
 
   pw_spin_delay_BACKEND = dir_pw_spin_delay_stm32cube
+
+  pw_display_BACKEND = dir_pw_display_stm32f429i_disc1_stm32cube_ili9341
+
+  # Configure backend for pw_touchscreen
+  pw_touchscreen_BACKEND = "$dir_pw_touchscreen_null"
 
   dir_pw_third_party_stm32cube = dir_pw_third_party_stm32cube_f4
   pw_third_party_stm32cube_PRODUCT = "STM32F429xx"

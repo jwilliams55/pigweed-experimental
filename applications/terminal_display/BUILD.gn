@@ -1,0 +1,56 @@
+# Copyright 2022 The Pigweed Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
+import("//build_overrides/pigweed.gni")
+
+import("$dir_pw_arduino_build/arduino.gni")
+import("$dir_pw_build/target_types.gni")
+import("$dir_pw_tokenizer/database.gni")
+import("$dir_pw_unit_test/test.gni")
+
+group("all") {
+  deps = [ ":terminal_demo" ]
+
+  # Build tokenizer_database for elf binaries only
+  if (host_os == "linux" || current_toolchain != "//targets/host:host_debug") {
+    deps += [ ":tokenizer_database" ]
+  }
+}
+
+pw_executable("terminal_demo") {
+  sources = [ "main.cc" ]
+  deps = [
+    "$dir_pw_color",
+    "$dir_pw_coordinates",
+    "$dir_pw_display",
+    "$dir_pw_draw",
+    "$dir_pw_framebuffer",
+    "$dir_pw_log",
+    "$dir_pw_random",
+    "$dir_pw_string",
+    "$dir_pw_touchscreen",
+    "//pw_board_led",
+    "//pw_spin_delay",
+  ]
+  remove_configs = [ "$dir_pw_build:strict_warnings" ]
+
+  if (pw_build_EXECUTABLE_TARGET_TYPE == "arduino_executable") {
+    ldflags = [ "-Wl,--print-memory-usage" ]
+  }
+}
+
+pw_tokenizer_database("tokenizer_database") {
+  database = "tokenizer_database.csv"
+  targets = [ ":terminal_demo" ]
+}

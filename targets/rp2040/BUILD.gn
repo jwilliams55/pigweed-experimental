@@ -76,6 +76,16 @@ generate_toolchain("rp2040") {
     # Configure backend for pw_spin_delay
     pw_spin_delay_BACKEND = "$dir_pw_spin_delay_pico"
 
+    # Configure backend for pw_display
+    # pw_display_null does nothing.
+    pw_display_BACKEND = "$dir_pw_display_null"
+
+    # pw_display_pico_ili9341 is for a ILI9341 screen connected over SPI.
+    # pw_display_BACKEND = "$dir_pw_display_pico_ili9341"
+
+    # Configure backend for pw_touchscreen
+    pw_touchscreen_BACKEND = "$dir_pw_touchscreen_null"
+
     current_cpu = "arm"
     current_os = ""
   }

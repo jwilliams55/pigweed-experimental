@@ -1,4 +1,4 @@
-# Copyright 2021 The Pigweed Authors
+# Copyright 2022 The Pigweed Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -38,6 +38,20 @@ target_toolchain_arduino = {
 
       # Configure backend for pw_spin_delay
       pw_spin_delay_BACKEND = "$dir_pw_spin_delay_arduino"
+
+      # Configure backend for pw_display
+      # pw_display_null does nothing.
+      pw_display_BACKEND = "$dir_pw_display_null"
+
+      # See //pw_display_teensy_ili9341/README.md for instructions.
+      # pw_display_BACKEND = "$dir_pw_display_teensy_ili9341"
+
+      # Configure backend for pw_touchscreen
+      pw_touchscreen_BACKEND = "$dir_pw_touchscreen_null"
+
+      # These backends are for Teensy core builds.
+      # pw_touchscreen_BACKEND = "$dir_pw_touchscreen_teensy_xpt2046"
+      # pw_touchscreen_BACKEND = "$dir_pw_touchscreen_teensy_stmpe610"
     }
   }
 

@@ -1,0 +1,90 @@
+# Copyright 2022 The Pigweed Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
+import("//build_overrides/pigweed.gni")
+
+import("$dir_pw_build/target_types.gni")
+import("imgui.gni")
+
+if (dir_pw_third_party_imgui != "") {
+  config("imgui") {
+    include_dirs = [
+      "$dir_pw_third_party_imgui",
+      "$dir_pw_third_party_imgui/backends",
+      "$dir_pw_third_party_imgui/examples/libs/glfw",
+    ]
+
+    if (host_os == "linux") {
+      libs = [
+        # pkg-config --static --libs gl
+        "GL",
+
+        # pkg-config --static --libs glfw3
+        "glfw",
+        "rt",
+        "m",
+        "dl",
+      ]
+      lib_dirs = [
+        "/usr/lib/x86_64-linux-gnu",
+        "/usr/lib",
+      ]
+    } else if (host_os == "mac") {
+      # TODO(tonymd) Test Mac build
+      ldflags = [
+        "-framework OpenGL",
+        "-framework Cocoa",
+        "-framework IOKit",
+        "-framework CoreVideo",
+      ]
+      libs = [ "glfw3" ]
+      lib_dirs = [
+        "$dir_pw_third_party_glfw/lib-universal",
+        "/usr/local/lib",
+        "/opt/local/lib",
+      ]
+      include_dirs += [
+        "$dir_pw_third_party_glfw/include",
+        "/usr/local/include",
+        "/opt/local/include",
+      ]
+    } else if (host_os == "win") {
+      libs = [
+        "glfw3",
+        "gdi32",
+        "opengl32",
+        "imm32",
+      ]
+      include_dirs += [ "$dir_pw_third_party_glfw/include" ]
+      lib_dirs = [ "$dir_pw_third_party_glfw/lib-mingw-w64" ]
+    }
+  }
+
+  _imgui_sources = [
+    "$dir_pw_third_party_imgui/backends/imgui_impl_glfw.cpp",
+    "$dir_pw_third_party_imgui/backends/imgui_impl_opengl3.cpp",
+    "$dir_pw_third_party_imgui/imgui.cpp",
+    "$dir_pw_third_party_imgui/imgui_demo.cpp",
+    "$dir_pw_third_party_imgui/imgui_draw.cpp",
+    "$dir_pw_third_party_imgui/imgui_tables.cpp",
+    "$dir_pw_third_party_imgui/imgui_widgets.cpp",
+  ]
+
+  pw_source_set("pw_display_host_imgui") {
+    configs = [ ":imgui" ]
+    deps = [ "$dir_pw_display:pw_display.facade" ]
+    sources = [ "display.cc" ] + _imgui_sources
+    remove_configs = [ "$dir_pw_build:strict_warnings" ]
+  }
+}

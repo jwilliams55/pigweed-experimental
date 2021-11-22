@@ -1,4 +1,4 @@
-# Copyright 2021 The Pigweed Authors
+# Copyright 2022 The Pigweed Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -16,6 +16,7 @@ import("//build_overrides/pigweed.gni")
 
 import("//targets/common_backends.gni")
 import("$dir_pigweed/targets/host/target_toolchains.gni")
+import("$dir_pw_display_host_imgui/imgui.gni")
 import("$dir_pw_protobuf_compiler/proto.gni")
 import("$dir_pw_third_party/nanopb/nanopb.gni")
 
@@ -48,6 +49,18 @@ target_toolchain_host = {
 
       # Configure backend for pw_sys_io facade.
       pw_sys_io_BACKEND = dir_pw_sys_io_stdio
+
+      # Configure backend for pw_display
+      # pw_display_null does nothing.
+      pw_display_BACKEND = "$dir_pw_display_null"
+
+      # pw_display_host_imgui uses imgui and opengl3
+      # See //pw_display_host_imgui/README.md for instructions.
+      if (dir_pw_third_party_imgui != "") {
+        pw_display_BACKEND = "$dir_pw_display_host_imgui"
+      }
+
+      pw_touchscreen_BACKEND = "$dir_pw_touchscreen_null"
 
       pw_board_led_BACKEND = dir_pw_board_led_host
       pw_spin_delay_BACKEND = dir_pw_spin_delay_host

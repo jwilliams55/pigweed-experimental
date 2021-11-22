@@ -33,6 +33,16 @@ declare_args() {
   dir_pw_color = get_path_info("//pw_color", "abspath")
   dir_pw_coordinates = get_path_info("//pw_coordinates", "abspath")
   dir_pw_display = get_path_info("//pw_display", "abspath")
+  dir_pw_display_host_imgui =
+      get_path_info("//pw_display_host_imgui", "abspath")
+  dir_pw_display_null = get_path_info("//pw_display_null", "abspath")
+  dir_pw_display_pico_ili9341 =
+      get_path_info("//pw_display_pico_ili9341", "abspath")
+  dir_pw_display_stm32f429i_disc1_stm32cube_ili9341 =
+      get_path_info("//pw_display_stm32f429i_disc1_stm32cube_ili9341",
+                    "abspath")
+  dir_pw_display_teensy_ili9341 =
+      get_path_info("//pw_display_teensy_ili9341", "abspath")
   dir_pw_draw = get_path_info("//pw_draw", "abspath")
   dir_pw_framebuffer = get_path_info("//pw_framebuffer", "abspath")
   dir_pw_spin_delay = get_path_info("//pw_spin_delay", "abspath")
@@ -45,4 +55,9 @@ declare_args() {
   dir_pw_spin_delay_stm32cube =
       get_path_info("//pw_spin_delay_stm32cube", "abspath")
   dir_pw_touchscreen = get_path_info("//pw_touchscreen", "abspath")
+  dir_pw_touchscreen_null = get_path_info("//pw_touchscreen_null", "abspath")
+  dir_pw_touchscreen_teensy_stmpe610 =
+      get_path_info("//pw_touchscreen_teensy_stmpe610", "abspath")
+  dir_pw_touchscreen_teensy_xpt2046 =
+      get_path_info("//pw_touchscreen_teensy_xpt2046", "abspath")
 }

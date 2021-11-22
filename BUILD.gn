@@ -41,6 +41,9 @@ group("host") {
     "//pw_color:tests_run(//targets/host:host_debug_tests)",
     "//pw_draw:tests_run(//targets/host:host_debug_tests)",
     "//pw_framebuffer:tests_run(//targets/host:host_debug_tests)",
+
+    # See //applications/pw_lcd_display_host_imgui/README.md for instructions.
+    "//applications/terminal_display:all(//targets/host:host_debug)",
   ]
 }
 
@@ -50,14 +53,20 @@ group("arduino") {
     deps = [ ":arduino_tests(//targets/arduino:arduino_debug_tests)" ]
 
     if (pw_arduino_build_CORE_NAME == "teensy") {
-      deps += []
+      deps += [
+        # See //pw_lcd_display_teensy_ili9341/README.md for instructions.
+        "//applications/terminal_display:all(//targets/arduino:arduino_debug)",
+      ]
     }
   }
 }
 
 group("pico") {
   if (PICO_SRC_DIR != "") {
-    deps = [ ":pico_tests(//targets/rp2040)" ]
+    deps = [
+      ":pico_tests(//targets/rp2040)",
+      "//applications/terminal_display:all(//targets/rp2040)",
+    ]
   }
 }
 
@@ -133,6 +142,7 @@ group("applications") {
     deps += [
       ":applications_tests(//targets/stm32f429i_disc1_stm32cube:stm32f429i_disc1_stm32cube_debug)",
       "//applications/blinky:blinky(//targets/stm32f429i_disc1_stm32cube:stm32f429i_disc1_stm32cube_debug)",
+      "//applications/terminal_display:all(//targets/stm32f429i_disc1_stm32cube:stm32f429i_disc1_stm32cube_debug)",
     ]
 
     # STMicroelectronics STM32F439ZI-Nucleo applications steps.
