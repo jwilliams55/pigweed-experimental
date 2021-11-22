@@ -22,7 +22,6 @@
 namespace remoticon {
 
 pw::Status SuperloopService::GetStats(
-    ServerContext&,
     const remoticon_StatsRequest& /* request */,
     remoticon_StatsResponse& response) {
   // Send back the number of superloop iterations by setting the field in the

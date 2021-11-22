@@ -28,8 +28,7 @@ class SuperloopService final : public generated::Superloop<SuperloopService> {
 
   // RPC method - this is exposed through the RPC server once the service is
   // registered.
-  pw::Status GetStats(ServerContext&,
-                      const remoticon_StatsRequest& request,
+  pw::Status GetStats(const remoticon_StatsRequest& request,
                       remoticon_StatsResponse& response);
 
   // TODO FOR WORKSHOP: Add blink control.
