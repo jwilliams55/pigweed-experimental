@@ -21,7 +21,8 @@
 
 namespace remoticon {
 
-class SuperloopService final : public generated::Superloop<SuperloopService> {
+class SuperloopService final
+    : public pw_rpc::nanopb::Superloop::Service<SuperloopService> {
  public:
   SuperloopService(unsigned& loop_iterations)
       : loop_iterations_(loop_iterations) {}
