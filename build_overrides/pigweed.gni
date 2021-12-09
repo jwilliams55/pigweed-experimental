@@ -37,5 +37,4 @@ declare_args() {
       get_path_info("//pw_spin_delay_stm32f429i_disc1", "abspath")
   dir_pw_spin_delay_stm32cube =
       get_path_info("//pw_spin_delay_stm32cube", "abspath")
-  dir_pw_sys_io_stm32cube = get_path_info("//pw_sys_io_stm32cube", "abspath")
 }
