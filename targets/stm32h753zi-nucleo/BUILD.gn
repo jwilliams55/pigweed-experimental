@@ -24,6 +24,18 @@ generate_toolchains("target_toolchains") {
   toolchains = pw_target_toolchain_stm32h753zi_nucleo_list
 }
 
+config("module_config_options") {
+  cflags = [
+    "-include",
+    rebase_path("module_config_overrides.h", root_build_dir),
+  ]
+}
+
+pw_source_set("module_config_overrides") {
+  public_configs = [ ":module_config_options" ]
+  sources = [ "module_config_overrides.h" ]
+}
+
 if (current_toolchain != default_toolchain) {
   pw_source_set("pre_init") {
     public_deps = [ "$dir_pw_sys_io_stm32cube" ]

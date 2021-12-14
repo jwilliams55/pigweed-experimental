@@ -59,10 +59,8 @@ _target_config = {
       "$dir_pw_sync_baremetal:interrupt_spin_lock"
   pw_log_BACKEND = dir_pw_log_basic
   pw_sys_io_BACKEND = dir_pw_sys_io_stm32cube
-  pw_sys_io_stm32cube_usart_num = "3"
-  pw_sys_io_stm32cube_gpio_port = "D"
-  pw_sys_io_stm32cube_gpio_tx_pin = "8"
-  pw_sys_io_stm32cube_gpio_rx_pin = "9"
+  pw_sys_io_stm32cube_CONFIG =
+      "//targets/stm32f207zg-nucleo:module_config_overrides"
 
   #TODO: remove dependency on stm32f429i-disc1 rpc server.
   pw_rpc_system_server_BACKEND =

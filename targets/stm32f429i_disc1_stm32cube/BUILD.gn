@@ -24,6 +24,18 @@ generate_toolchains("target_toolchains") {
   toolchains = pw_target_toolchain_stm32f429i_disc1_list
 }
 
+config("module_config_options") {
+  cflags = [
+    "-include",
+    rebase_path("module_config_overrides.h", root_build_dir),
+  ]
+}
+
+pw_source_set("module_config_overrides") {
+  public_configs = [ ":module_config_options" ]
+  sources = [ "module_config_overrides.h" ]
+}
+
 config("pw_malloc_active") {
   if (pw_malloc_BACKEND != "") {
     defines = [ "PW_MALLOC_ACTIVE=1" ]
