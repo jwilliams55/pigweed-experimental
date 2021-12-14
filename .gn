@@ -17,4 +17,7 @@ buildconfig = "//BUILDCONFIG.gn"
 default_args = {
   # Set the nanopb directory for protobuf generation.
   dir_pw_third_party_nanopb = "//third_party/nanopb"
+
+  # Sets the FreeRTOS source directory.
+  dir_pw_third_party_freertos = "//third_party/freertos/Source"
 }

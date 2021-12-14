@@ -82,7 +82,6 @@ _target_config = {
   pw_third_party_stm32cube_CONFIG =
       "//targets/stm32f439zi_nucleo:stm32f4xx_hal_config"
 
-  dir_pw_third_party_freertos = "//third_party/freertos"
   pw_third_party_freertos_CONFIG =
       "//targets/stm32f439zi_nucleo:freertos_config"
   pw_third_party_freertos_PORT = "//third_party/freertos:arm_cm4f_freertos_port"
