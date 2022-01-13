@@ -22,3 +22,7 @@
 	path = third_party/freertos/Source
 	url = https://pigweed.googlesource.com/third_party/github/FreeRTOS/FreeRTOS-Kernel.git
 	branch = main
+[submodule "infra/config"]
+	path = infra/config
+	url = https://pigweed.googlesource.com/infra/config
+	branch = main
