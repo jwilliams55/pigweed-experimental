@@ -5,6 +5,7 @@ compile_commands.json
 
 # Environment
 .environment/
+environment/
 
 # Editors
 .idea/
