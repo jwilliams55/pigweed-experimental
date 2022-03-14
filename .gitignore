@@ -6,6 +6,7 @@ compile_commands.json
 # Environment
 .environment/
 environment/
+build_overrides/pigweed_environment.gni
 
 # Editors
 .idea/
