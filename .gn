@@ -20,4 +20,7 @@ default_args = {
 
   # Sets the FreeRTOS source directory.
   dir_pw_third_party_freertos = "//third_party/freertos/Source"
+
+  # Use the new Python build and merged 'pigweed' Python package.
+  pw_build_USE_NEW_PYTHON_BUILD = true
 }

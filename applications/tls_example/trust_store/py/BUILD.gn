@@ -16,7 +16,11 @@ import("//build_overrides/pigweed.gni")
 import("$dir_pw_build/python.gni")
 
 pw_python_package("py") {
-  setup = [ "setup.py" ]
+  setup = [
+    "pyproject.toml",
+    "setup.cfg",
+    "setup.py",
+  ]
   sources = [
     "trust_store_generation/__init__.py",
     "trust_store_generation/generate_trust_store.py",
