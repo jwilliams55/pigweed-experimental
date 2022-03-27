@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
+import("//build_overrides/pi_pico.gni")
 import("//build_overrides/pigweed.gni")
 
 import("$dir_pw_arduino_build/arduino.gni")
@@ -27,6 +28,7 @@ group("default") {
     ":applications",
     ":arduino",
     ":host",
+    ":pico",
     ":python.lint",
     ":python.tests",
   ]
@@ -45,6 +47,12 @@ group("arduino") {
     if (pw_arduino_build_CORE_NAME == "teensy") {
       deps += []
     }
+  }
+}
+
+group("pico") {
+  if (PICO_SRC_DIR != "") {
+    deps = [ ":pico_tests(//targets/rp2040)" ]
   }
 }
 
@@ -89,6 +97,16 @@ group("applications") {
       "//applications/tls_example:boringssl_teensy_ethernet(//targets/arduino:arduino_debug)",
       "//applications/tls_example:mbedtls_teensy_ethernet(//targets/arduino:arduino_debug)",
       "//applications/tls_example:picotls_teensy_ethernet(//targets/arduino:arduino_debug)",
+    ]
+  }
+
+  # Raspberry Pi Pico
+  if (PICO_SRC_DIR != "") {
+    deps += [
+      ":applications_tests(//targets/rp2040)",
+      "//applications/blinky:blinky(//targets/rp2040)",
+      "//applications/rpc:all(//targets/rp2040)",
+      "//applications/strings:all(//targets/rp2040)",
     ]
   }
 
@@ -146,6 +164,7 @@ pw_test_group("tests") {
 foreach(test_group,
         [
           "arduino",
+          "pico",
           "host",
           "applications",
         ]) {

@@ -25,6 +25,7 @@ declare_args() {
   dir_pw_board_led = get_path_info("//pw_board_led", "abspath")
   dir_pw_board_led_arduino = get_path_info("//pw_board_led_arduino", "abspath")
   dir_pw_board_led_host = get_path_info("//pw_board_led_host", "abspath")
+  dir_pw_board_led_pico = get_path_info("//pw_board_led_pico", "abspath")
   dir_pw_board_led_stm32f429i_disc1 =
       get_path_info("//pw_board_led_stm32f429i_disc1", "abspath")
   dir_pw_board_led_stm32cube =
@@ -33,6 +34,7 @@ declare_args() {
   dir_pw_spin_delay_arduino =
       get_path_info("//pw_spin_delay_arduino", "abspath")
   dir_pw_spin_delay_host = get_path_info("//pw_spin_delay_host", "abspath")
+  dir_pw_spin_delay_pico = get_path_info("//pw_spin_delay_pico", "abspath")
   dir_pw_spin_delay_stm32f429i_disc1 =
       get_path_info("//pw_spin_delay_stm32f429i_disc1", "abspath")
   dir_pw_spin_delay_stm32cube =
