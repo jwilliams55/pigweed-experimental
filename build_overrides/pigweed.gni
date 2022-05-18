@@ -32,6 +32,7 @@ declare_args() {
       get_path_info("//pw_board_led_stm32cube", "abspath")
   dir_pw_color = get_path_info("//pw_color", "abspath")
   dir_pw_coordinates = get_path_info("//pw_coordinates", "abspath")
+  dir_pw_display = get_path_info("//pw_display", "abspath")
   dir_pw_draw = get_path_info("//pw_draw", "abspath")
   dir_pw_framebuffer = get_path_info("//pw_framebuffer", "abspath")
   dir_pw_spin_delay = get_path_info("//pw_spin_delay", "abspath")
@@ -43,4 +44,5 @@ declare_args() {
       get_path_info("//pw_spin_delay_stm32f429i_disc1", "abspath")
   dir_pw_spin_delay_stm32cube =
       get_path_info("//pw_spin_delay_stm32cube", "abspath")
+  dir_pw_touchscreen = get_path_info("//pw_touchscreen", "abspath")
 }
