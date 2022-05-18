@@ -1,0 +1,2 @@
+# //applications/tls_example/trust_store/py
+pyOpenSSL==22.0.0
