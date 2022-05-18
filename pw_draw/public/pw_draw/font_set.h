@@ -11,16 +11,17 @@
 // WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 // License for the specific language governing permissions and limitations under
 // the License.
+#pragma once
 
-#include "pw_spin_delay/delay.h"
+#include "pw_color/color.h"
 
-#include "stm32cube/stm32cube.h"
+// Grab the x'th bit from a number
+#define PW_FONT_BIT(x, number) (((number) >> (x)) & 1);
 
-namespace pw::spin_delay {
-
-void WaitMillis(size_t delay_ms) { HAL_Delay(delay_ms); }
-
-uint32_t Millis() { return HAL_GetTick(); }
-uint32_t Micros() { return HAL_GetTick() * 1000; }
-
-}  // namespace pw::spin_delay
+struct FontSet {
+  const int width;
+  const int height;
+  const int starting_character;
+  const int ending_character;
+  const pw::color::color_1bit_t* data;
+};

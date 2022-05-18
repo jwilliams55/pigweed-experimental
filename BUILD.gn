@@ -1,4 +1,4 @@
-# Copyright 2021 The Pigweed Authors
+# Copyright 2022 The Pigweed Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -36,7 +36,12 @@ group("default") {
 
 # Group all targets that run on host only, e.g. tests, utils.
 group("host") {
-  deps = [ ":host_tests(//targets/host:host_debug_tests)" ]
+  deps = [
+    ":host_tests(//targets/host:host_debug_tests)",
+    "//pw_color:tests_run(//targets/host:host_debug_tests)",
+    "//pw_draw:tests_run(//targets/host:host_debug_tests)",
+    "//pw_framebuffer:tests_run(//targets/host:host_debug_tests)",
+  ]
 }
 
 # Arduino specific targets.
@@ -94,10 +99,15 @@ group("applications") {
       "//applications/blinky:blinky(//targets/arduino:arduino_debug)",
       "//applications/rpc:all(//targets/arduino:arduino_debug)",
       "//applications/strings:all(//targets/arduino:arduino_debug)",
-      "//applications/tls_example:boringssl_teensy_ethernet(//targets/arduino:arduino_debug)",
-      "//applications/tls_example:mbedtls_teensy_ethernet(//targets/arduino:arduino_debug)",
-      "//applications/tls_example:picotls_teensy_ethernet(//targets/arduino:arduino_debug)",
     ]
+
+    if (pw_arduino_build_CORE_NAME == "teensy") {
+      deps += [
+        "//applications/tls_example:boringssl_teensy_ethernet(//targets/arduino:arduino_debug)",
+        "//applications/tls_example:mbedtls_teensy_ethernet(//targets/arduino:arduino_debug)",
+        "//applications/tls_example:picotls_teensy_ethernet(//targets/arduino:arduino_debug)",
+      ]
+    }
   }
 
   # Raspberry Pi Pico
@@ -147,6 +157,7 @@ group("applications") {
   # Host applications steps.
   deps += [
     ":applications_tests(//targets/host:host_debug_tests)",
+    "//applications/blinky:blinky(//targets/host:host_debug)",
     "//applications/strings:all(//targets/host:host_debug)",
   ]
 }
@@ -170,7 +181,7 @@ foreach(test_group,
         ]) {
   group("${test_group}_tests") {
     deps = []
-    if (pw_unit_test_AUTOMATIC_RUNNER == "") {
+    if (pw_unit_test_AUTOMATIC_RUNNER == "" || test_group != "host") {
       # Without a test runner defined, build the tests but don't run them.
       deps += [ ":tests" ]
     } else {

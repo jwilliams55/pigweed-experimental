@@ -1,0 +1,25 @@
+#pragma once
+
+struct FontSet {
+  const int width;
+  const int height;
+  const int starting_character;
+  const int ending_character;
+  const uint8_t* data;
+};
+
+const uint8_t font6x8_data[] = {
+{% for sprite in sprite_data %}
+    // Sprite {{ loop.index0 }}
+    {% for pixel in sprite %}
+    {{ pixel }}
+    {%- endfor %}
+
+{% endfor -%}
+};
+
+FontSet font6x8 = {.width = {{ sprite_width }},
+                   .height = {{ sprite_height }},
+                   .starting_character = 0,
+                   .ending_character = {{ count-1 }},
+                   .data = font6x8_data};

@@ -11,16 +11,26 @@
 // WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 // License for the specific language governing permissions and limitations under
 // the License.
+#include "pw_draw/sprite_sheet.h"
 
-#include "pw_spin_delay/delay.h"
+namespace pw::draw {
 
-#include "stm32cube/stm32cube.h"
+color_rgb565_t SpriteSheet::GetColor(int x, int y, int sprite_index = 0) {
+  int start_y = sprite_index * height + y;
+  return _data[start_y * width + x];
+}
 
-namespace pw::spin_delay {
+void SpriteSheet::SetIndex(int index) { current_index = index; }
 
-void WaitMillis(size_t delay_ms) { HAL_Delay(delay_ms); }
+void SpriteSheet::RotateIndexLoop() {
+  current_index = (current_index + 1) % count;
+}
 
-uint32_t Millis() { return HAL_GetTick(); }
-uint32_t Micros() { return HAL_GetTick() * 1000; }
+void SpriteSheet::RotateIndexPingPong() {
+  current_index += index_direction;
+  if (current_index == 0 || current_index == count - 1) {
+    index_direction *= -1;
+  }
+}
 
-}  // namespace pw::spin_delay
+}  // namespace pw::draw

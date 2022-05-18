@@ -1,0 +1,25 @@
+#pragma once
+
+#include <cinttypes>
+
+#include "pw_color/color.h"
+#include "pw_draw/sprite_sheet.h"
+
+const color_rgb565_t {{ file_name }}_sprite_data[] = {
+
+{% for sprite in sprite_data %}
+    // Sprite {{ loop.index0 }}
+    {% for pixel in sprite %}
+    {{ pixel }}
+    {%- endfor %}
+
+{% endfor -%}
+};
+
+pw::draw::SpriteSheet {{ file_name }}_sprite_sheet = {
+    .width = {{ sprite_width }},
+    .height = {{ sprite_height }},
+    .count = {{ count }},
+    .transparent_color = {{ transparent_color }},
+    ._data = {{ file_name }}_sprite_data};
+

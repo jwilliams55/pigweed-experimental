@@ -14,25 +14,28 @@
 
 import("//build_overrides/pigweed.gni")
 
-import("$dir_pw_build/python.gni")
+import("$dir_pw_build/target_types.gni")
+import("$dir_pw_docgen/docs.gni")
+import("$dir_pw_unit_test/test.gni")
 
-pw_python_package("tools") {
-  setup = [
-    "pyproject.toml",
-    "setup.cfg",
-    "setup.py",
+config("default_config") {
+  include_dirs = [ "public" ]
+}
+
+pw_source_set("pw_framebuffer") {
+  public_configs = [ ":default_config" ]
+  public_deps = [ "$dir_pw_color" ]
+  public = [ "public/pw_framebuffer/rgb565.h" ]
+}
+
+pw_test("framebuffer_test") {
+  deps = [
+    ":pw_framebuffer",
+    "$dir_pw_log",
   ]
-  sources = [
-    "pigweed_experimental_tools/__init__.py",
-    "pigweed_experimental_tools/experimental_packages.py",
-    "pigweed_experimental_tools/packages/__init__.py",
-    "pigweed_experimental_tools/packages/glfw.py",
-    "pigweed_experimental_tools/packages/imgui.py",
-    "pigweed_experimental_tools/presubmit_checks.py",
-  ]
-  python_deps = [
-    "$dir_pw_cli/py",
-    "$dir_pw_presubmit/py",
-  ]
-  pylintrc = "$dir_pigweed/.pylintrc"
+  sources = [ "framebuffer_test.cc" ]
+}
+
+pw_test_group("tests") {
+  tests = [ ":framebuffer_test" ]
 }

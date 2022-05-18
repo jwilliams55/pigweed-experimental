@@ -14,25 +14,31 @@
 
 import("//build_overrides/pigweed.gni")
 
-import("$dir_pw_build/python.gni")
+import("$dir_pw_build/target_types.gni")
+import("$dir_pw_docgen/docs.gni")
+import("$dir_pw_unit_test/test.gni")
 
-pw_python_package("tools") {
-  setup = [
-    "pyproject.toml",
-    "setup.cfg",
-    "setup.py",
+config("default_config") {
+  include_dirs = [ "public" ]
+}
+
+pw_source_set("pw_color") {
+  public_configs = [ ":default_config" ]
+  public = [
+    "public/pw_color/color.h",
+    "public/pw_color/colors_endesga32.h",
+    "public/pw_color/colors_pico8.h",
   ]
-  sources = [
-    "pigweed_experimental_tools/__init__.py",
-    "pigweed_experimental_tools/experimental_packages.py",
-    "pigweed_experimental_tools/packages/__init__.py",
-    "pigweed_experimental_tools/packages/glfw.py",
-    "pigweed_experimental_tools/packages/imgui.py",
-    "pigweed_experimental_tools/presubmit_checks.py",
+}
+
+pw_test("color_test") {
+  deps = [
+    ":pw_color",
+    "$dir_pw_log",
   ]
-  python_deps = [
-    "$dir_pw_cli/py",
-    "$dir_pw_presubmit/py",
-  ]
-  pylintrc = "$dir_pigweed/.pylintrc"
+  sources = [ "color_test.cc" ]
+}
+
+pw_test_group("tests") {
+  tests = [ ":color_test" ]
 }

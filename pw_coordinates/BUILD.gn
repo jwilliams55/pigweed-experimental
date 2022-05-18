@@ -14,25 +14,18 @@
 
 import("//build_overrides/pigweed.gni")
 
-import("$dir_pw_build/python.gni")
+import("$dir_pw_build/target_types.gni")
+import("$dir_pw_docgen/docs.gni")
+import("$dir_pw_unit_test/test.gni")
 
-pw_python_package("tools") {
-  setup = [
-    "pyproject.toml",
-    "setup.cfg",
-    "setup.py",
+config("default_config") {
+  include_dirs = [ "public" ]
+}
+
+pw_source_set("pw_coordinates") {
+  public_configs = [ ":default_config" ]
+  public = [
+    "public/pw_coordinates/vec2.h",
+    "public/pw_coordinates/vec_int.h",
   ]
-  sources = [
-    "pigweed_experimental_tools/__init__.py",
-    "pigweed_experimental_tools/experimental_packages.py",
-    "pigweed_experimental_tools/packages/__init__.py",
-    "pigweed_experimental_tools/packages/glfw.py",
-    "pigweed_experimental_tools/packages/imgui.py",
-    "pigweed_experimental_tools/presubmit_checks.py",
-  ]
-  python_deps = [
-    "$dir_pw_cli/py",
-    "$dir_pw_presubmit/py",
-  ]
-  pylintrc = "$dir_pigweed/.pylintrc"
 }
