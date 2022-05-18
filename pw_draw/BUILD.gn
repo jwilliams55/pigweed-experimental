@@ -27,6 +27,7 @@ pw_source_set("pw_draw") {
   public = [
     "public/pw_draw/draw.h",
     "public/pw_draw/font6x8.h",
+    "public/pw_draw/font6x8_box_chars.h",
     "public/pw_draw/font_set.h",
     "public/pw_draw/pigweed_farm.h",
     "public/pw_draw/sprite_sheet.h",

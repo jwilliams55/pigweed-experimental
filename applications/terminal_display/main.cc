@@ -24,6 +24,7 @@
 #include "pw_display/display.h"
 #include "pw_draw/draw.h"
 #include "pw_draw/font6x8.h"
+#include "pw_draw/font6x8_box_chars.h"
 #include "pw_draw/pigweed_farm.h"
 #include "pw_framebuffer/rgb565.h"
 #include "pw_log/log.h"
@@ -39,26 +40,12 @@ typedef bool (*bool_function_pointer)();
 typedef pw::coordinates::Vec3Int (*vec3int_function_pointer)();
 pw::framebuffer::FramebufferRgb565 frame_buffer = FramebufferRgb565();
 
-const uint8_t banner[] = {
-    127, 128, 128, 128, 128, 128, 129, 32,  32,  128, 127, 32,  32,  129, 128,
-    128, 128, 127, 32,  32,  127, 128, 32,  32,  32,  32,  127, 128, 32,  127,
-    127, 128, 128, 128, 128, 127, 32,  127, 127, 128, 128, 128, 128, 127, 32,
-    127, 127, 128, 128, 128, 128, 129, 10,  127, 128, 127, 32,  32,  128, 127,
-    32,  127, 128, 127, 32,  128, 128, 127, 32,  132, 128, 127, 32,  127, 128,
-    127, 32,  128, 32,  127, 128, 32,  32,  127, 128, 32,  32,  32,  132, 32,
-    32,  127, 128, 32,  32,  32,  132, 32,  32,  127, 128, 32,  32,  132, 128,
-    130, 10,  127, 128, 129, 129, 129, 128, 127, 32,  127, 128, 127, 32,  128,
-    127, 127, 32,  129, 129, 127, 32,  127, 128, 127, 32,  128, 32,  127, 128,
-    32,  32,  127, 128, 128, 128, 32,  32,  32,  32,  127, 128, 128, 128, 32,
-    32,  32,  32,  127, 128, 32,  32,  32,  128, 130, 10,  127, 128, 132, 32,
-    32,  32,  32,  32,  127, 128, 127, 32,  127, 128, 32,  32,  32,  128, 127,
-    32,  127, 128, 127, 32,  128, 32,  127, 128, 32,  32,  127, 128, 32,  32,
-    32,  129, 32,  32,  127, 128, 32,  32,  32,  129, 32,  32,  127, 128, 32,
-    32,  129, 128, 130, 10,  127, 128, 32,  32,  32,  32,  32,  32,  127, 128,
-    127, 32,  127, 127, 128, 128, 128, 132, 32,  32,  32,  127, 128, 127, 132,
-    127, 128, 127, 32,  127, 127, 128, 128, 128, 128, 127, 32,  127, 127, 128,
-    128, 128, 128, 127, 32,  127, 127, 128, 128, 128, 128, 132, 10,  0,
-};
+const wchar_t pigweed_banner[] = {
+    L"▒█████▄   █▓  ▄███▒  ▒█    ▒█ ░▓████▒ ░▓████▒ ▒▓████▄\n"
+    L" ▒█░  █░ ░█▒ ██▒ ▀█▒ ▒█░ █ ▒█  ▒█   ▀  ▒█   ▀  ▒█  ▀█▌\n"
+    L" ▒█▄▄▄█░ ░█▒ █▓░ ▄▄░ ▒█░ █ ▒█  ▒███    ▒███    ░█   █▌\n"
+    L" ▒█▀     ░█░ ▓█   █▓ ░█░ █ ▒█  ▒█   ▄  ▒█   ▄  ░█  ▄█▌\n"
+    L" ▒█      ░█░ ░▓███▀   ▒█▓▀▓█░ ░▓████▒ ░▓████▒ ▒▓████▀\n"};
 
 }  // namespace
 
@@ -171,30 +158,36 @@ int main() {
     frame_buffer.SetPenColor(0);
     pw::draw::Fill(&frame_buffer);
 
-    pw::draw::TextArea text_area(&frame_buffer, &font6x8);
+    pw::draw::TextArea text_area(&frame_buffer, &font6x8_box_chars);
 
     text_area.DrawCharacter('\n', 0, 1, colors_pico8_rgb565[COLOR_DARK_BLUE]);
 
     // Draw the Pigweed "ASCII" banner.
-    int i = 0;
-    while (banner[i] > 0) {
-      text_area.DrawCharacter(banner[i], colors_pico8_rgb565[COLOR_PINK]);
-      i++;
-    }
+    frame_buffer.SetPenColor(colors_pico8_rgb565[COLOR_PINK]);
+    text_area.DrawText(pigweed_banner);
 
+    text_area.SetFont(&font6x8);
     for (int c = font6x8.starting_character; c <= font6x8.ending_character;
          c++) {
-      if (c % 16 == 0) {
+      if (c % 32 == 0) {
         text_area.DrawCharacter('\n');
       }
       frame_buffer.SetPenColor(colors_pico8_rgb565[c % 16]);
       text_area.DrawCharacter(c);
     }
+    text_area.DrawCharacter('\n');
 
-    text_area.DrawCharacter('\n');
-    text_area.DrawCharacter('\n');
+    text_area.SetFont(&font6x8);
     text_area.DrawTestFontSheet(
         32, text_area.cursor_x, text_area.cursor_y, 0xFFFF);
+    text_area.DrawText("\n\nBox Characters:\n");
+
+    text_area.SetFont(&font6x8_box_chars);
+    text_area.DrawTestFontSheet(
+        32, text_area.cursor_x, text_area.cursor_y, 0xFFFF);
+
+    text_area.SetFont(&font6x8);
+    text_area.DrawCharacter('\n');
 
     int sprite_pos_x = 10;
     int sprite_pos_y = 180;

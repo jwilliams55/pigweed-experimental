@@ -130,6 +130,10 @@ class TextArea {
 
   void DrawText(const char* str, color_rgb565_t rgb565_foreground_color);
 
+  void DrawText(const wchar_t* str);
+
+  void DrawText(const wchar_t* str, color_rgb565_t rgb565_foreground_color);
+
   void DrawText(const char* str,
                 int x,
                 int y,

@@ -259,6 +259,12 @@ void TextArea::DrawCharacter(int character) {
     return;
   }
 
+  if (character == ' ') {
+    cursor_x = cursor_x + current_font->width;
+    column_count++;
+    return;
+  }
+
   if ((int)character < current_font->starting_character ||
       (int)character > current_font->ending_character) {
     return;
@@ -317,7 +323,17 @@ void TextArea::DrawTestFontSheet(int character_width,
 // text to the next line.
 void TextArea::DrawText(const char* str) {
   int character_index = 0;
-  char character;
+  int character;
+  do {
+    character = str[character_index];
+    DrawCharacter(character);
+    character_index++;
+  } while (character != '\0');
+}
+
+void TextArea::DrawText(const wchar_t* str) {
+  int character_index = 0;
+  int character;
   do {
     character = str[character_index];
     DrawCharacter(character);
