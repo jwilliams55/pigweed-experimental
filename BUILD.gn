@@ -61,6 +61,8 @@ group("arduino") {
   }
 }
 
+# This gn arg must be set to build for the rp2040
+# PICO_SRC_DIR = "$HOME/pico-sdk"
 group("pico") {
   if (PICO_SRC_DIR != "") {
     deps = [

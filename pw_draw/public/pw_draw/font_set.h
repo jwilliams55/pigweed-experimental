@@ -15,13 +15,28 @@
 
 #include "pw_color/color.h"
 
+namespace pw::draw {
+
 // Grab the x'th bit from a number
 #define PW_FONT_BIT(x, number) (((number) >> (x)) & 1);
 
 struct FontSet {
-  const int width;
-  const int height;
+  constexpr FontSet(
+      const uint8_t* d, uint8_t w, uint8_t h, int start_char, int end_char)
+      : data(d),
+        width(w),
+        height(h),
+        starting_character(start_char),
+        ending_character(end_char) {}
+
+  const uint8_t* data;
+  const uint8_t width;
+  const uint8_t height;
   const int starting_character;
   const int ending_character;
-  const pw::color::color_1bit_t* data;
 };
+
+extern const FontSet font6x8;
+extern const FontSet font6x8_box_chars;
+
+}  // namespace pw::draw

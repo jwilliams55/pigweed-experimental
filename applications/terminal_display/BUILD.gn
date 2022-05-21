@@ -39,6 +39,7 @@ pw_executable("terminal_demo") {
     "$dir_pw_log",
     "$dir_pw_random",
     "$dir_pw_string",
+    "$dir_pw_sys_io",
     "$dir_pw_touchscreen",
     "//pw_board_led",
     "//pw_spin_delay",

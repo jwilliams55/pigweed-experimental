@@ -60,5 +60,68 @@ TEST(FramebufferRgb565, SetPixelGetPixel) {
   EXPECT_EQ(fb.GetPixel(7, 7), indigo);
 }
 
+TEST(FramebufferRgb565, Blit) {
+  uint16_t data[8 * 8];
+  FramebufferRgb565 fb(data, 8, 8);
+  color_rgb565_t indigo = colors_pico8_rgb565[12];
+  fb.Fill(indigo);
+  // First pixel
+  EXPECT_EQ(fb.pixel_data[0], indigo);
+  // Last pixel
+  EXPECT_EQ(fb.pixel_data[8 * 8 - 1], indigo);
+
+  uint16_t data2[4 * 4];
+  FramebufferRgb565 fb2(data2, 4, 4);
+  color_rgb565_t orange = 0xfd00;
+  fb2.Fill(orange);
+
+  // Do the blits
+  fb.Blit(&fb2, -3, -3);
+
+  fb.Blit(&fb2, 2, 2);
+
+  // TODO(tonymd): Include PrintFramebufferAsANSI from draw_test.cc
+  // PrintFramebufferAsANSI(&fb);
+
+  // One orange pixel in the upper left corner
+  EXPECT_EQ(fb.pixel_data[0], orange);
+  EXPECT_EQ(fb.pixel_data[1], indigo);
+  EXPECT_EQ(fb.pixel_data[8], indigo);
+  EXPECT_EQ(fb.pixel_data[9], indigo);
+
+  // Center 4x4 square is orange
+  // x = 1
+  EXPECT_EQ(fb.pixel_data[(8 * 1) + 1], indigo);
+  EXPECT_EQ(fb.pixel_data[(8 * 1) + 2], indigo);
+  EXPECT_EQ(fb.pixel_data[(8 * 1) + 3], indigo);
+  EXPECT_EQ(fb.pixel_data[(8 * 1) + 4], indigo);
+  EXPECT_EQ(fb.pixel_data[(8 * 1) + 5], indigo);
+  EXPECT_EQ(fb.pixel_data[(8 * 1) + 6], indigo);
+
+  // x = 2
+  EXPECT_EQ(fb.pixel_data[(8 * 2) + 1], indigo);
+  EXPECT_EQ(fb.pixel_data[(8 * 2) + 2], orange);
+  EXPECT_EQ(fb.pixel_data[(8 * 2) + 3], orange);
+  EXPECT_EQ(fb.pixel_data[(8 * 2) + 4], orange);
+  EXPECT_EQ(fb.pixel_data[(8 * 2) + 5], orange);
+  EXPECT_EQ(fb.pixel_data[(8 * 2) + 6], indigo);
+
+  // x = 5
+  EXPECT_EQ(fb.pixel_data[(8 * 5) + 1], indigo);
+  EXPECT_EQ(fb.pixel_data[(8 * 5) + 2], orange);
+  EXPECT_EQ(fb.pixel_data[(8 * 5) + 3], orange);
+  EXPECT_EQ(fb.pixel_data[(8 * 5) + 4], orange);
+  EXPECT_EQ(fb.pixel_data[(8 * 5) + 5], orange);
+  EXPECT_EQ(fb.pixel_data[(8 * 5) + 6], indigo);
+
+  // x = 6
+  EXPECT_EQ(fb.pixel_data[(8 * 6) + 1], indigo);
+  EXPECT_EQ(fb.pixel_data[(8 * 6) + 2], indigo);
+  EXPECT_EQ(fb.pixel_data[(8 * 6) + 3], indigo);
+  EXPECT_EQ(fb.pixel_data[(8 * 6) + 4], indigo);
+  EXPECT_EQ(fb.pixel_data[(8 * 6) + 5], indigo);
+  EXPECT_EQ(fb.pixel_data[(8 * 6) + 6], indigo);
+}
+
 }  // namespace
 }  // namespace pw::framebuffer

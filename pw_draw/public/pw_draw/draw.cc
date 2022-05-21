@@ -17,7 +17,6 @@
 #include <math.h>
 
 #include "pw_color/color.h"
-#include "pw_draw/font_set.h"
 #include "pw_draw/sprite_sheet.h"
 #include "pw_framebuffer/rgb565.h"
 
@@ -233,127 +232,6 @@ void DrawTestPattern(pw::framebuffer::FramebufferRgb565* fb) {
       }
     }
   }
-}
-
-TextArea::TextArea(pw::framebuffer::FramebufferRgb565* fb, FontSet* font) {
-  framebuffer = fb;
-  cursor_x = 0;
-  cursor_y = 0;
-  current_font = font;
-}
-
-// Change the current font.
-void TextArea::SetFont(FontSet* new_font) { current_font = new_font; }
-
-void TextArea::SetCursor(int x, int y) {
-  cursor_x = x;
-  cursor_y = y;
-  column_count = 0;
-}
-
-void TextArea::DrawCharacter(int character) {
-  if (character == '\n') {
-    cursor_y = cursor_y + current_font->height;
-    cursor_x = cursor_x - (column_count * current_font->width);
-    column_count = 0;
-    return;
-  }
-
-  if (character == ' ') {
-    cursor_x = cursor_x + current_font->width;
-    column_count++;
-    return;
-  }
-
-  if ((int)character < current_font->starting_character ||
-      (int)character > current_font->ending_character) {
-    return;
-  }
-
-  int character_index = (int)character - current_font->starting_character;
-  uint8_t pixel_on;
-  for (int font_row = 0; font_row < current_font->height; font_row++) {
-    for (int font_column = 0; font_column < current_font->width;
-         font_column++) {
-      pixel_on = PW_FONT_BIT(
-          current_font->width - font_column - 1,
-          current_font
-              ->data[current_font->height * character_index + font_row]);
-      if (pixel_on) {
-        framebuffer->SetPixel(cursor_x + font_column, cursor_y + font_row);
-      }
-    }
-  }
-  cursor_x = cursor_x + current_font->width;
-  column_count++;
-}
-
-void TextArea::DrawCharacter(int character,
-                             color_rgb565_t rgb565_foreground_color) {
-  framebuffer->SetPenColor(rgb565_foreground_color);
-  DrawCharacter(character);
-}
-
-void TextArea::DrawCharacter(int character,
-                             int x,
-                             int y,
-                             color_rgb565_t rgb565_foreground_color) {
-  framebuffer->SetPenColor(rgb565_foreground_color);
-  SetCursor(x, y);
-  DrawCharacter(character);
-}
-
-void TextArea::DrawTestFontSheet(int character_width,
-                                 int x,
-                                 int y,
-                                 color_rgb565_t rgb565_foreground_color) {
-  framebuffer->SetPenColor(rgb565_foreground_color);
-  SetCursor(x, y);
-  for (int c = current_font->starting_character;
-       c <= current_font->ending_character;
-       c++) {
-    if (c % character_width == 0) {
-      DrawCharacter('\n');
-    }
-    DrawCharacter(c);
-  }
-}
-
-// DrawText at x, y (upper left pixel of font). Carriage returns will move
-// text to the next line.
-void TextArea::DrawText(const char* str) {
-  int character_index = 0;
-  int character;
-  do {
-    character = str[character_index];
-    DrawCharacter(character);
-    character_index++;
-  } while (character != '\0');
-}
-
-void TextArea::DrawText(const wchar_t* str) {
-  int character_index = 0;
-  int character;
-  do {
-    character = str[character_index];
-    DrawCharacter(character);
-    character_index++;
-  } while (character != '\0');
-}
-
-void TextArea::DrawText(const char* str,
-                        color_rgb565_t rgb565_foreground_color) {
-  framebuffer->SetPenColor(rgb565_foreground_color);
-  DrawText(str);
-}
-
-void TextArea::DrawText(const char* str,
-                        int x,
-                        int y,
-                        color_rgb565_t rgb565_foreground_color) {
-  framebuffer->SetPenColor(rgb565_foreground_color);
-  SetCursor(x, y);
-  DrawText(str);
 }
 
 }  // namespace pw::draw

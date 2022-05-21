@@ -81,7 +81,9 @@ generate_toolchain("rp2040") {
     pw_display_BACKEND = "$dir_pw_display_null"
 
     # pw_display_pico_ili9341 is for a ILI9341 screen connected over SPI.
-    # pw_display_BACKEND = "$dir_pw_display_pico_ili9341"
+    if (PICO_SRC_DIR != "") {
+      pw_display_BACKEND = "$dir_pw_display_pico_ili9341"
+    }
 
     # Configure backend for pw_touchscreen
     pw_touchscreen_BACKEND = "$dir_pw_touchscreen_null"

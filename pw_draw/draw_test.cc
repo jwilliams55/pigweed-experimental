@@ -17,6 +17,8 @@
 #include "gtest/gtest.h"
 #include "pw_color/color.h"
 #include "pw_color/colors_pico8.h"
+#include "pw_draw/font_set.h"
+#include "pw_draw/text_area.h"
 #include "pw_framebuffer/rgb565.h"
 #include "pw_log/log.h"
 #include "pw_string/string_builder.h"
@@ -28,14 +30,17 @@ namespace pw::draw {
 namespace {
 
 void PrintFramebufferAsANSI(FramebufferRgb565* fb) {
-  pw::StringBuffer<1024> line;
+  pw::StringBuffer<4096> line;
   pw::StringBuffer<128> color_string;
+
   for (int y = 0; y < fb->height; y += 2) {
     line.clear();
+
     for (int x = 0; x < fb->width; x++) {
       color_string.clear();
       ColorRGBA row1(fb->GetPixel(x, y));
       color_rgb565_t row2_color = fb->GetPixel(x, y + 1);
+
       if (row2_color == fb->transparent_color) {
         color_string.Format("[m[38;2;%d;%d;%dm▀", row1.r, row1.g, row1.b);
       } else {
@@ -292,5 +297,19 @@ TEST(DrawCircle, Empty) {
   EXPECT_EQ(fb.GetPixel(5, 6), 0);
   EXPECT_EQ(fb.GetPixel(6, 6), 0);
 }
+
+TEST(DrawText, WithFgBg) {
+  uint16_t data[(5 * 6) * (3 * 8)];
+  FramebufferRgb565 fb(data, 5 * 6, 3 * 8);
+  fb.Fill(0);
+
+  pw::draw::TextArea text_area(&fb, &font6x8);
+  text_area.SetForegroundColor(colors_pico8_rgb565[COLOR_PINK]);
+  text_area.SetBackgroundColor(0);
+  text_area.DrawText("Hell\noT\nhere.\nWorld");
+
+  PrintFramebufferAsANSI(&fb);
+}
+
 }  // namespace
 }  // namespace pw::draw

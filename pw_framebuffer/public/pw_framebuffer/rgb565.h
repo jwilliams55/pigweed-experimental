@@ -13,11 +13,6 @@
 // the License.
 #pragma once
 
-#include <math.h>
-
-#include <cstddef>
-#include <cstdint>
-
 #include "pw_color/color.h"
 
 using namespace pw::color;
@@ -33,77 +28,45 @@ class FramebufferRgb565 {
   color_rgb565_t pen_color;
   color_rgb565_t transparent_color;
 
-  FramebufferRgb565() {
-    width = 0;
-    height = 0;
-    pixel_data = NULL;
-    SetDefaultColors();
-  }
+  FramebufferRgb565();
 
   FramebufferRgb565(color_rgb565_t* data,
                     int desired_width,
-                    int desired_height) {
-    width = desired_width;
-    height = desired_height;
-    pixel_data = data;
-    SetDefaultColors();
-  }
+                    int desired_height);
 
-  void SetDefaultColors() {
-    pen_color = ColorRGBA(0xff, 0xff, 0xff).ToRgb565();          // White
-    transparent_color = ColorRGBA(0xff, 0x00, 0xff).ToRgb565();  // Magenta
-  }
+  void SetDefaultColors();
 
-  color_rgb565_t* GetFramebufferData() { return pixel_data; }
+  color_rgb565_t* GetFramebufferData();
 
   void SetFramebufferData(color_rgb565_t* data,
                           int desired_width,
-                          int desired_height) {
-    width = desired_width;
-    height = desired_height;
-    pixel_data = data;
-  }
+                          int desired_height);
 
   // Return the RGB565 color at position x, y. Bounds are checked.
-  color_rgb565_t GetPixel(int x, int y) {
-    color_rgb565_t value = transparent_color;
-    if (x >= 0 && x < width && y >= 0 && y < height) {
-      value = pixel_data[y * width + x];
-    }
-    return value;
-  }
+  color_rgb565_t GetPixel(int x, int y);
 
   // Draw a color at (x, y) if it's a valid positon.
-  void SetPixel(int x, int y, color_rgb565_t rgb565_color) {
-    if (x >= 0 && x < width && y >= 0 && y < height) {
-      pixel_data[y * width + x] = rgb565_color;
-    }
-  }
+  void SetPixel(int x, int y, color_rgb565_t rgb565_color);
 
   // Draw the current pen color at x, y. Check that x, y is a valid positon.
-  void SetPixel(int x, int y) { SetPixel(x, y, pen_color); }
+  void SetPixel(int x, int y);
+
+  // Copy the colors from another framebuffer into this one at position x, y.
+  void Blit(FramebufferRgb565* fb, int x, int y);
 
   // Fill the entire buffer with a color.
-  void Fill(color_rgb565_t color) {
-    for (int i = 0; i < width * height; i++) {
-      pixel_data[i] = color;
-    }
-  }
+  void Fill(color_rgb565_t color);
 
   // Fill the entire buffer with the pen color.
-  void Fill() {
-    for (int i = 0; i < width * height; i++) {
-      pixel_data[i] = pen_color;
-    }
-  }
+  void Fill();
 
-  void SetPenColor(color_rgb565_t color) { pen_color = color; }
+  void SetPenColor(color_rgb565_t color);
 
-  color_rgb565_t GetPenColor() { return pen_color; }
+  color_rgb565_t GetPenColor();
 
-  void SetTransparentColor(color_rgb565_t color) { transparent_color = color; }
+  void SetTransparentColor(color_rgb565_t color);
 
-  color_rgb565_t GetTransparentColor() { return transparent_color; }
+  color_rgb565_t GetTransparentColor();
 };
 
 }  // namespace pw::framebuffer

@@ -51,15 +51,18 @@ uint16_t internal_framebuffer[kDisplayDataSize];
 GLuint lcd_pixel_data[kDisplayDataSize];
 
 // imgui state
-bool show_demo_window = true;
-bool show_another_window = false;
-ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+bool show_imgui_demo_window = false;
+ImVec4 clear_color = ImVec4(0.27f, 0.27f, 0.27f, 1.00f);
 GLuint lcd_texture = 0;
 GLFWwindow* window;
-int lcd_texture_display_scale = 2;
+int lcd_texture_display_scale = 3;
 int old_lcd_texture_display_scale = 0;
 bool lcd_texture_display_mode_nearest = true;
 bool old_lcd_texture_display_mode_nearest = true;
+
+bool left_mouse_pressed = false;
+int texture_mouse_x = 0;
+int texture_mouse_y = 0;
 
 void CleanupAndExit() {
   ImGui_ImplOpenGL3_Shutdown();
@@ -114,7 +117,7 @@ void UpdateLcdTexture(FramebufferRgb565* frame_buffer) {
                   GL_UNSIGNED_BYTE,
                   lcd_pixel_data);
   // Unbind texture
-  glBindTexture(GL_TEXTURE_2D, NULL);
+  glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void SetupLcdTexture(GLuint* out_texture) {
@@ -148,7 +151,7 @@ void SetupLcdTexture(GLuint* out_texture) {
                GL_UNSIGNED_BYTE,
                lcd_pixel_data);
 
-  glBindTexture(GL_TEXTURE_2D, NULL);
+  glBindTexture(GL_TEXTURE_2D, 0);
 
   *out_texture = image_texture;
 }
@@ -196,7 +199,7 @@ void Init() {
 #endif
 
   // Create window with graphics context
-  window = glfwCreateWindow(1280, 720, "pw_display", NULL, NULL);
+  window = glfwCreateWindow(1280, 800, "pw_display", NULL, NULL);
   if (window == NULL)
     return;
   glfwMakeContextCurrent(window);
@@ -237,83 +240,91 @@ void Update(pw::framebuffer::FramebufferRgb565* frame_buffer) {
   // Poll and handle events (inputs, window resize, etc.)
   glfwPollEvents();
 
+  left_mouse_pressed = false;
+  double mouse_xpos = 0, mouse_ypos = 0;
+  glfwGetCursorPos(window, &mouse_xpos, &mouse_ypos);
+  if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+    left_mouse_pressed = true;
+  }
+
   // Start the Dear ImGui frame
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
 
+  int display_w, display_h;
+  glfwGetFramebufferSize(window, &display_w, &display_h);
+
   // 1. Show the big demo window (Most of the sample code is in
   // ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear
   // ImGui!).
-  if (show_demo_window) {
-    ImGui::ShowDemoWindow(&show_demo_window);
+  if (show_imgui_demo_window) {
+    ImGui::ShowDemoWindow(&show_imgui_demo_window);
   }
 
-  // 2. Show a simple window that we create ourselves. We use a Begin/End pair
-  // to created a named window.
-  {
-    static float f = 0.0f;
-    static int counter = 0;
+  // Calculate the display texture draw coordinates
+  int scaled_width = kDisplayWidth * lcd_texture_display_scale;
+  int scaled_height = kDisplayHeight * lcd_texture_display_scale;
 
-    ImGui::Begin("Hello, world!");  // Create a window called "Hello, world!"
-                                    // and append into it.
+  float offset_x = round((display_w - scaled_width) / 2.0);
+  float offset_y = round((display_h - scaled_height) / 2.0);
 
-    ImGui::Text("This is some useful text.");  // Display some text (you can use
-                                               // a format strings too)
-    ImGui::Checkbox(
-        "Demo Window",
-        &show_demo_window);  // Edit bools storing our window open/close state
-    ImGui::Checkbox("Another Window", &show_another_window);
+  ImGui::Begin("Pigweed Display");
+  ImGui::Text("Pixel Size = %d x %d", kDisplayWidth, kDisplayHeight);
+  ImGui::SliderInt("Integer Scaling", &lcd_texture_display_scale, 1, 10);
+  ImGui::Checkbox("Nearest neighbor", &lcd_texture_display_mode_nearest);
+  // Show the display in the Imgui window itself:
+  // ImGui::Image((void*)(intptr_t)lcd_texture,
+  //              ImVec2(lcd_texture_display_scale * kDisplayWidth,
+  //                     lcd_texture_display_scale * kDisplayHeight));
 
-    ImGui::SliderFloat("float",
-                       &f,
-                       0.0f,
-                       1.0f);  // Edit 1 float using a slider from 0.0f to 1.0f
-    ImGui::ColorEdit3(
-        "clear color",
-        (float*)&clear_color);  // Edit 3 floats representing a color
+  texture_mouse_x = round((mouse_xpos - offset_x) / lcd_texture_display_scale);
+  texture_mouse_y = round((mouse_ypos - offset_y) / lcd_texture_display_scale);
+  ImGui::Separator();
+  ImGui::Text("Mouse position = %d, %d", texture_mouse_x, texture_mouse_y);
+  ImGui::Text("Mouse Left button pressed: %d", left_mouse_pressed);
 
-    if (ImGui::Button("Button"))  // Buttons return true when clicked (most
-                                  // widgets return true when edited/activated)
-      counter++;
-    ImGui::SameLine();
-    ImGui::Text("counter = %d", counter);
+  ImGui::Separator();
+  ImGui::Checkbox("Show Imgui Demo Window", &show_imgui_demo_window);
+  ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+              1000.0f / ImGui::GetIO().Framerate,
+              ImGui::GetIO().Framerate);
 
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-                1000.0f / ImGui::GetIO().Framerate,
-                ImGui::GetIO().Framerate);
-    ImGui::End();
-
-    ImGui::Begin("Display");
-    ImGui::Text("Pixel Size = %d x %d", kDisplayWidth, kDisplayHeight);
-    ImGui::Checkbox("Nearest neighbor", &lcd_texture_display_mode_nearest);
-    ImGui::SliderInt("Integer Scaling", &lcd_texture_display_scale, 1, 10);
-    ImGui::Image((void*)(intptr_t)lcd_texture,
-                 ImVec2(lcd_texture_display_scale * kDisplayWidth,
-                        lcd_texture_display_scale * kDisplayHeight));
-    ImGui::End();
-  }
-
-  // 3. Show another simple window.
-  if (show_another_window) {
-    ImGui::Begin(
-        "Another Window",
-        &show_another_window);  // Pass a pointer to our bool variable (the
-                                // window will have a closing button that will
-                                // clear the bool when clicked)
-    ImGui::Text("Hello from another window!");
-    if (ImGui::Button("Close Me"))
-      show_another_window = false;
-    ImGui::End();
-  }
+  ImGui::End();
 
   // Rendering
   ImGui::Render();
-  int display_w, display_h;
-  glfwGetFramebufferSize(window, &display_w, &display_h);
+
   glViewport(0, 0, display_w, display_h);
+
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glOrtho(0.0f, display_w, display_h, 0.0f, -1.0f, 1.0f);
+
+  // Clear the screen
   glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
   glClear(GL_COLOR_BUFFER_BIT);
+
+  // Draw the display texture
+  glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+  glPushMatrix();
+
+  glBindTexture(GL_TEXTURE_2D, lcd_texture);
+  glEnable(GL_TEXTURE_2D);
+
+  glBegin(GL_QUADS);
+  glTexCoord2f(0.0, 0.0);
+  glVertex2f(offset_x, offset_y);
+  glTexCoord2f(0.0, 1.0);
+  glVertex2f(offset_x, offset_y + scaled_height);
+  glTexCoord2f(1.0, 1.0);
+  glVertex2f(offset_x + scaled_width, offset_y + scaled_height);
+  glTexCoord2f(1.0, 0.0);
+  glVertex2f(offset_x + scaled_width, offset_y);
+  glEnd();
+
+  glPopMatrix();
+
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
   glfwSwapBuffers(window);
@@ -323,15 +334,22 @@ void Update(pw::framebuffer::FramebufferRgb565* frame_buffer) {
   }
 }
 
-bool TouchscreenAvailable() { return false; }
+bool TouchscreenAvailable() { return true; }
 
-bool NewTouchEvent() { return false; }
+bool NewTouchEvent() { return left_mouse_pressed; }
 
 pw::coordinates::Vec3Int GetTouchPoint() {
   pw::coordinates::Vec3Int point;
   point.x = 0;
   point.y = 0;
   point.z = 0;
+  if (left_mouse_pressed && texture_mouse_x >= 0 &&
+      texture_mouse_x < kDisplayWidth && texture_mouse_y >= 0 &&
+      texture_mouse_y < kDisplayHeight) {
+    point.x = texture_mouse_x;
+    point.y = texture_mouse_y;
+    point.z = 1;
+  }
   return point;
 }
 

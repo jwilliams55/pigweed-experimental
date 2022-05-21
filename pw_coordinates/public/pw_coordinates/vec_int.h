@@ -16,6 +16,8 @@
 namespace pw::coordinates {
 
 struct Vec3Int {
+  Vec3Int(int new_x, int new_y, int new_z) : x(new_x), y(new_y), z(new_z) {}
+  Vec3Int() : x(0), y(0), z(0) {}
   int x;
   int y;
   int z;

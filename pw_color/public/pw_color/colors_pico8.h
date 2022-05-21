@@ -20,22 +20,22 @@
 namespace pw::color {
 
 const color_rgb565_t colors_pico8_rgb565[] = {
-    ColorRGBA(0x00, 0x00, 0x00).ToRgb565(),  // 0x0000, // #000000 0 BLACK
-    ColorRGBA(0x1d, 0x2b, 0x53).ToRgb565(),  // 0x194a, // #1d2b53 1 DARK_BLUE
-    ColorRGBA(0x7e, 0x25, 0x53).ToRgb565(),  // 0x792a, // #7e2553 2 DARK_PURPLE
-    ColorRGBA(0x00, 0x87, 0x51).ToRgb565(),  // 0x042a, // #008751 3 DARK_GREEN
-    ColorRGBA(0xab, 0x52, 0x36).ToRgb565(),  // 0xaa86, // #ab5236 4 BROWN
-    ColorRGBA(0x5f, 0x57, 0x4f).ToRgb565(),  // 0x5aa9, // #5f574f 5 DARK_GRAY
-    ColorRGBA(0xc2, 0xc3, 0xc7).ToRgb565(),  // 0xc618, // #c2c3c7 6 LIGHT_GRAY
-    ColorRGBA(0xff, 0xf1, 0xe8).ToRgb565(),  // 0xff9d, // #fff1e8 7 WHITE
-    ColorRGBA(0xff, 0x00, 0x4d).ToRgb565(),  // 0xf809, // #ff004d 8 RED
-    ColorRGBA(0xff, 0xa3, 0x00).ToRgb565(),  // 0xfd00, // #ffa300 9 ORANGE
-    ColorRGBA(0xff, 0xec, 0x27).ToRgb565(),  // 0xff64, // #ffec27 10 YELLOW
-    ColorRGBA(0x00, 0xe4, 0x36).ToRgb565(),  // 0x0726, // #00e436 11 GREEN
-    ColorRGBA(0x29, 0xad, 0xff).ToRgb565(),  // 0x2d7f, // #29adff 12 BLUE
-    ColorRGBA(0x83, 0x76, 0x9c).ToRgb565(),  // 0x83b3, // #83769c 13 INDIGO
-    ColorRGBA(0xff, 0x77, 0xa8).ToRgb565(),  // 0xfbb5, // #ff77a8 14 PINK
-    ColorRGBA(0xff, 0xcc, 0xaa).ToRgb565(),  // 0xfe75, // #ffccaa 15 PEACH
+    0x0000,  // #000000 0 BLACK
+    0x194a,  // #1d2b53 1 DARK_BLUE
+    0x792a,  // #7e2553 2 DARK_PURPLE
+    0x042a,  // #008751 3 DARK_GREEN
+    0xaa86,  // #ab5236 4 BROWN
+    0x5aa9,  // #5f574f 5 DARK_GRAY
+    0xc618,  // #c2c3c7 6 LIGHT_GRAY
+    0xff9d,  // #fff1e8 7 WHITE
+    0xf809,  // #ff004d 8 RED
+    0xfd00,  // #ffa300 9 ORANGE
+    0xff64,  // #ffec27 10 YELLOW
+    0x0726,  // #00e436 11 GREEN
+    0x2d7f,  // #29adff 12 BLUE
+    0x83b3,  // #83769c 13 INDIGO
+    0xfbb5,  // #ff77a8 14 PINK
+    0xfe75,  // #ffccaa 15 PEACH
 };
 
 const color_rgba8888_t colors_pico8_rgba8888[] = {

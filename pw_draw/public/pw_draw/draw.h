@@ -95,49 +95,4 @@ void DrawSprite(pw::framebuffer::FramebufferRgb565* fb,
 
 void DrawTestPattern();
 
-class TextArea {
- public:
-  int cursor_x;
-  int cursor_y;
-  int column_count;
-  FontSet* current_font;
-  pw::framebuffer::FramebufferRgb565* framebuffer;
-
-  TextArea(pw::framebuffer::FramebufferRgb565* fb, FontSet* font);
-
-  // Change the current font.
-  void SetFont(FontSet* new_font);
-
-  void SetCursor(int x, int y);
-
-  void DrawCharacter(int character);
-
-  void DrawCharacter(int character, color_rgb565_t rgb565_foreground_color);
-
-  void DrawCharacter(int character,
-                     int x,
-                     int y,
-                     color_rgb565_t rgb565_foreground_color);
-
-  void DrawTestFontSheet(int character_width,
-                         int x,
-                         int y,
-                         color_rgb565_t rgb565_foreground_color);
-
-  // DrawText at x, y (upper left pixel of font). Carriage returns will move
-  // text to the next line.
-  void DrawText(const char* str);
-
-  void DrawText(const char* str, color_rgb565_t rgb565_foreground_color);
-
-  void DrawText(const wchar_t* str);
-
-  void DrawText(const wchar_t* str, color_rgb565_t rgb565_foreground_color);
-
-  void DrawText(const char* str,
-                int x,
-                int y,
-                color_rgb565_t rgb565_foreground_color);
-};
-
 }  // namespace pw::draw

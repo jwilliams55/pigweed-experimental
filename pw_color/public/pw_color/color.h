@@ -67,11 +67,6 @@ class ColorRGBA {
   }
 
   color_rgb565_t ToRgb565() {
-    // TODO(tonymd): Scale 8-bit RGB values to 5,6,5 bits?
-    return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | ((b & 0xF8) >> 3);
-  }
-  uint16_t ToUint16() {
-    // TODO(tonymd): Scale 8-bit RGB values to 5,6,5 bits?
     return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | ((b & 0xF8) >> 3);
   }
 
