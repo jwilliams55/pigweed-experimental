@@ -16,6 +16,7 @@
 
 #define PW_LOG_LEVEL PW_LOG_LEVEL_DEBUG
 
+#include "ansi.h"
 #include "pw_board_led/led.h"
 #include "pw_color/color.h"
 #include "pw_color/colors_endesga32.h"
@@ -43,17 +44,29 @@ typedef pw::coordinates::Vec3Int (*vec3int_function_pointer)();
 pw::framebuffer::FramebufferRgb565 frame_buffer = FramebufferRgb565();
 pw::draw::TextArea log_text_area(&frame_buffer, &pw::draw::font6x8);
 
+class DemoDecoder : public AnsiDecoder {
+ protected:
+  virtual void SetFgColor(uint8_t r, uint8_t g, uint8_t b) {
+    log_text_area.SetForegroundColor(pw::color::ColorRGBA(r, g, b).ToRgb565());
+  }
+  virtual void SetBgColor(uint8_t r, uint8_t g, uint8_t b) {
+    log_text_area.SetBackgroundColor(pw::color::ColorRGBA(r, g, b).ToRgb565());
+  }
+  virtual void EmitChar(char c) { log_text_area.DrawCharacter(c); }
+};
+
+DemoDecoder demo_decoder = DemoDecoder();
+
 void (*write_log_to_screen)(std::string_view) = [](std::string_view log) {
-  // Start logging at this screen position
   static int cursor_x = 0;
   static int cursor_y = 232;
-  log_text_area.SetForegroundColor(0xFFFF);
-  log_text_area.SetBackgroundColor(0);
   log_text_area.SetCursor(cursor_x, cursor_y);
 
-  log_text_area.DrawText(log.data());
-  log_text_area.DrawCharacter('\n');
-  // Update text cursor
+  for (auto c : log) {
+    demo_decoder.ProcessChar(c);
+  }
+  demo_decoder.ProcessChar('\n');
+
   cursor_x = log_text_area.cursor_x;
   cursor_y = log_text_area.cursor_y;
 
