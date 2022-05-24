@@ -47,16 +47,16 @@ class Glfw(pw_package.package_manager.Package):
 
         downloads = {
             'Darwin': {
-                'url': ('https://github.com/glfw/glfw/releases/download/3.3.5/'
-                        'glfw-3.3.5.bin.MACOS.zip'),
-                'sha256sum': ('184f165464ed9c46effd96c9fb6e3559'
-                              '96d62f5f96f5e90542f00775fe781511'),
+                'url': ('https://github.com/glfw/glfw/releases/download/3.3.7/'
+                        'glfw-3.3.7.bin.MACOS.zip'),
+                'sha256sum': ('e67bcb04348edf7ee83c18089ec527fb'
+                              'b2c16ecf4ea9ab74042b873492a85faa'),
             },
             'Windows': {
-                'url': ('https://github.com/glfw/glfw/releases/download/3.3.5/'
-                        'glfw-3.3.5.bin.WIN64.zip'),
-                'sha256sum': ('74a46f804f677c58a67efe8c24b416b1'
-                              'f3c95f6242600d329734522393c88c85'),
+                'url': ('https://github.com/glfw/glfw/releases/download/3.3.7/'
+                        'glfw-3.3.7.bin.WIN64.zip'),
+                'sha256sum': ('3d4de772d3c436ae6f7cc2c1f053f97a'
+                              '1358e1be2d19dbc34882927f240599d0'),
             }
         }
 

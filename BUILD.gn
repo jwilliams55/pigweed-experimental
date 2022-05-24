@@ -96,6 +96,7 @@ pw_internal_pip_install("pip_install_experimental_tools") {
   packages = [
     "//applications/tls_example/trust_store/py",
     "//tools:tools",
+    "//pw_graphics/py",
   ]
   editable = true
 }

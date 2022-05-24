@@ -12,9 +12,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-"""PNG to rgb565 header file converter."""
-
-# TODO(tonymd): Add this to a Python package with Pillow as a dep.
+"""PNG to rgb565 cc file converter."""
 
 import argparse
 import logging
@@ -124,6 +122,7 @@ def render_font_header(
 
 
 def main() -> None:
+    """Main."""
     args = _arg_parser()
 
     image_path = args.IMAGE

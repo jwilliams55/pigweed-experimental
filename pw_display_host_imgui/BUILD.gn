@@ -15,6 +15,7 @@
 import("//build_overrides/pigweed.gni")
 
 import("$dir_pw_build/target_types.gni")
+import("glfw.gni")
 import("imgui.gni")
 
 if (dir_pw_third_party_imgui != "") {
@@ -43,21 +44,23 @@ if (dir_pw_third_party_imgui != "") {
     } else if (host_os == "mac") {
       # TODO(tonymd) Test Mac build
       ldflags = [
-        "-framework OpenGL",
-        "-framework Cocoa",
-        "-framework IOKit",
-        "-framework CoreVideo",
+        "-framework",
+        "OpenGL",
+        "-framework",
+        "Cocoa",
+        "-framework",
+        "IOKit",
+        "-framework",
+        "CoreVideo",
       ]
       libs = [ "glfw3" ]
       lib_dirs = [
         "$dir_pw_third_party_glfw/lib-universal",
         "/usr/local/lib",
-        "/opt/local/lib",
       ]
       include_dirs += [
         "$dir_pw_third_party_glfw/include",
         "/usr/local/include",
-        "/opt/local/include",
       ]
     } else if (host_os == "win") {
       libs = [
@@ -82,7 +85,7 @@ if (dir_pw_third_party_imgui != "") {
   ]
 
   pw_source_set("pw_display_host_imgui") {
-    configs = [ ":imgui" ]
+    public_configs = [ ":imgui" ]
     deps = [ "$dir_pw_display:pw_display.facade" ]
     sources = [ "display.cc" ] + _imgui_sources
     remove_configs = [ "$dir_pw_build:strict_warnings" ]
