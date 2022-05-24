@@ -34,6 +34,17 @@ if (current_toolchain != default_toolchain) {
     ]
     sources = [ "pico_logging_test_main.cc" ]
   }
+
+  config("elf2uf2_configs") {
+    include_dirs = [ "$PICO_SRC_DIR/src/common/boot_uf2/include" ]
+    cflags_cc = [ "-std=gnu++14" ]
+  }
+
+  pw_executable("elf2uf2") {
+    configs = [ ":elf2uf2_configs" ]
+    sources = [ "$PICO_SRC_DIR/tools/elf2uf2/main.cpp" ]
+    remove_configs = [ "$dir_pw_build:strict_warnings" ]
+  }
 }
 
 generate_toolchain("rp2040") {

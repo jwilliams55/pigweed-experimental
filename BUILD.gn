@@ -38,13 +38,18 @@ group("default") {
 group("host") {
   deps = [
     ":host_tests(//targets/host:host_debug_tests)",
-    "//pw_color:tests_run(//targets/host:host_debug_tests)",
-    "//pw_draw:tests_run(//targets/host:host_debug_tests)",
-    "//pw_framebuffer:tests_run(//targets/host:host_debug_tests)",
+    "$dir_pw_color:tests_run(//targets/host:host_debug_tests)",
+    "$dir_pw_draw:tests_run(//targets/host:host_debug_tests)",
+    "$dir_pw_framebuffer:tests_run(//targets/host:host_debug_tests)",
 
     # See //applications/pw_lcd_display_host_imgui/README.md for instructions.
     "//applications/terminal_display:all(//targets/host:host_debug)",
   ]
+
+  # If building Pi Pico builds compile the elf2uf2 utility.
+  if (PICO_SRC_DIR != "") {
+    deps += [ "//targets/rp2040:elf2uf2(//targets/host:host_debug)" ]
+  }
 }
 
 # Arduino specific targets.
