@@ -38,9 +38,9 @@ group("default") {
 group("host") {
   deps = [
     ":host_tests(//targets/host:host_debug_tests)",
-    "$dir_pw_color:tests_run(//targets/host:host_debug_tests)",
-    "$dir_pw_draw:tests_run(//targets/host:host_debug_tests)",
-    "$dir_pw_framebuffer:tests_run(//targets/host:host_debug_tests)",
+    "$dir_pw_color:tests.run(//targets/host:host_debug_tests)",
+    "$dir_pw_draw:tests.run(//targets/host:host_debug_tests)",
+    "$dir_pw_framebuffer:tests.run(//targets/host:host_debug_tests)",
 
     # See //applications/pw_lcd_display_host_imgui/README.md for instructions.
     "//applications/terminal_display:all(//targets/host:host_debug)",
@@ -204,7 +204,7 @@ foreach(test_group,
       deps += [ ":tests" ]
     } else {
       # With a test runner, build and run tests.
-      deps += [ ":tests_run" ]
+      deps += [ ":tests.run" ]
     }
   }
 }
