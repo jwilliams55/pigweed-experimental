@@ -67,6 +67,17 @@ target_toolchain_host = {
     }
   }
 
+  clang_debug_cpp20 = {
+    name = "host_debug_cpp20"
+    _toolchain_base = clang_debug
+    forward_variables_from(_toolchain_base, "*", _excluded_members)
+    defaults = {
+      forward_variables_from(_toolchain_base.defaults, "*", _excluded_defaults)
+      forward_variables_from(toolchain_overrides, "*")
+      pw_toolchain_CXX_STANDARD = pw_toolchain_STANDARD.CXX20
+    }
+  }
+
   # Toolchain for tests only.
   clang_debug_tests = {
     name = "host_debug_tests"
@@ -85,9 +96,22 @@ target_toolchain_host = {
       pw_log_BACKEND = dir_pw_log_basic
     }
   }
+
+  clang_debug_tests_cpp20 = {
+    name = "host_debug_tests_cpp20"
+    _toolchain_base = clang_debug_tests
+    forward_variables_from(_toolchain_base, "*", _excluded_members)
+    defaults = {
+      forward_variables_from(_toolchain_base.defaults, "*", _excluded_defaults)
+      forward_variables_from(toolchain_overrides, "*")
+      pw_toolchain_CXX_STANDARD = pw_toolchain_STANDARD.CXX20
+    }
+  }
 }
 
 toolchains_list = [
   target_toolchain_host.clang_debug,
+  target_toolchain_host.clang_debug_cpp20,
   target_toolchain_host.clang_debug_tests,
+  target_toolchain_host.clang_debug_tests_cpp20,
 ]
