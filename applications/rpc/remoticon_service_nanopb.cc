@@ -15,8 +15,8 @@
 #include "remoticon/remoticon_service_nanopb.h"
 
 #include <cstring>
-#include <span>
 
+#include "pw_span/span.h"
 #include "pw_status/status.h"
 
 namespace remoticon {

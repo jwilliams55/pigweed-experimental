@@ -13,11 +13,11 @@
 // the License.
 
 #include <array>
-#include <span>
 
 #include "pw_board_led/led.h"
 #include "pw_hex_dump/hex_dump.h"
 #include "pw_log/log.h"
+#include "pw_span/span.h"
 #include "pw_spin_delay/delay.h"
 #include "pw_string/format.h"
 #include "pw_string/string_builder.h"
@@ -28,7 +28,7 @@ int main() {
   const char my_data[] = "Super Simple Status Logging";
   std::array<char, 80> hex_dump_buffer;
   pw::dump::FormattedHexDumper hex_dumper(hex_dump_buffer);
-  hex_dumper.BeginDump(std::as_bytes(std::span(my_data)));
+  hex_dumper.BeginDump(pw::as_bytes(pw::span(my_data)));
   while (hex_dumper.DumpLine().ok()) {
     PW_LOG_INFO("%s", hex_dump_buffer.data());
   }

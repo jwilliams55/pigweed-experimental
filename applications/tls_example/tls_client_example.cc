@@ -14,10 +14,9 @@
 
 #include <sys/types.h>
 
-#include <span>
-
 #include "backends/backend_interface.h"
 #include "pw_log/log.h"
+#include "pw_span/span.h"
 #include "pw_spin_delay/delay.h"
 #include "pw_sys_io/sys_io.h"
 #include "trust_store/ca_certificates_crls.h"
@@ -120,7 +119,7 @@ void TlsClientExample() {
     }
     // Display on serial console
     pw::sys_io::WriteBytes(
-        std::as_bytes(std::span{recv_buffer, static_cast<size_t>(read)}));
+        pw::as_bytes(pw::span{recv_buffer, static_cast<size_t>(read)}));
   }
 }
 }  // namespace

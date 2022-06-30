@@ -14,8 +14,8 @@
 #pragma once
 
 #include <cstring>
-#include <span>
 
+#include "pw_span/span.h"
 #include "pw_status/status.h"
 #include "remoticon_proto/remoticon.rpc.pb.h"
 

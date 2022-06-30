@@ -124,7 +124,10 @@ template("tls_client_example") {
   # Runnable target
   pw_executable(example_binary_target_name) {
     forward_variables_from(executable_common_vars, "*")
-    deps += [ invoker.tls_backend ]
+    deps += [
+      dir_pw_span,
+      invoker.tls_backend,
+    ]
   }
 
   # Size report target.

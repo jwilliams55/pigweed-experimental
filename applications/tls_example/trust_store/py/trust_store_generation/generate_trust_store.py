@@ -23,14 +23,14 @@ const unsigned char kRootCACert_1[] = {...};
 
 ...
 
-const std::span<const unsigned char> kRootCerts[] = {
-    std::span{kRootCACert_0},
-    std::span{kRootCACert_1},
+const pw::span<const unsigned char> kRootCerts[] = {
+    pw::span{kRootCACert_0},
+    pw::span{kRootCACert_1},
 };
 }  // namespace
 
-std::span<const std::span<const unsigned char>> GetBuiltInRootCert() {
-  return std::span{kRootCerts};
+pw::span<const pw::span<const unsigned char>> GetBuiltInRootCert() {
+  return pw::span{kRootCerts};
 }
 
 GetBuiltInRootCert() is the API for retrieving the certificates.
@@ -62,8 +62,8 @@ LICENSE_HEADER = """// Copyright 2021 The Pigweed Authors
 """
 
 ROOT_CERT_API_FUNC = """
-std::span<const std::span<const unsigned char>> GetBuiltInRootCert() {
-    return std::span{kRootCerts};
+pw::span<const pw::span<const unsigned char>> GetBuiltInRootCert() {
+    return pw::span{kRootCerts};
 }
 """
 
@@ -112,11 +112,11 @@ def main():
     print(args)
     with open(args.out, "w") as header:
         header.write(LICENSE_HEADER)
-        header.write("#include <span>\n\n")
+        header.write('#include "pw_span/span.h"\n\n')
         certs = args.root_cert if args.root_cert else []
         cert_collection_array = "".join([
             "const ",
-            "std::span<const unsigned char>",
+            "pw::span<const unsigned char>",
             "kRootCerts[] = {",
         ])
         header.write("namespace {\n\n")
@@ -127,7 +127,7 @@ def main():
             header.write(f'// {cert}\n')
             header.write(generate_der_c_array_for_cert(cert, var_name))
             header.write("\n\n")
-            cert_collection_array += f'std::span{{{var_name}}},'
+            cert_collection_array += f'pw::span{{{var_name}}},'
         cert_collection_array += "};"
         header.write(cert_collection_array)
         header.write("\n\n")

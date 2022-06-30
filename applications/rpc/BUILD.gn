@@ -38,6 +38,7 @@ pw_executable("rpc") {
     "$dir_pw_board_led",
     "$dir_pw_spin_delay",
     dir_pw_log,
+    dir_pw_span,
 
     # RPC related dependencies.
     "$dir_pw_hdlc:pw_rpc",

@@ -67,4 +67,4 @@
   "XA7cpwQ3pwG2LJTQjLG3+Lvk0HECG14=\r\n"                                 \
   "-----END X509 CRL-----\r\n"
 
-std::span<const std::span<const unsigned char>> GetBuiltInRootCert();
+pw::span<const pw::span<const unsigned char>> GetBuiltInRootCert();

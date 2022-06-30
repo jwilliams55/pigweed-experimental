@@ -13,7 +13,6 @@
 // the License.
 
 #include <array>
-#include <span>
 #include <string_view>
 
 #include "pw_board_led/led.h"
@@ -23,6 +22,7 @@
 #include "pw_log/log.h"
 #include "pw_rpc/echo_service_nanopb.h"
 #include "pw_rpc/server.h"
+#include "pw_span/span.h"
 #include "pw_spin_delay/delay.h"
 #include "pw_stream/sys_io_stream.h"
 #include "remoticon/remoticon_service_nanopb.h"
