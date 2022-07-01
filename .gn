@@ -26,7 +26,15 @@ default_args = {
   pw_build_USE_NEW_PYTHON_BUILD = true
 
   pw_build_PIP_CONSTRAINTS = [
+    # Pigweed upstream constraints
     "$dir_pw_env_setup/py/pw_env_setup/virtualenv_setup/constraint.list",
+
+    # Experimental specific constraints
     "//tools/constraint.list",
+  ]
+
+  pw_build_PIP_REQUIREMENTS = [
+    # Experimental specific requirements
+    "//tools/requirements.txt",
   ]
 }
