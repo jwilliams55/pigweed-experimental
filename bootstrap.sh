@@ -128,4 +128,6 @@ unset SETUP_SH
 unset _bootstrap_abspath
 unset _util_sh
 
+pw_install_post_checkout_hook
+
 pw_cleanup
