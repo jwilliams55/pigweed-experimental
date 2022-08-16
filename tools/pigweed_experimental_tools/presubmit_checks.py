@@ -70,8 +70,8 @@ _BUILD_EXTENSIONS = frozenset(
 #
 def default_build(ctx: PresubmitContext):
     """Creates a default build."""
-    build.gn_gen(PROJECT_ROOT, ctx.output_dir)
-    build.ninja(ctx.output_dir)
+    build.gn_gen_2(ctx)
+    build.ninja(ctx)
 
 
 def check_for_git_changes(_: PresubmitContext):
