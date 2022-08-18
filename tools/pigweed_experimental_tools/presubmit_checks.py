@@ -70,7 +70,7 @@ _BUILD_EXTENSIONS = frozenset(
 #
 def default_build(ctx: PresubmitContext):
     """Creates a default build."""
-    build.gn_gen_2(ctx)
+    build.gn_gen(ctx)
     build.ninja(ctx)
 
 
