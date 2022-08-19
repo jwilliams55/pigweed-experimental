@@ -28,7 +28,7 @@ The demo applications that make use of these libraries are:
 
 ### Build instructions
 
-First time setup:
+**First time setup:**
 
 ```
 git clone --recursive https://pigweed.googlesource.com/pigweed/experimental
@@ -37,20 +37,21 @@ cd experimental
 pw package install imgui
 pw package install glfw
 pw package install stm32cube_f4
+pw package install pico_sdk
 ```
 
 #### **[STM32F429-DISC1](https://www.st.com/en/evaluation-tools/32f429idiscovery.html)**
 
-Compile:
+**Compile:**
 
 ```sh
 gn gen out --export-compile-commands --args="
-  dir_pw_third_party_stm32cube_f4=\"$PROJECT_DIR/.environment/packages/stm32cube_f4\"
+  dir_pw_third_party_stm32cube_f4=\"$PW_PROJECT_ROOT/environment/packages/stm32cube_f4\"
 "
 ninja -C out
 ```
 
-Flash:
+**Flash:**
 
 ```
 openocd -f third_party/pigweed/targets/stm32f429i_disc1/py/stm32f429i_disc1_utils/openocd_stm32f4xx.cfg -c "program out/stm32f429i_disc1_stm32cube_debug/obj/applications/terminal_display/bin/terminal_demo.elf verify reset exit"
@@ -58,16 +59,16 @@ openocd -f third_party/pigweed/targets/stm32f429i_disc1/py/stm32f429i_disc1_util
 
 #### **Linux, Windows or Mac**
 
-Compile:
+**Compile:**
 
 ```sh
 gn gen out --export-compile-commands --args="
-  dir_pw_third_party_imgui=\"$PROJECT_DIR/.environment/packages/imgui\"
+  dir_pw_third_party_imgui=\"$PW_PROJECT_ROOT/environment/packages/imgui\"
 "
 ninja -C out
 ```
 
-Run:
+**Run:**
 
 ```
 out/host_debug/obj/applications/terminal_display/bin/terminal_demo
@@ -75,25 +76,60 @@ out/host_debug/obj/applications/terminal_display/bin/terminal_demo
 
 #### **[Raspberry Pi Pico](https://www.raspberrypi.com/products/raspberry-pi-pico/) Connected to an [ILI9341](https://www.adafruit.com/?q=ili9341&sort=BestMatch)**
 
-Clone the pico-sdk repo:
-```
-cd $HOME
-git clone https://github.com/raspberrypi/pico-sdk
-```
-
-Compile:
+**Compile:**
 
 ```sh
 gn gen out --export-compile-commands --args="
-  PICO_SRC_DIR=\"$HOME/pico-sdk\"
+  PICO_SRC_DIR=\"$PW_PROJECT_ROOT/environment/packages/pico_sdk\"
 "
 ninja -C out
 ```
 
-Create a uf2 file for flashing the Pico with:
+**Flash:**
 
-```sh
-./out/host_debug/obj/targets/rp2040/bin/elf2uf2 ./out/rp2040/obj/applications/terminal_display/bin/terminal_demo.elf ./out/rp2040/obj/applications/terminal_display/bin/terminal_demo.uf2
-```
+- Using a uf2 file:
 
-Copy `./out/rp2040/obj/applications/terminal_display/bin/terminal_demo.uf2` to your Pi Pico.
+  ```sh
+  ./out/host_debug/obj/targets/rp2040/bin/elf2uf2 ./out/rp2040/obj/applications/terminal_display/bin/terminal_demo.elf ./out/rp2040/obj/applications/terminal_display/bin/terminal_demo.uf2
+  ```
+
+  Copy `./out/rp2040/obj/applications/terminal_display/bin/terminal_demo.uf2` to your Pi Pico.
+
+- Using a Pico Probe and openocd:
+
+  This requires installing the Raspberry Pi foundation's OpenOCD fork for the
+  Pico probe. More details including how to connect the two Pico boards is available at [Raspberry Pi Pico and RP2040 - C/C++ Part 2: Debugging with VS Code](https://www.digikey.com/en/maker/projects/raspberry-pi-pico-and-rp2040-cc-part-2-debugging-with-vs-code/470abc7efb07432b82c95f6f67f184c0)
+
+  **Install RaspberryPi's OpenOCD Fork:**
+
+  ```sh
+  git clone https://github.com/raspberrypi/openocd.git \
+    --branch picoprobe \
+    --depth=1 \
+    --no-single-branch \
+    openocd-picoprobe
+
+  cd openocd-picoprobe
+
+  ./bootstrap
+  ./configure --enable-picoprobe --prefix=$HOME/apps/openocd --disable-werror
+  make -j2
+  make install
+  ```
+
+  **Setup udev rules (Linux only):**
+
+  ```sh
+  cat <<EOF > 49-picoprobe.rules
+  SUBSYSTEMS=="usb", ATTRS{idVendor}=="2e8a", ATTRS{idProduct}=="0004", MODE:="0666"
+  KERNEL=="ttyACM*", ATTRS{idVendor}=="2e8a", ATTRS{idProduct}=="0004", MODE:="0666"
+  EOF
+  sudo cp 49-picoprobe.rules /usr/lib/udev/rules.d/49-picoprobe.rules
+  sudo udevadm control --reload-rules
+   ```
+
+  **Flash the Pico:**
+
+  ```sh
+  ~/apps/openocd/bin/openocd -f ~/apps/openocd/share/openocd/scripts/interface/picoprobe.cfg -f ~/apps/openocd/share/openocd/scripts/target/rp2040.cfg -c 'program out/rp2040/obj/applications/terminal_display/bin/terminal_demo.elf verify reset exit'
+  ```

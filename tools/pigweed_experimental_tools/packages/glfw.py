@@ -34,29 +34,26 @@ class Glfw(pw_package.package_manager.Package):
         if self.status(path):
             return
 
-        if platform.system() == 'Linux':
-            raise RuntimeError(
-                '\nInstalling glfw binaries on Linux is not supported.\n\n'
-                'Please install using your package manager.\n'
-                'Ubuntu/Debian:\n'
-                '  sudo apt install libglfw3-dev libglfw3\n'
-                'Arch Linux\n'
-                '  sudo pacman -S glfw-x11')
-
         path.mkdir(parents=True, exist_ok=True)
 
         downloads = {
+            'Linux': {
+                'url': ('https://github.com/glfw/glfw/releases/download/3.3.8/'
+                        'glfw-3.3.8.zip'),
+                'sha256sum': ('4d025083cc4a3dd1f91ab9b9ba4f5807'
+                              '193823e565a5bcf4be202669d9911ea6'),
+            },
             'Darwin': {
-                'url': ('https://github.com/glfw/glfw/releases/download/3.3.7/'
-                        'glfw-3.3.7.bin.MACOS.zip'),
-                'sha256sum': ('e67bcb04348edf7ee83c18089ec527fb'
-                              'b2c16ecf4ea9ab74042b873492a85faa'),
+                'url': ('https://github.com/glfw/glfw/releases/download/3.3.8/'
+                        'glfw-3.3.8.bin.MACOS.zip'),
+                'sha256sum': ('dc1fc3d3e7763b9de66f7cbb86c4ba3a'
+                              '82118441a15f64045a61cfcdedda88d2'),
             },
             'Windows': {
-                'url': ('https://github.com/glfw/glfw/releases/download/3.3.7/'
-                        'glfw-3.3.7.bin.WIN64.zip'),
-                'sha256sum': ('3d4de772d3c436ae6f7cc2c1f053f97a'
-                              '1358e1be2d19dbc34882927f240599d0'),
+                'url': ('https://github.com/glfw/glfw/releases/download/3.3.8/'
+                        'glfw-3.3.8.bin.WIN64.zip'),
+                'sha256sum': ('7851c068b63c3cebf11a3b52c9e7dbdb'
+                              '6159afe32666b0aad268e4a258a9bdd1'),
             }
         }
 
@@ -65,10 +62,7 @@ class Glfw(pw_package.package_manager.Package):
         sha256sum = downloads[host_os]['sha256sum']
 
         glfw_zip = file_operations.download_to_cache(
-            url=url,
-            expected_sha256sum=sha256sum,
-            cache_directory=path,
-            downloaded_file_name='glfw-3.3.5.bin.zip')
+            url=url, expected_sha256sum=sha256sum, cache_directory=path)
 
         _extracted_files = file_operations.extract_archive(
             glfw_zip,
@@ -79,8 +73,17 @@ class Glfw(pw_package.package_manager.Package):
     def info(self, path: Path) -> Sequence[str]:
         return (
             f'{self.name} installed in: {path}',
+            '',
             "Enable by running 'gn args out' and adding this line:",
             f'  dir_pw_third_party_glfw = "{path}"',
+            '',
+            'NOTE: Installing glfw binaries on Linux is not supported.',
+            '      Please install using your package manager.',
+            '',
+            'Ubuntu/Debian:',
+            '  sudo apt install libglfw3-dev libglfw3',
+            'Arch Linux',
+            '  sudo pacman -S glfw-x11',
         )
 
 
