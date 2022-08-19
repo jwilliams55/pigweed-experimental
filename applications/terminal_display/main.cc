@@ -59,7 +59,8 @@ DemoDecoder demo_decoder = DemoDecoder();
 
 void (*write_log_to_screen)(std::string_view) = [](std::string_view log) {
   static int cursor_x = 0;
-  static int cursor_y = 232;
+  static int cursor_y =
+      log_text_area.framebuffer->height - log_text_area.current_font->height;
   log_text_area.SetCursor(cursor_x, cursor_y);
 
   for (auto c : log) {
@@ -205,6 +206,18 @@ void create_demo_log_messages() {
   PW_LOG_DEBUG("Debug output");
 }
 
+// Full resolution
+#define FRAMEBUFFER_WIDTH 320
+#define FRAMEBUFFER_HEIGHT 240
+#define FRAMEBUFFER_UPDATE_FUNCTION Update
+
+// Half resolution
+// #define FRAMEBUFFER_WIDTH 160
+// #define FRAMEBUFFER_HEIGHT 120
+// #define FRAMEBUFFER_UPDATE_FUNCTION UpdatePixelDouble
+
+uint16_t display_framebuffer_data[FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT];
+
 }  // namespace
 
 int main() {
@@ -230,10 +243,9 @@ int main() {
 
   pw::board_led::Init();
 
-  uint16_t* ifb = pw::display::GetInternalFramebuffer();
-  if (ifb != NULL) {
-    frame_buffer.SetFramebufferData(ifb, 320, 240);
-  }
+  frame_buffer.SetFramebufferData(
+      display_framebuffer_data, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+
   // Clear the framebuffer to black
   frame_buffer.SetPenColor(0);
   pw::draw::Fill(&frame_buffer);
@@ -253,7 +265,7 @@ int main() {
 
   // Touch event variables
   Vec2 screen_center =
-      Vec2(pw::display::GetWidth() / 2, pw::display::GetHeight() / 2);
+      Vec2(frame_buffer.width / 2.0, frame_buffer.height / 2.0);
   Vec2 touch_location;
   Vec2 touch_location_from_origin;
   float touch_location_angle;
@@ -263,7 +275,7 @@ int main() {
 
   draw_sprite_and_text_demo();
   // Push the frame buffer to the screen.
-  pw::display::Update(&frame_buffer);
+  pw::display::FRAMEBUFFER_UPDATE_FUNCTION(&frame_buffer);
 
   // Setup the log message button position variables.
   pw::draw::TextArea button_text_area(&frame_buffer, &pw::draw::font6x8);
@@ -299,16 +311,15 @@ int main() {
 
         // Find the angle and length of the touch location from the
         // screen_center.
-
+        //
         // touch_location_angle will fall within the range [-pi, pi]
         // Map it to [0, 2*pi] instead.
-        if (touch_location_angle < 0)
-          touch_location_angle = kTwoPi + touch_location_angle;
-        touch_location_angle = kTwoPi - touch_location_angle;
-
-        PW_LOG_DEBUG("       degrees:%f length:%f",
-                     degrees(touch_location_angle),
-                     touch_location_length);
+        // if (touch_location_angle < 0)
+        //   touch_location_angle = kTwoPi + touch_location_angle;
+        // touch_location_angle = kTwoPi - touch_location_angle;
+        // PW_LOG_DEBUG("       degrees:%f length:%f",
+        //              degrees(touch_location_angle),
+        //              touch_location_length);
 
         // If a button was just pressed, call create_demo_log_messages.
         if (button_just_pressed && touch_location.x >= button_pos_x &&
@@ -344,7 +355,7 @@ int main() {
     // Display Write Phase
     time_start_screen_spi_update = pw::spin_delay::Millis();
 
-    pw::display::Update(&frame_buffer);
+    pw::display::FRAMEBUFFER_UPDATE_FUNCTION(&frame_buffer);
 
     // End Display Write Phase
     delta_screen_spi_update =

@@ -45,8 +45,6 @@ constexpr int kDisplayWidth = 320;
 constexpr int kDisplayHeight = 240;
 constexpr int kDisplayDataSize = kDisplayWidth * kDisplayHeight;
 
-uint16_t internal_framebuffer[kDisplayDataSize];
-
 // OpenGL texture data.
 GLuint lcd_pixel_data[kDisplayDataSize];
 
@@ -95,15 +93,7 @@ void _SetTexturePixel(GLuint x, GLuint y, color_rgb565_t rgb565) {
   _SetTexturePixel(x, y, c.r, c.g, c.b, 255);
 }
 
-void UpdateLcdTexture(FramebufferRgb565* frame_buffer) {
-  // Copy frame_buffer into lcd_pixel_data
-  for (GLuint x = 0; x < kDisplayWidth; x++) {
-    for (GLuint y = 0; y < kDisplayHeight; y++) {
-      color_rgb565_t c = frame_buffer->GetPixel(x, y);
-      _SetTexturePixel(x, y, c);
-    }
-  }
-
+void UpdateLcdTexture() {
   // Set current texture
   glBindTexture(GL_TEXTURE_2D, lcd_texture);
   // Update texture
@@ -164,10 +154,8 @@ static void glfw_error_callback(int error, const char* description) {
 
 namespace pw::display {
 
-uint16_t* GetInternalFramebuffer() { return internal_framebuffer; }
-
-int GetWidth() { return kDisplayWidth; }
-int GetHeight() { return kDisplayHeight; }
+const int GetWidth() { return kDisplayWidth; }
+const int GetHeight() { return kDisplayHeight; }
 
 void Init() {
   // Setup window
@@ -229,13 +217,52 @@ void Init() {
   SetupLcdTexture(&lcd_texture);
 }
 
-void Update(pw::framebuffer::FramebufferRgb565* frame_buffer) {
+void RecreateLcdTexture() {
   if (old_lcd_texture_display_mode_nearest !=
       lcd_texture_display_mode_nearest) {
     old_lcd_texture_display_mode_nearest = lcd_texture_display_mode_nearest;
     SetupLcdTexture(&lcd_texture);
   }
-  UpdateLcdTexture(frame_buffer);
+}
+
+void Render();
+
+void UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer) {
+  RecreateLcdTexture();
+
+  // Copy frame_buffer into lcd_pixel_data
+  int basex, basey;
+  for (GLuint y = 0; y < frame_buffer->height; y++) {
+    for (GLuint x = 0; x < frame_buffer->width; x++) {
+      color_rgb565_t c = frame_buffer->GetPixel(x, y);
+      basex = x * 2;
+      basey = y * 2;
+      _SetTexturePixel(basex, basey, c);
+      _SetTexturePixel(basex + 1, basey, c);
+      _SetTexturePixel(basex, basey + 1, c);
+      _SetTexturePixel(basex + 1, basey + 1, c);
+    }
+  }
+
+  Render();
+}
+
+void Update(pw::framebuffer::FramebufferRgb565* frame_buffer) {
+  RecreateLcdTexture();
+
+  // Copy frame_buffer into lcd_pixel_data
+  for (GLuint x = 0; x < kDisplayWidth; x++) {
+    for (GLuint y = 0; y < kDisplayHeight; y++) {
+      color_rgb565_t c = frame_buffer->GetPixel(x, y);
+      _SetTexturePixel(x, y, c);
+    }
+  }
+
+  Render();
+}
+
+void Render() {
+  UpdateLcdTexture();
 
   // Poll and handle events (inputs, window resize, etc.)
   glfwPollEvents();

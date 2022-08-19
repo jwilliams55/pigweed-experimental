@@ -20,18 +20,20 @@ namespace pw::display {
 
 namespace {
 
-uint16_t internal_framebuffer[320 * 240];
+constexpr int kDisplayWidth = 320;
+constexpr int kDisplayHeight = 240;
+constexpr int kDisplayDataSize = kDisplayWidth * kDisplayHeight;
 
 }  // namespace
 
 void Init() {}
 
-int GetWidth() { return 320; }
-int GetHeight() { return 240; }
-
-uint16_t* GetInternalFramebuffer() { return internal_framebuffer; }
+const int GetWidth() { return kDisplayWidth; }
+const int GetHeight() { return kDisplayHeight; }
 
 void Update(pw::framebuffer::FramebufferRgb565* frame_buffer) {}
+
+void UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer) {}
 
 bool TouchscreenAvailable() { return false; }
 

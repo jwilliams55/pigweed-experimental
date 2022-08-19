@@ -21,13 +21,13 @@ using namespace pw::framebuffer;
 namespace pw::display {
 
 void Init();
-uint16_t* GetInternalFramebuffer();
 // TODO(tonymd): Add a DPI or physical size value.
-int GetWidth();
-int GetHeight();
+const int GetWidth();
+const int GetHeight();
 // TODO(tonymd): Add update functions for new framebuffer types or make this a
 // templated class.
 void Update(FramebufferRgb565* framebuffer);
+void UpdatePixelDouble(FramebufferRgb565* framebuffer);
 bool TouchscreenAvailable();
 bool NewTouchEvent();
 pw::coordinates::Vec3Int GetTouchPoint();

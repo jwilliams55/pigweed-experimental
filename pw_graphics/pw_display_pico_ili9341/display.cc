@@ -29,8 +29,7 @@ namespace pw::display {
 
 namespace {
 
-#define SPI_PORT spi0
-
+// Display Registers
 #define ILI9341_MADCTL 0x36
 #define MADCTL_MY 0x80
 #define MADCTL_MX 0x40
@@ -39,20 +38,21 @@ namespace {
 #define MADCTL_RGB 0x00
 #define MADCTL_BGR 0x08
 #define MADCTL_MH 0x04
-
 #define ILI9341_PIXEL_FORMAT_SET 0x3A
 
-constexpr int TFT_DC = 18;   // stm32f429i-disc1: PD13
-constexpr int TFT_CS = 5;    // stm32f429i-disc1: PC2
-constexpr int TFT_RST = 19;  // stm32f429i-disc1: NRST
-constexpr int TFT_MOSI = 3;  // stm32f429i-disc1: PF9
-constexpr int TFT_SCLK = 2;  // stm32f429i-disc1: PF7
-constexpr int TFT_MISO = 4;  // stm32f429i-disc1: PF8
+// Pico spi0 Pins
+#define SPI_PORT spi0
+constexpr int TFT_SCLK = 18;  // SPI0 SCK
+constexpr int TFT_MOSI = 19;  // SPI0 TX
+// Unused
+// const int TFT_MISO = 4;   // SPI0 RX
+constexpr int TFT_CS = 9;    // SPI0 CSn
+constexpr int TFT_DC = 10;   // GP10
+constexpr int TFT_RST = 11;  // GP11
 
 constexpr int kDisplayWidth = 320;
 constexpr int kDisplayHeight = 240;
 constexpr int kDisplayDataSize = kDisplayWidth * kDisplayHeight;
-uint16_t internal_framebuffer[kDisplayDataSize];
 
 // SPI Functions
 // TODO(tonymd): move to pw_spi
@@ -125,7 +125,8 @@ void Init() {
 
   // Init pico SPI
   printf("Actual Baudrate: %i\n", actual_baudrate);
-  gpio_set_function(TFT_MISO, GPIO_FUNC_SPI);
+  // TFT_MISO is unused:
+  // gpio_set_function(TFT_MISO, GPIO_FUNC_SPI);
   gpio_set_function(TFT_SCLK, GPIO_FUNC_SPI);
   gpio_set_function(TFT_MOSI, GPIO_FUNC_SPI);
 
@@ -136,6 +137,7 @@ void Init() {
   gpio_set_dir(TFT_CS, GPIO_OUT);
   gpio_set_dir(TFT_DC, GPIO_OUT);
   gpio_set_dir(TFT_RST, GPIO_OUT);
+
   gpio_put(TFT_CS, 1);
   gpio_put(TFT_DC, 0);
   gpio_put(TFT_RST, 0);
@@ -296,11 +298,11 @@ void Init() {
   // Column Address Set
   SPISendCommand(0x2A);
   SPISendShort(0);
-  SPISendShort(319);
+  SPISendShort(kDisplayWidth - 1);
   // Page Address Set
   SPISendCommand(0x2B);
   SPISendShort(0);
-  SPISendShort(239);
+  SPISendShort(kDisplayHeight - 1);
 
   sleep_ms(10);
 
@@ -315,13 +317,27 @@ void Init() {
   spi_set_format(SPI_PORT, 16, (spi_cpol_t)1, (spi_cpha_t)1, SPI_MSB_FIRST);
 }
 
-int GetWidth() { return kDisplayWidth; }
-int GetHeight() { return kDisplayHeight; }
+const int GetWidth() { return kDisplayWidth; }
+const int GetHeight() { return kDisplayHeight; }
 
-uint16_t* GetInternalFramebuffer() { return internal_framebuffer; }
+void UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer) {
+  uint16_t temp_row[kDisplayWidth];
+  for (int y = 0; y < frame_buffer->height; y++) {
+    // Populate this row with each pixel repeated twice
+    for (int x = 0; x < frame_buffer->width; x++) {
+      temp_row[x * 2] = frame_buffer->pixel_data[y * frame_buffer->width + x];
+      temp_row[(x * 2) + 1] =
+          frame_buffer->pixel_data[y * frame_buffer->width + x];
+    }
+    // Send this row to the display twice.
+    spi_write16_blocking(SPI_PORT, temp_row, kDisplayWidth);
+    spi_write16_blocking(SPI_PORT, temp_row, kDisplayWidth);
+  }
+}
 
 void Update(pw::framebuffer::FramebufferRgb565* frame_buffer) {
-  spi_write16_blocking(SPI_PORT, internal_framebuffer, kDisplayDataSize);
+  spi_write16_blocking(
+      SPI_PORT, (uint16_t*)frame_buffer->pixel_data, kDisplayDataSize);
 }
 
 bool TouchscreenAvailable() { return false; }

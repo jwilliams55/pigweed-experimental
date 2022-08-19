@@ -24,6 +24,7 @@
 #include "pw_framebuffer/rgb565.h"
 #include "stm32cube/stm32cube.h"
 #include "stm32f4xx_hal.h"
+#include "stm32f4xx_hal_def.h"
 #include "stm32f4xx_hal_spi.h"
 
 namespace pw::display {
@@ -53,11 +54,9 @@ SPI_HandleTypeDef hspi5;
 
 #define ILI9341_PIXEL_FORMAT_SET 0x3A
 
-constexpr int kDisplayWidth = 320;
-constexpr int kDisplayHeight = 240;
-constexpr int kDisplayDataSize = kDisplayWidth * kDisplayHeight;
-
-uint16_t internal_framebuffer[kDisplayDataSize];
+const int kDisplayWidth = 320;
+const int kDisplayHeight = 240;
+const int kDisplayDataSize = kDisplayWidth * kDisplayHeight;
 
 // SPI Functions
 // TODO(tonymd): move to pw_spi
@@ -334,11 +333,11 @@ void Init() {
   // Column Address Set
   SPISendCommand(0x2A);
   SPISendShort(0);
-  SPISendShort(319);
+  SPISendShort(kDisplayWidth - 1);
   // Page Address Set
   SPISendCommand(0x2B);
   SPISendShort(0);
-  SPISendShort(239);
+  SPISendShort(kDisplayHeight - 1);
   SPISendCommand(0x2C);
 
   ChipSelectEnable();
@@ -360,20 +359,37 @@ void Init() {
   HAL_SPI_Init(&hspi5);
 }
 
-int GetWidth() { return kDisplayWidth; }
-int GetHeight() { return kDisplayHeight; }
+const int GetWidth() { return kDisplayWidth; }
+const int GetHeight() { return kDisplayHeight; }
 
-uint16_t* GetInternalFramebuffer() { return internal_framebuffer; }
+void UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer) {
+  uint16_t temp_row[kDisplayWidth];
+  for (int y = 0; y < frame_buffer->height; y++) {
+    // Populate this row with each pixel repeated twice
+    for (int x = 0; x < frame_buffer->width; x++) {
+      temp_row[x * 2] = frame_buffer->pixel_data[y * frame_buffer->width + x];
+      temp_row[(x * 2) + 1] =
+          frame_buffer->pixel_data[y * frame_buffer->width + x];
+    }
+    // Send this row to the display twice.
+    HAL_SPI_Transmit(HSPI_INSTANCE,
+                     (uint8_t*)temp_row,
+                     (uint16_t)kDisplayWidth,
+                     HAL_MAX_DELAY);
+    HAL_SPI_Transmit(HSPI_INSTANCE,
+                     (uint8_t*)temp_row,
+                     (uint16_t)kDisplayWidth,
+                     HAL_MAX_DELAY);
+  }
+}
 
 void Update(pw::framebuffer::FramebufferRgb565* frame_buffer) {
   // Send 10 rows at a time
   for (int i = 0; i < 24; i++) {
     HAL_SPI_Transmit(HSPI_INSTANCE,
-                     (uint8_t*)&internal_framebuffer[320 * (10 * i)],
+                     (uint8_t*)&frame_buffer->pixel_data[320 * (10 * i)],
                      320 * 10,
-                     // TODO(tonymd): Figure out what the timeout should be.
-                     // 100 here works for 10 rows of 320 pixels.
-                     100);
+                     HAL_MAX_DELAY);
   }
 }
 

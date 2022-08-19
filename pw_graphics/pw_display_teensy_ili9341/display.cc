@@ -39,30 +39,27 @@ constexpr int kDisplayHeight = 240;
 constexpr int kDisplayDataSize = kDisplayWidth * kDisplayHeight;
 
 ILI9341_t3n tft = ILI9341_t3n(TFT_CS, TFT_DC, TFT_RST);
-uint16_t internal_framebuffer[kDisplayDataSize];
 
 }  // namespace
 
-uint16_t* GetInternalFramebuffer() { return internal_framebuffer; }
-
 void Init() {
-  for (int i = 0; i < 320 * 240; i++) {
-    internal_framebuffer[i] = 0x0726;
-  }
-  // SPI Clock: 40MHz writes & 20MHz reads.
-  // Lower write speed to 30MHz if the display doesn't work.
+  // SPI Clock: 30MHz writes & 20MHz reads.
+  // Lower write speed if the display doesn't work.
   tft.begin(30000000u, 2000000);
-  tft.setFrameBuffer(internal_framebuffer);
   tft.useFrameBuffer(1);
   tft.setRotation(3);
   tft.setCursor(0, 0);
-  tft.updateScreen();
 }
 
-int GetWidth() { return tft.width(); }
-int GetHeight() { return tft.height(); }
+const int GetWidth() { return tft.width(); }
+const int GetHeight() { return tft.height(); }
+
+void UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer) {
+  // Not implemented.
+}
 
 void Update(pw::framebuffer::FramebufferRgb565* frame_buffer) {
+  tft.setFrameBuffer(frame_buffer->pixel_data);
   tft.updateScreen();
 }
 

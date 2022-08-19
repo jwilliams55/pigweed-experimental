@@ -47,7 +47,8 @@ pw_executable("terminal_demo") {
   ]
   remove_configs = [ "$dir_pw_build:strict_warnings" ]
 
-  if (pw_build_EXECUTABLE_TARGET_TYPE == "arduino_executable") {
+  if (pw_build_EXECUTABLE_TARGET_TYPE == "arduino_executable" ||
+      pw_build_EXECUTABLE_TARGET_TYPE == "pico_executable") {
     ldflags = [ "-Wl,--print-memory-usage" ]
   }
 }
