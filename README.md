@@ -74,7 +74,12 @@ ninja -C out
 out/host_debug/obj/applications/terminal_display/bin/terminal_demo
 ```
 
-#### **[Raspberry Pi Pico](https://www.raspberrypi.com/products/raspberry-pi-pico/) Connected to an [ILI9341](https://www.adafruit.com/?q=ili9341&sort=BestMatch)**
+#### **[Raspberry Pi Pico](https://www.raspberrypi.com/products/raspberry-pi-pico/) Connected to an external SPI display**
+
+Working displays:
+
+- [ILI9341](https://www.adafruit.com/?q=ili9341&sort=BestMatch)
+- [Pico Display Pack 2.0 (ST7789)](https://shop.pimoroni.com/products/pico-display-pack-2-0)
 
 **Compile:**
 

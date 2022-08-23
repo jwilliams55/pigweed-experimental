@@ -29,7 +29,7 @@ namespace pw::display {
 
 namespace {
 
-// Display Registers
+// ILI9341 Display Registers
 #define ILI9341_MADCTL 0x36
 #define MADCTL_MY 0x80
 #define MADCTL_MX 0x40
