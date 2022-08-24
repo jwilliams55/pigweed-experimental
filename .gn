@@ -37,4 +37,7 @@ default_args = {
     # Experimental specific requirements
     "//tools/requirements.txt",
   ]
+
+  # Default gn build virtualenv target.
+  pw_build_PYTHON_BUILD_VENV = "//:pw_experimental_build_venv"
 }

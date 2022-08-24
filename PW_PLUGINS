@@ -13,5 +13,5 @@
 # Pigweed's presubmit check script
 presubmit pigweed_experimental_tools.presubmit_checks main
 heap-viewer pw_allocator.heap_viewer main
-rpc pw_hdlc.rpc_console main
+rpc pw_system.console main
 package pigweed_experimental_tools.experimental_packages main
