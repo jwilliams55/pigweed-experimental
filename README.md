@@ -64,6 +64,7 @@ openocd -f third_party/pigweed/targets/stm32f429i_disc1/py/stm32f429i_disc1_util
 ```sh
 gn gen out --export-compile-commands --args="
   dir_pw_third_party_imgui=\"$PW_PROJECT_ROOT/environment/packages/imgui\"
+  dir_pw_third_party_glfw=\"$PW_PROJECT_ROOT/environment/packages/glfw\"
 "
 ninja -C out
 ```
