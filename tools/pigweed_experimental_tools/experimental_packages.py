@@ -33,6 +33,7 @@ from pw_package.packages import smartfusion_mss  # pylint: disable=unused-import
 from pw_package.packages import stm32cube  # pylint: disable=unused-import
 from pigweed_experimental_tools.packages import imgui  # pylint: disable=unused-import
 from pigweed_experimental_tools.packages import glfw  # pylint: disable=unused-import
+from pigweed_experimental_tools.packages import pico_tool  # pylint: disable=unused-import
 
 
 def initialize():

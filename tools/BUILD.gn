@@ -28,6 +28,7 @@ pw_python_package("tools") {
     "pigweed_experimental_tools/packages/__init__.py",
     "pigweed_experimental_tools/packages/glfw.py",
     "pigweed_experimental_tools/packages/imgui.py",
+    "pigweed_experimental_tools/packages/pico_tool.py",
     "pigweed_experimental_tools/presubmit_checks.py",
   ]
   python_deps = [
