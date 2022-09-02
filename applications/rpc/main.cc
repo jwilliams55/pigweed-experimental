@@ -129,7 +129,7 @@ void ParseByteFromUartAndHandleRpcs() {
 
   // Packet was validated and correct (CRC, etc); so send it to the RPC server.
   // The RPC server may send response packets before returning from this call.
-  server.ProcessPacket(hdlc_frame.data(), hdlc_channel_output);
+  server.ProcessPacket(hdlc_frame.data());
 }
 
 // TODO FOR WORKSHOP: Add an RPC to change the blink time.
