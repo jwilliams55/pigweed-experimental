@@ -13,21 +13,72 @@
 # the License.
 """Install and check status of PicoTool."""
 
+from contextlib import contextmanager
+import logging
+import os
 import pathlib
+from pathlib import Path
+import shlex
+import shutil
+import subprocess
 from typing import Sequence
 
 import pw_package.git_repo
 import pw_package.package_manager
 
+_LOG = logging.getLogger(__package__)
 
-class PicoTool(pw_package.git_repo.GitRepo):
+
+@contextmanager
+def change_working_dir(directory: Path):
+    original_dir = Path.cwd()
+    try:
+        os.chdir(directory)
+        yield directory
+    finally:
+        os.chdir(original_dir)
+
+
+class PicoTool(pw_package.package_manager.Package):
     """Install and check status of PicoTool."""
     def __init__(self, *args, **kwargs):
-        super().__init__(*args,
-                         name='picotool',
-                         url='https://github.com/raspberrypi/picotool.git',
-                         commit='03f28122cc170535f35e5bf8fa37be024489f5eb',
-                         **kwargs)
+        super().__init__(*args, name='picotool', **kwargs)
+
+        self._pico_tool_repo = pw_package.git_repo.GitRepo(
+            name='picotool',
+            url='https://github.com/raspberrypi/picotool.git',
+            commit='03f28122cc170535f35e5bf8fa37be024489f5eb',
+        )
+
+    def install(self, path: Path) -> None:
+        self._pico_tool_repo.install(path)
+
+        env = os.environ.copy()
+        env['PICO_SDK_PATH'] = str(path.parent.absolute() / 'pico_sdk')
+        bootstrap_env_path = Path(env.get('_PW_ACTUAL_ENVIRONMENT_ROOT', ''))
+
+        commands = [
+            'cmake -S ./ -B out/ -G Ninja',
+            'ninja -C out',
+        ]
+
+        with change_working_dir(path) as _picotool_repo:
+            for command in commands:
+                _LOG.info('==> %s', command)
+                subprocess.run(shlex.split(command),
+                               env=env,
+                               capture_output=True,
+                               check=True)
+
+        picotool_bin = path / 'out/picotool'
+        _LOG.info('Done! picotool binary located at:')
+        _LOG.info(picotool_bin)
+
+        if bootstrap_env_path.is_dir() and picotool_bin.is_file():
+            bin_path = bootstrap_env_path / 'cipd/packages/pigweed/bin'
+            destination_path = bin_path / picotool_bin.name
+            _LOG.info('Copy %s -> %s', picotool_bin, destination_path)
+            shutil.copyfile(picotool_bin, destination_path)
 
     def info(self, path: pathlib.Path) -> Sequence[str]:
         return (
