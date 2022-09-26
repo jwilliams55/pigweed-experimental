@@ -135,8 +135,18 @@ def run(install: bool, exclude: list, **presubmit_args) -> int:
 
     # Install the presubmit Git pre-push hook, if requested.
     if install:
-        install_hook.install_hook(__file__, 'pre-push', ['--base', 'HEAD~'],
-                                  git_repo.root())
+        install_hook.install_git_hook(
+            'pre-push',
+            [
+                'python',
+                '-m',
+                'pigweed_experimental_tools.presubmit_checks',
+                '--base',
+                'origin/main..HEAD',
+                '--program',
+                'quick',
+            ],
+        )
         return 0
 
     exclude.extend(PATH_EXCLUSIONS)
