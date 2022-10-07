@@ -32,6 +32,9 @@ declare_args() {
       get_path_info("//pw_board_led_stm32cube", "abspath")
   dir_pw_color = get_path_info("//pw_graphics/pw_color", "abspath")
   dir_pw_coordinates = get_path_info("//pw_graphics/pw_coordinates", "abspath")
+  dir_pw_digital_io_pico = get_path_info("//pw_digital_io_pico", "abspath")
+  dir_pw_digital_io_stm32cube =
+      get_path_info("//pw_digital_io_stm32cube", "abspath")
   dir_pw_display = get_path_info("//pw_graphics/pw_display", "abspath")
   dir_pw_display_host_imgui =
       get_path_info("//pw_graphics/pw_display_host_imgui", "abspath")
