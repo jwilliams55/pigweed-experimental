@@ -52,6 +52,9 @@ declare_args() {
       get_path_info("//pw_graphics/pw_display_teensy_ili9341", "abspath")
   dir_pw_draw = get_path_info("//pw_graphics/pw_draw", "abspath")
   dir_pw_framebuffer = get_path_info("//pw_graphics/pw_framebuffer", "abspath")
+  dir_pw_spi_pico = get_path_info("//pw_spi_pico", "abspath")
+  dir_pw_spi_stm32f429i_disc1_stm32cube =
+      get_path_info("//pw_spi_stm32f429i_disc1_stm32cube", "abspath")
   dir_pw_spin_delay = get_path_info("//pw_spin_delay", "abspath")
   dir_pw_spin_delay_arduino =
       get_path_info("//pw_spin_delay_arduino", "abspath")
