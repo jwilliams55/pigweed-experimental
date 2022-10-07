@@ -51,8 +51,8 @@ void Init() {
   tft.setCursor(0, 0);
 }
 
-const int GetWidth() { return tft.width(); }
-const int GetHeight() { return tft.height(); }
+int GetWidth() { return tft.width(); }
+int GetHeight() { return tft.height(); }
 
 void UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer) {
   // Not implemented.

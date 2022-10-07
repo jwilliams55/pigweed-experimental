@@ -12,24 +12,33 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-import("//build_overrides/pi_pico.gni")
 import("//build_overrides/pigweed.gni")
 
 import("$dir_pw_build/target_types.gni")
+import("$dir_pw_docgen/docs.gni")
+import("$dir_pw_unit_test/test.gni")
 
-pw_source_set("pw_display_pico_ili9341") {
-  deps = [
-    "$PICO_ROOT/src/common/pico_base",
-    "$PICO_ROOT/src/common/pico_stdlib",
-    "$PICO_ROOT/src/rp2_common/hardware_spi",
-    "$dir_pw_digital_io_pico",
-    "$dir_pw_display:pw_display.facade",
-    "$dir_pw_display_driver_ili9341",
-    "$dir_pw_log",
-    "$dir_pw_spi_pico",
-    "$dir_pw_sync:borrow",
-    "$dir_pw_sync:mutex",
+config("public_include_path") {
+  include_dirs = [ "public" ]
+  visibility = [ ":*" ]
+}
+
+group("pw_display_driver") {
+  deps = [ ":display_driver" ]
+}
+
+pw_source_set("display_driver") {
+  public_configs = [ ":public_include_path" ]
+  public = [ "public/pw_display_driver/display_driver.h" ]
+  public_deps = [
+    "$dir_pw_framebuffer",
+    "$dir_pw_status",
   ]
-  sources = [ "display.cc" ]
-  remove_configs = [ "$dir_pw_build:strict_warnings" ]
+}
+
+pw_test("display_driver_test") {
+}
+
+pw_doc_group("docs") {
+  sources = [ "docs.rst" ]
 }

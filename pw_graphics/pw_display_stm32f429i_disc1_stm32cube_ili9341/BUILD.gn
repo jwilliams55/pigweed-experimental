@@ -18,9 +18,14 @@ import("$dir_pw_build/target_types.gni")
 
 pw_source_set("pw_display_stm32f429i_disc1_stm32cube_ili9341") {
   deps = [
+    "$dir_pw_digital_io",
+    "$dir_pw_digital_io_stm32cube",
     "$dir_pw_display:pw_display.facade",
+    "$dir_pw_display_driver_ili9341",
+    "$dir_pw_spi_stm32f429i_disc1_stm32cube",
+    "$dir_pw_sync:borrow",
+    "$dir_pw_sync:mutex",
     "$dir_pw_third_party/stm32cube",
   ]
   sources = [ "display.cc" ]
-  remove_configs = [ "$dir_pw_build:strict_warnings" ]
 }

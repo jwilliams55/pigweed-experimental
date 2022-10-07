@@ -43,6 +43,9 @@ _target_config = {
   pw_assert_BACKEND = dir_pw_assert_basic
   pw_boot_BACKEND = "$dir_pw_boot_cortex_m:armv7m"
 
+  # TODO(cmumford): Review backend - adding to allow compile.
+  pw_sync_MUTEX_BACKEND = "$dir_pw_sync_baremetal:mutex"
+
   ### pw_cpu_exception not yet used
   # pw_cpu_exception_ENTRY_BACKEND =
   #     "$dir_pw_cpu_exception_cortex_m:cpu_exception_armv7m"

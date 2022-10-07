@@ -279,8 +279,8 @@ void Init() {
   sleep_ms(50);
 }
 
-const int GetWidth() { return kDisplayWidth; }
-const int GetHeight() { return kDisplayHeight; }
+int GetWidth() { return kDisplayWidth; }
+int GetHeight() { return kDisplayHeight; }
 
 void SendDisplayWriteCommand() {
   uint8_t command = ST7789_RAMWR;

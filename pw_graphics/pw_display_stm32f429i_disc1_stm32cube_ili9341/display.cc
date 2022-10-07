@@ -14,383 +14,140 @@
 
 #include "pw_display/display.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-
-#include <cinttypes>
 #include <cstdint>
 
 #include "pw_color/color.h"
+#include "pw_digital_io_stm32cube/digital_io.h"
+#include "pw_display_driver_ili9341/display_driver.h"
 #include "pw_framebuffer/rgb565.h"
+#include "pw_spi_stm32f429i_disc1_stm32cube/chip_selector.h"
+#include "pw_spi_stm32f429i_disc1_stm32cube/initiator.h"
+#include "pw_sync/borrow.h"
+#include "pw_sync/mutex.h"
 #include "stm32cube/stm32cube.h"
 #include "stm32f4xx_hal.h"
-#include "stm32f4xx_hal_def.h"
 #include "stm32f4xx_hal_spi.h"
 
-namespace pw::display {
+using pw::display_driver::DisplayDriverILI9341;
 
+namespace pw::display {
 namespace {
 
-SPI_HandleTypeDef hspi5;
-
-#define HSPI_INSTANCE &hspi5
-
-// CHIP SELECT PIN AND PORT
+// CHIP SELECT PORT AND PIN.
 #define LCD_CS_PORT GPIOC
 #define LCD_CS_PIN GPIO_PIN_2
 
-// DATA COMMAND PIN AND PORT
+// DATA/COMMAND PORT AND PIN.
 #define LCD_DC_PORT GPIOD
 #define LCD_DC_PIN GPIO_PIN_13
 
-#define ILI9341_MADCTL 0x36
-#define MADCTL_MY 0x80
-#define MADCTL_MX 0x40
-#define MADCTL_MV 0x20
-#define MADCTL_ML 0x10
-#define MADCTL_RGB 0x00
-#define MADCTL_BGR 0x08
-#define MADCTL_MH 0x04
+constexpr int kDisplayWidth = 320;
+constexpr int kDisplayHeight = 240;
+constexpr int kNumDisplayPixels = kDisplayWidth * kDisplayHeight;
 
-#define ILI9341_PIXEL_FORMAT_SET 0x3A
+constexpr pw::spi::Config kSpiConfig{
+    .polarity = pw::spi::ClockPolarity::kActiveHigh,
+    .phase = pw::spi::ClockPhase::kFallingEdge,
+    .bits_per_word = pw::spi::BitsPerWord(8),
+    .bit_order = pw::spi::BitOrder::kMsbFirst,
+};
 
-const int kDisplayWidth = 320;
-const int kDisplayHeight = 240;
-const int kDisplayDataSize = kDisplayWidth * kDisplayHeight;
+class InstanceData {
+ public:
+  InstanceData()
+      : chip_selector_gpio_(LCD_CS_PORT, LCD_CS_PIN),
+        data_cmd_gpio_(LCD_DC_PORT, LCD_DC_PIN),
+        spi_chip_selector_(chip_selector_gpio_),
+        borrowable_spi_initiator_(spi_initiator_, spi_initiator_mutex_),
+        spi_device_(borrowable_spi_initiator_, kSpiConfig, spi_chip_selector_),
+        driver_config_{
+            .data_cmd_gpio = data_cmd_gpio_,
+            .reset_gpio = nullptr,
+            .spi_device = spi_device_,
+        },
+        display_driver_(driver_config_) {}
 
-// SPI Functions
-// TODO(tonymd): move to pw_spi
-static inline void ChipSelectEnable() {
-  HAL_GPIO_WritePin(LCD_CS_PORT, LCD_CS_PIN, GPIO_PIN_RESET);
-}
+  void Init() {
+    InitGPIO();
+    InitSPI();
+    InitDisplayDriver();
+  }
 
-static inline void ChipSelectDisable() {
-  HAL_GPIO_WritePin(LCD_CS_PORT, LCD_CS_PIN, GPIO_PIN_SET);
-}
+  void Update(pw::framebuffer::FramebufferRgb565* frame_buffer) {
+    display_driver_.Update(frame_buffer);
+  }
 
-static inline void DataCommandEnable() {
-  HAL_GPIO_WritePin(LCD_DC_PORT, LCD_DC_PIN, GPIO_PIN_RESET);
-}
+  void UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer) {
+    display_driver_.UpdatePixelDouble(frame_buffer);
+  }
 
-static inline void DataCommandDisable() {
-  HAL_GPIO_WritePin(LCD_DC_PORT, LCD_DC_PIN, GPIO_PIN_SET);
-}
+ private:
+  void InitGPIO() {
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_GPIOC_CLK_ENABLE();
+    __HAL_RCC_GPIOD_CLK_ENABLE();
+    __HAL_RCC_GPIOE_CLK_ENABLE();
+    __HAL_RCC_GPIOF_CLK_ENABLE();
+    __HAL_RCC_GPIOG_CLK_ENABLE();
+    __HAL_RCC_GPIOH_CLK_ENABLE();
 
-static void inline SPISendByte(uint8_t data) {
-  ChipSelectEnable();
-  DataCommandDisable();
-  HAL_SPI_Transmit(HSPI_INSTANCE, &data, 1, 1);
-  ChipSelectDisable();
-}
+    chip_selector_gpio_.Enable();
+    data_cmd_gpio_.Enable();
+  }
 
-static void inline SPISendShort(uint16_t data) {
-  ChipSelectEnable();
-  DataCommandDisable();
+  void InitSPI() {
+    __HAL_RCC_SPI5_CLK_ENABLE();
 
-  uint8_t shortBuffer[2];
+    // SPI5 GPIO Configuration:
+    // PF7 SPI5_SCK
+    // PF8 SPI5_MISO
+    // PF9 SPI5_MOSI
+    GPIO_InitTypeDef spi_pin_config = {
+        .Pin = GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9,
+        .Mode = GPIO_MODE_AF_PP,
+        .Pull = GPIO_NOPULL,
+        .Speed = GPIO_SPEED_FREQ_VERY_HIGH,
+        .Alternate = GPIO_AF5_SPI5,
+    };
+    HAL_GPIO_Init(GPIOF, &spi_pin_config);
+  }
 
-  shortBuffer[0] = (uint8_t)(data >> 8);
-  shortBuffer[1] = (uint8_t)data;
+  void InitDisplayDriver() {
+    display_driver_.Init();
+    // From hereafter only display pixel updates are made, so switch to 16-bit
+    // mode which is expected by DisplayDriver::Update();
+    // TODO(b/251033990): Switch to pw_spi way to change word size.
+    spi_initiator_.SetOverrideBitsPerWord(pw::spi::BitsPerWord(16));
+  }
 
-  HAL_SPI_Transmit(HSPI_INSTANCE, shortBuffer, 2, 1);
+  pw::digital_io::Stm32CubeDigitalOut chip_selector_gpio_;
+  pw::digital_io::Stm32CubeDigitalOut data_cmd_gpio_;
+  pw::spi::Stm32CubeChipSelector spi_chip_selector_;
+  pw::spi::Stm32CubeInitiator spi_initiator_;
+  pw::sync::VirtualMutex spi_initiator_mutex_;
+  pw::sync::Borrowable<pw::spi::Initiator> borrowable_spi_initiator_;
+  pw::spi::Device spi_device_;
+  DisplayDriverILI9341::Config driver_config_;
+  DisplayDriverILI9341 display_driver_;
+};  // namespace
 
-  ChipSelectDisable();
-}
-
-static void inline SPISendCommand(uint8_t command) {
-  // set data/command to command mode (low).
-  DataCommandEnable();
-
-  ChipSelectEnable();
-
-  // send the command to the display.
-  HAL_SPI_Transmit(HSPI_INSTANCE, &command, 1, 1);
-
-  // put the display back into data mode (high).
-  DataCommandDisable();
-
-  ChipSelectDisable();
-}
-
-void MX_GPIO_Init(void) {
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-
-  // GPIO Ports Clock Enable
-  __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOF_CLK_ENABLE();
-  __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
-  __HAL_RCC_GPIOG_CLK_ENABLE();
-  __HAL_RCC_GPIOE_CLK_ENABLE();
-  __HAL_RCC_GPIOD_CLK_ENABLE();
-
-  HAL_GPIO_WritePin(LCD_CS_PORT, LCD_CS_PIN, GPIO_PIN_RESET);
-
-  GPIO_InitStruct.Pin = LCD_CS_PIN;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LCD_CS_PORT, &GPIO_InitStruct);
-
-  HAL_GPIO_WritePin(LCD_DC_PORT, LCD_DC_PIN, GPIO_PIN_RESET);
-
-  GPIO_InitStruct.Pin = LCD_DC_PIN;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LCD_DC_PORT, &GPIO_InitStruct);
-
-  // Reset pin not connected
-
-  __HAL_RCC_SPI5_CLK_ENABLE();
-
-  // SPI5 GPIO Configuration:
-  // PF7 SPI5_SCK
-  // PF8 SPI5_MISO
-  // PF9 SPI5_MOSI
-  GPIO_InitStruct.Pin = GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-  GPIO_InitStruct.Alternate = GPIO_AF5_SPI5;
-  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
-}
-
-void MX_SPI5_Init(void) {
-  hspi5.Instance = SPI5;
-  hspi5.Init.Mode = SPI_MODE_MASTER;
-  hspi5.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi5.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi5.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi5.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi5.Init.NSS = SPI_NSS_SOFT;
-  hspi5.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
-  hspi5.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi5.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi5.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi5.Init.CRCPolynomial = 7;
-  HAL_SPI_Init(&hspi5);
-}
+InstanceData s_instance_data;
 
 }  // namespace
 
-void Init() {
-  MX_GPIO_Init();
-  MX_SPI5_Init();
-  // CS OFF
-  HAL_GPIO_WritePin(LCD_CS_PORT, LCD_CS_PIN, GPIO_PIN_RESET);
+void Init() { s_instance_data.Init(); }
 
-  // Init Display
-  ChipSelectEnable();
+int GetWidth() { return kDisplayWidth; }
 
-  // ILI9341 Init Sequence:
-
-  // ?
-  SPISendCommand(0xEF);
-  SPISendByte(0x03);
-  SPISendByte(0x80);
-  SPISendByte(0x02);
-
-  // ?
-  SPISendCommand(0xCF);
-  SPISendByte(0x00);
-  SPISendByte(0xC1);
-  SPISendByte(0x30);
-
-  // ?
-  SPISendCommand(0xED);
-  SPISendByte(0x64);
-  SPISendByte(0x03);
-  SPISendByte(0x12);
-  SPISendByte(0x81);
-
-  // ?
-  SPISendCommand(0xE8);
-  SPISendByte(0x85);
-  SPISendByte(0x00);
-  SPISendByte(0x78);
-
-  // ?
-  SPISendCommand(0xCB);
-  SPISendByte(0x39);
-  SPISendByte(0x2C);
-  SPISendByte(0x00);
-  SPISendByte(0x34);
-  SPISendByte(0x02);
-
-  // ?
-  SPISendCommand(0xF7);
-  SPISendByte(0x20);
-
-  // ?
-  SPISendCommand(0xEA);
-  SPISendByte(0x00);
-  SPISendByte(0x00);
-
-  // Power control
-  SPISendCommand(0xC0);
-  SPISendByte(0x23);
-
-  // Power control
-  SPISendCommand(0xC1);
-  SPISendByte(0x10);
-
-  // VCM control
-  SPISendCommand(0xC5);
-  SPISendByte(0x3e);
-  SPISendByte(0x28);
-
-  // VCM control
-  SPISendCommand(0xC7);
-  SPISendByte(0x86);
-
-  SPISendCommand(ILI9341_MADCTL);
-  // Rotation
-  // SPISendByte(MADCTL_MX | MADCTL_BGR); // 0
-  // SPISendByte(MADCTL_MV | MADCTL_BGR); // 1 landscape
-  // SPISendByte(MADCTL_MY | MADCTL_BGR); // 2
-  SPISendByte(MADCTL_MX | MADCTL_MY | MADCTL_MV | MADCTL_BGR);  // 3 landscape
-
-  SPISendCommand(ILI9341_PIXEL_FORMAT_SET);
-  SPISendByte(0x55);  // 16 bits / pixel
-  // SPISendByte(0x36);  // 18 bits / pixel
-
-  // Frame Control (Normal Mode)
-  SPISendCommand(0xB1);
-  SPISendByte(0x00);  // division ratio
-  SPISendByte(0x1F);  // 61 Hz
-  // SPISendByte(0x1B);  // 70 Hz - default
-  // SPISendByte(0x18);  // 79 Hz
-  // SPISendByte(0x10);  // 119 Hz
-
-  // Display Function Control
-  SPISendCommand(0xB6);
-  SPISendByte(0x08);
-  SPISendByte(0x82);
-  SPISendByte(0x27);
-
-  // Gamma Function Disable?
-  SPISendCommand(0xF2);
-  SPISendByte(0x00);
-
-  // Gamma Set
-  SPISendCommand(0x26);
-  SPISendByte(0x01);
-
-  // Positive Gamma Correction
-  SPISendCommand(0xE0);
-  SPISendByte(0x0F);
-  SPISendByte(0x31);
-  SPISendByte(0x2B);
-  SPISendByte(0x0C);
-  SPISendByte(0x0E);
-  SPISendByte(0x08);
-  SPISendByte(0x4E);
-  SPISendByte(0xF1);
-  SPISendByte(0x37);
-  SPISendByte(0x07);
-  SPISendByte(0x10);
-  SPISendByte(0x03);
-  SPISendByte(0x0E);
-  SPISendByte(0x09);
-  SPISendByte(0x00);
-
-  // Negative Gamma Correction
-  SPISendCommand(0xE1);
-  SPISendByte(0x00);
-  SPISendByte(0x0E);
-  SPISendByte(0x14);
-  SPISendByte(0x03);
-  SPISendByte(0x11);
-  SPISendByte(0x07);
-  SPISendByte(0x31);
-  SPISendByte(0xC1);
-  SPISendByte(0x48);
-  SPISendByte(0x08);
-  SPISendByte(0x0F);
-  SPISendByte(0x0C);
-  SPISendByte(0x31);
-  SPISendByte(0x36);
-  SPISendByte(0x0F);
-
-  // Exit Sleep
-  SPISendCommand(0x11);
-
-  HAL_Delay(100);
-
-  // Display On
-  SPISendCommand(0x29);
-
-  HAL_Delay(100);
-
-  // Normal display mode on
-  SPISendCommand(0x13);
-
-  // Setup drawing full framebuffers
-
-  // Landscape drawing
-  // Column Address Set
-  SPISendCommand(0x2A);
-  SPISendShort(0);
-  SPISendShort(kDisplayWidth - 1);
-  // Page Address Set
-  SPISendCommand(0x2B);
-  SPISendShort(0);
-  SPISendShort(kDisplayHeight - 1);
-  SPISendCommand(0x2C);
-
-  ChipSelectEnable();
-  DataCommandDisable();
-
-  // SPI writes from here out use 16 data bits (for drawing the framebuffer).
-  hspi5.Instance = SPI5;
-  hspi5.Init.Mode = SPI_MODE_MASTER;
-  hspi5.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi5.Init.DataSize = SPI_DATASIZE_16BIT;
-  hspi5.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi5.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi5.Init.NSS = SPI_NSS_SOFT;
-  hspi5.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
-  hspi5.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi5.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi5.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi5.Init.CRCPolynomial = 7;
-  HAL_SPI_Init(&hspi5);
-}
-
-const int GetWidth() { return kDisplayWidth; }
-const int GetHeight() { return kDisplayHeight; }
-
-void UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer) {
-  uint16_t temp_row[kDisplayWidth];
-  for (int y = 0; y < frame_buffer->height; y++) {
-    // Populate this row with each pixel repeated twice
-    for (int x = 0; x < frame_buffer->width; x++) {
-      temp_row[x * 2] = frame_buffer->pixel_data[y * frame_buffer->width + x];
-      temp_row[(x * 2) + 1] =
-          frame_buffer->pixel_data[y * frame_buffer->width + x];
-    }
-    // Send this row to the display twice.
-    HAL_SPI_Transmit(HSPI_INSTANCE,
-                     (uint8_t*)temp_row,
-                     (uint16_t)kDisplayWidth,
-                     HAL_MAX_DELAY);
-    HAL_SPI_Transmit(HSPI_INSTANCE,
-                     (uint8_t*)temp_row,
-                     (uint16_t)kDisplayWidth,
-                     HAL_MAX_DELAY);
-  }
-}
+int GetHeight() { return kDisplayHeight; }
 
 void Update(pw::framebuffer::FramebufferRgb565* frame_buffer) {
-  // Send 10 rows at a time
-  for (int i = 0; i < 24; i++) {
-    HAL_SPI_Transmit(HSPI_INSTANCE,
-                     (uint8_t*)&frame_buffer->pixel_data[320 * (10 * i)],
-                     320 * 10,
-                     HAL_MAX_DELAY);
-  }
+  s_instance_data.Update(frame_buffer);
+}
+
+void UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer) {
+  s_instance_data.UpdatePixelDouble(frame_buffer);
 }
 
 bool TouchscreenAvailable() { return false; }
@@ -398,11 +155,7 @@ bool TouchscreenAvailable() { return false; }
 bool NewTouchEvent() { return false; }
 
 pw::coordinates::Vec3Int GetTouchPoint() {
-  pw::coordinates::Vec3Int point;
-  point.x = 0;
-  point.y = 0;
-  point.z = 0;
-  return point;
+  return pw::coordinates::Vec3Int{0, 0, 0};
 }
 
 }  // namespace pw::display

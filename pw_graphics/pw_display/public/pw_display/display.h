@@ -22,8 +22,8 @@ namespace pw::display {
 
 void Init();
 // TODO(tonymd): Add a DPI or physical size value.
-const int GetWidth();
-const int GetHeight();
+int GetWidth();
+int GetHeight();
 // TODO(tonymd): Add update functions for new framebuffer types or make this a
 // templated class.
 void Update(FramebufferRgb565* framebuffer);

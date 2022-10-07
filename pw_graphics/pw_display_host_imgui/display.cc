@@ -154,8 +154,8 @@ static void glfw_error_callback(int error, const char* description) {
 
 namespace pw::display {
 
-const int GetWidth() { return kDisplayWidth; }
-const int GetHeight() { return kDisplayHeight; }
+int GetWidth() { return kDisplayWidth; }
+int GetHeight() { return kDisplayHeight; }
 
 void Init() {
   // Setup window

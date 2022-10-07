@@ -28,8 +28,8 @@ constexpr int kDisplayDataSize = kDisplayWidth * kDisplayHeight;
 
 void Init() {}
 
-const int GetWidth() { return kDisplayWidth; }
-const int GetHeight() { return kDisplayHeight; }
+int GetWidth() { return kDisplayWidth; }
+int GetHeight() { return kDisplayHeight; }
 
 void Update(pw::framebuffer::FramebufferRgb565* frame_buffer) {}
 
