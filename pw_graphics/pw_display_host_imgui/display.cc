@@ -61,6 +61,7 @@ bool old_lcd_texture_display_mode_nearest = true;
 bool left_mouse_pressed = false;
 int texture_mouse_x = 0;
 int texture_mouse_y = 0;
+uint16_t framebuffer_data[kDisplayDataSize];
 
 void CleanupAndExit() {
   ImGui_ImplOpenGL3_Shutdown();
@@ -232,8 +233,8 @@ void UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer) {
 
   // Copy frame_buffer into lcd_pixel_data
   int basex, basey;
-  for (GLuint y = 0; y < frame_buffer->height; y++) {
-    for (GLuint x = 0; x < frame_buffer->width; x++) {
+  for (GLuint y = 0; y < frame_buffer->GetHeight(); y++) {
+    for (GLuint x = 0; x < frame_buffer->GetWidth(); x++) {
       color_rgb565_t c = frame_buffer->GetPixel(x, y);
       basex = x * 2;
       basey = y * 2;
@@ -378,6 +379,12 @@ pw::coordinates::Vec3Int GetTouchPoint() {
     point.z = 1;
   }
   return point;
+}
+
+Status InitFramebuffer(FramebufferRgb565* framebuffer) {
+  framebuffer->SetFramebufferData(
+      framebuffer_data, kDisplayWidth, kDisplayHeight);
+  return OkStatus();
 }
 
 }  // namespace pw::display

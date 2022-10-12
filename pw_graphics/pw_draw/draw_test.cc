@@ -33,15 +33,15 @@ void PrintFramebufferAsANSI(FramebufferRgb565* fb) {
   pw::StringBuffer<4096> line;
   pw::StringBuffer<128> color_string;
 
-  for (int y = 0; y < fb->height; y += 2) {
+  for (int y = 0; y < fb->GetHeight(); y += 2) {
     line.clear();
 
-    for (int x = 0; x < fb->width; x++) {
+    for (int x = 0; x < fb->GetWidth(); x++) {
       color_string.clear();
       ColorRGBA row1(fb->GetPixel(x, y));
       color_rgb565_t row2_color = fb->GetPixel(x, y + 1);
 
-      if (row2_color == fb->transparent_color) {
+      if (row2_color == fb->GetTransparentColor()) {
         color_string.Format("[m[38;2;%d;%d;%dm▀", row1.r, row1.g, row1.b);
       } else {
         ColorRGBA row2(row2_color);
@@ -69,12 +69,12 @@ TEST(DrawLine, Diagonal) {
 
   fb.Fill(0);
 
-  DrawLine(&fb, 0, 0, fb.width, fb.height, indigo);
+  DrawLine(&fb, 0, 0, fb.GetWidth(), fb.GetHeight(), indigo);
   PrintFramebufferAsANSI(&fb);
 
   // Check the diagonal is set to indigo, everything else should be 0.
-  for (int x = 0; x < fb.width; x++) {
-    for (int y = 0; y < fb.height; y++) {
+  for (int x = 0; x < fb.GetWidth(); x++) {
+    for (int y = 0; y < fb.GetHeight(); y++) {
       if (x == y)
         EXPECT_EQ(fb.GetPixel(x, y), indigo);
       else
@@ -90,11 +90,11 @@ TEST(DrawHLine, Top) {
   fb.Fill(0);
 
   // Horizonal line at y = 0
-  DrawHLine(&fb, 0, fb.width, 0, indigo);
+  DrawHLine(&fb, 0, fb.GetWidth(), 0, indigo);
   PrintFramebufferAsANSI(&fb);
 
   // Check color at y = 0 is indigo, y = 1 should be 0.
-  for (int x = 0; x < fb.width; x++) {
+  for (int x = 0; x < fb.GetWidth(); x++) {
     EXPECT_EQ(fb.GetPixel(x, 0), indigo);
     EXPECT_EQ(fb.GetPixel(x, 1), 0);
   }

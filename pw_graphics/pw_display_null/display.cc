@@ -47,4 +47,6 @@ pw::coordinates::Vec3Int GetTouchPoint() {
   return point;
 }
 
+Status InitFramebuffer(FramebufferRgb565* framebuffer) { return OkStatus(); }
+
 }  // namespace pw::display

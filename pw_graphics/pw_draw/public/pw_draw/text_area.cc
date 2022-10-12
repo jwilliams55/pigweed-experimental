@@ -50,7 +50,7 @@ void TextArea::SetBackgroundColor(color_rgb565_t color) {
 }
 
 void TextArea::SetBackgroundTransparent() {
-  background_color = framebuffer->transparent_color;
+  background_color = framebuffer->GetTransparentColor();
 }
 
 void TextArea::SetCharacterWrap(bool new_setting) {
@@ -67,7 +67,7 @@ void TextArea::InsertLineBreak() {
   cursor_x = cursor_x - (column_count * current_font->width);
   column_count = 0;
 
-  if (cursor_y >= framebuffer->height) {
+  if (cursor_y >= framebuffer->GetHeight()) {
     ScrollUp(1);
     cursor_y = cursor_y - current_font->height;
   }
@@ -77,7 +77,7 @@ void TextArea::DrawSpace() {
   for (int font_row = 0; font_row < current_font->height; font_row++) {
     for (int font_column = 0; font_column < current_font->width;
          font_column++) {
-      if (background_color != framebuffer->transparent_color) {
+      if (background_color != framebuffer->GetTransparentColor()) {
         framebuffer->SetPixel(
             cursor_x + font_column, cursor_y + font_row, background_color);
       }
@@ -105,7 +105,7 @@ void TextArea::DrawCharacter(int character) {
   }
 
   if (character_wrap_enabled &&
-      (current_font->width + cursor_x) > framebuffer->width) {
+      (current_font->width + cursor_x) > framebuffer->GetWidth()) {
     InsertLineBreak();
   }
 
@@ -122,7 +122,7 @@ void TextArea::DrawCharacter(int character) {
       if (pixel_on) {
         framebuffer->SetPixel(
             cursor_x + font_column, cursor_y + font_row, foreground_color);
-      } else if (background_color != framebuffer->transparent_color) {
+      } else if (background_color != framebuffer->GetTransparentColor()) {
         framebuffer->SetPixel(
             cursor_x + font_column, cursor_y + font_row, background_color);
       }
@@ -187,8 +187,8 @@ void TextArea::ScrollUp(int lines) {
   int start_y = pixel_height;
 
   color_rgb565_t pixel_color;
-  for (int current_x = 0; current_x < framebuffer->width; current_x++) {
-    for (int current_y = start_y; current_y < framebuffer->height;
+  for (int current_x = 0; current_x < framebuffer->GetWidth(); current_x++) {
+    for (int current_y = start_y; current_y < framebuffer->GetHeight();
          current_y++) {
       pixel_color = framebuffer->GetPixel(current_x, current_y);
       framebuffer->SetPixel(
@@ -198,8 +198,9 @@ void TextArea::ScrollUp(int lines) {
 
   // Draw a filled background_color rectangle at the bottom to erase the old
   // text.
-  for (int x = 0; x < framebuffer->width; x++) {
-    for (int y = framebuffer->height - pixel_height; y < framebuffer->height;
+  for (int x = 0; x < framebuffer->GetWidth(); x++) {
+    for (int y = framebuffer->GetHeight() - pixel_height;
+         y < framebuffer->GetHeight();
          y++) {
       framebuffer->SetPixel(x, y, background_color);
     }

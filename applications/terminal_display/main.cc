@@ -36,40 +36,47 @@
 #include "pw_touchscreen/touchscreen.h"
 
 using pw::color::colors_pico8_rgb565;
+using pw::draw::TextArea;
+using pw::framebuffer::FramebufferRgb565;
 
 namespace {
 
 typedef bool (*bool_function_pointer)();
 typedef pw::coordinates::Vec3Int (*vec3int_function_pointer)();
-pw::framebuffer::FramebufferRgb565 frame_buffer = FramebufferRgb565();
-pw::draw::TextArea log_text_area(&frame_buffer, &pw::draw::font6x8);
 
 class DemoDecoder : public AnsiDecoder {
+ public:
+  DemoDecoder(TextArea& log_text_area) : log_text_area_(log_text_area) {}
+
  protected:
   virtual void SetFgColor(uint8_t r, uint8_t g, uint8_t b) {
-    log_text_area.SetForegroundColor(pw::color::ColorRGBA(r, g, b).ToRgb565());
+    log_text_area_.SetForegroundColor(pw::color::ColorRGBA(r, g, b).ToRgb565());
   }
   virtual void SetBgColor(uint8_t r, uint8_t g, uint8_t b) {
-    log_text_area.SetBackgroundColor(pw::color::ColorRGBA(r, g, b).ToRgb565());
+    log_text_area_.SetBackgroundColor(pw::color::ColorRGBA(r, g, b).ToRgb565());
   }
-  virtual void EmitChar(char c) { log_text_area.DrawCharacter(c); }
+  virtual void EmitChar(char c) { log_text_area_.DrawCharacter(c); }
+
+ private:
+  TextArea& log_text_area_;
 };
 
-DemoDecoder demo_decoder = DemoDecoder();
+TextArea* g_log_text_area;
+DemoDecoder* g_demo_decoder;
 
 void (*write_log_to_screen)(std::string_view) = [](std::string_view log) {
   static int cursor_x = 0;
-  static int cursor_y =
-      log_text_area.framebuffer->height - log_text_area.current_font->height;
-  log_text_area.SetCursor(cursor_x, cursor_y);
+  static int cursor_y = g_log_text_area->framebuffer->GetHeight() -
+                        g_log_text_area->current_font->height;
+  g_log_text_area->SetCursor(cursor_x, cursor_y);
 
   for (auto c : log) {
-    demo_decoder.ProcessChar(c);
+    g_demo_decoder->ProcessChar(c);
   }
-  demo_decoder.ProcessChar('\n');
+  g_demo_decoder->ProcessChar('\n');
 
-  cursor_x = log_text_area.cursor_x;
-  cursor_y = log_text_area.cursor_y;
+  cursor_x = g_log_text_area->cursor_x;
+  cursor_y = g_log_text_area->cursor_y;
 
   pw::sys_io::WriteLine(log).IgnoreError();
 };
@@ -81,7 +88,8 @@ const wchar_t pigweed_banner[] = {
     L" ▒█▀     ░█░ ▓█   █▓ ░█░ █ ▒█  ▒█   ▄  ▒█   ▄  ░█  ▄█▌\n"
     L" ▒█      ░█░ ░▓███▀   ▒█▓▀▓█░ ░▓████▒ ░▓████▒ ▒▓████▀\n"};
 
-void draw_sprite_and_text_demo() {
+void draw_sprite_and_text_demo(FramebufferRgb565& frame_buffer,
+                               TextArea& log_text_area) {
   int sprite_pos_x = 10;
   int sprite_pos_y = 24;
   int sprite_scale = 4;
@@ -206,18 +214,6 @@ void create_demo_log_messages() {
   PW_LOG_DEBUG("Debug output");
 }
 
-// Full resolution
-#define FRAMEBUFFER_WIDTH 320
-#define FRAMEBUFFER_HEIGHT 240
-#define FRAMEBUFFER_UPDATE_FUNCTION Update
-
-// Half resolution
-// #define FRAMEBUFFER_WIDTH 160
-// #define FRAMEBUFFER_HEIGHT 120
-// #define FRAMEBUFFER_UPDATE_FUNCTION UpdatePixelDouble
-
-uint16_t display_framebuffer_data[FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT];
-
 }  // namespace
 
 int main() {
@@ -243,8 +239,16 @@ int main() {
 
   pw::board_led::Init();
 
-  frame_buffer.SetFramebufferData(
-      display_framebuffer_data, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+  FramebufferRgb565 frame_buffer;
+  pw::display::InitFramebuffer(&frame_buffer).IgnoreError();
+  TextArea log_text_area(&frame_buffer, &pw::draw::font6x8);
+  DemoDecoder demo_decoder = DemoDecoder(log_text_area);
+
+  // Save global pointers needed for the logging callback.
+  // TODO(cmumford): See if we can use a functor or std::bind to eliminate
+  // these.
+  g_log_text_area = &log_text_area;
+  g_demo_decoder = &demo_decoder;
 
   // Clear the framebuffer to black
   frame_buffer.SetPenColor(0);
@@ -265,7 +269,7 @@ int main() {
 
   // Touch event variables
   Vec2 screen_center =
-      Vec2(frame_buffer.width / 2.0, frame_buffer.height / 2.0);
+      Vec2(frame_buffer.GetWidth() / 2.0, frame_buffer.GetHeight() / 2.0);
   Vec2 touch_location;
   Vec2 touch_location_from_origin;
   float touch_location_angle;
@@ -273,15 +277,15 @@ int main() {
 
   pw::coordinates::Vec3Int last_frame_touch_state(0, 0, 0);
 
-  draw_sprite_and_text_demo();
+  draw_sprite_and_text_demo(frame_buffer, log_text_area);
   // Push the frame buffer to the screen.
-  pw::display::FRAMEBUFFER_UPDATE_FUNCTION(&frame_buffer);
+  pw::display::Update(&frame_buffer);
 
   // Setup the log message button position variables.
-  pw::draw::TextArea button_text_area(&frame_buffer, &pw::draw::font6x8);
+  TextArea button_text_area(&frame_buffer, &pw::draw::font6x8);
   int button_width = 19 * button_text_area.current_font->width;
   int button_height = button_text_area.current_font->height;
-  int button_pos_x = frame_buffer.width - button_width;
+  int button_pos_x = frame_buffer.GetWidth() - button_width;
   int button_pos_y = 0;
   button_text_area.SetCursor(button_pos_x, button_pos_y);
   button_text_area.SetForegroundColor(colors_pico8_rgb565[COLOR_BLACK]);
@@ -355,7 +359,7 @@ int main() {
     // Display Write Phase
     time_start_screen_spi_update = pw::spin_delay::Millis();
 
-    pw::display::FRAMEBUFFER_UPDATE_FUNCTION(&frame_buffer);
+    pw::display::Update(&frame_buffer);
 
     // End Display Write Phase
     delta_screen_spi_update =

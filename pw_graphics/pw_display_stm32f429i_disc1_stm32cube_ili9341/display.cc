@@ -41,8 +41,18 @@ namespace {
 #define LCD_DC_PORT GPIOD
 #define LCD_DC_PIN GPIO_PIN_13
 
-constexpr int kDisplayWidth = 320;
-constexpr int kDisplayHeight = 240;
+constexpr int kILI9341Width = 320;
+constexpr int kILI9341Height = 240;
+
+#if 1
+constexpr int kDisplayWidth = kILI9341Width;
+constexpr int kDisplayHeight = kILI9341Height;
+constexpr int kScaleFactor = 1;
+#else
+constexpr int kDisplayWidth = kILI9341Width / 2;
+constexpr int kDisplayHeight = kILI9341Height / 2;
+constexpr int kScaleFactor = 2;
+#endif
 constexpr int kNumDisplayPixels = kDisplayWidth * kDisplayHeight;
 
 constexpr pw::spi::Config kSpiConfig{
@@ -74,11 +84,20 @@ class InstanceData {
   }
 
   void Update(pw::framebuffer::FramebufferRgb565* frame_buffer) {
-    display_driver_.Update(frame_buffer);
+    if (kScaleFactor == 1)
+      display_driver_.Update(frame_buffer);
+    else
+      display_driver_.UpdatePixelDouble(frame_buffer);
   }
 
   void UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer) {
     display_driver_.UpdatePixelDouble(frame_buffer);
+  }
+
+  Status InitFramebuffer(FramebufferRgb565* framebuffer) {
+    framebuffer->SetFramebufferData(
+        framebuffer_data_, kDisplayWidth, kDisplayHeight);
+    return OkStatus();
   }
 
  private:
@@ -130,6 +149,7 @@ class InstanceData {
   pw::spi::Device spi_device_;
   DisplayDriverILI9341::Config driver_config_;
   DisplayDriverILI9341 display_driver_;
+  uint16_t framebuffer_data_[kNumDisplayPixels];
 };  // namespace
 
 InstanceData s_instance_data;
@@ -156,6 +176,10 @@ bool NewTouchEvent() { return false; }
 
 pw::coordinates::Vec3Int GetTouchPoint() {
   return pw::coordinates::Vec3Int{0, 0, 0};
+}
+
+Status InitFramebuffer(FramebufferRgb565* framebuffer) {
+  return s_instance_data.InitFramebuffer(framebuffer);
 }
 
 }  // namespace pw::display

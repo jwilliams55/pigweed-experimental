@@ -96,6 +96,12 @@ class InstanceData {
     display_driver_.UpdatePixelDouble(frame_buffer);
   }
 
+  Status InitFramebuffer(FramebufferRgb565* framebuffer) {
+    framebuffer->SetFramebufferData(
+        framebuffer_data_, kDisplayWidth, kDisplayHeight);
+    return OkStatus();
+  }
+
  private:
   void InitGPIO() {
     stdio_init_all();
@@ -136,6 +142,7 @@ class InstanceData {
   pw::spi::Device spi_device_;
   DisplayDriverILI9341::Config driver_config_;
   DisplayDriverILI9341 display_driver_;
+  uint16_t framebuffer_data_[kNumDisplayPixels];
 };  // namespace
 
 InstanceData s_instance_data;
@@ -162,6 +169,10 @@ bool NewTouchEvent() { return false; }
 
 pw::coordinates::Vec3Int GetTouchPoint() {
   return pw::coordinates::Vec3Int{0, 0, 0};
+}
+
+Status InitFramebuffer(FramebufferRgb565* framebuffer) {
+  return s_instance_data.InitFramebuffer(framebuffer);
 }
 
 }  // namespace pw::display

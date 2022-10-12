@@ -320,12 +320,12 @@ Status DisplayDriverILI9341::UpdatePixelDouble(
   uint16_t temp_row[kDisplayWidth];
   auto transaction =
       spi_device_.StartTransaction(ChipSelectBehavior::kPerTransaction);
-  for (int y = 0; y < frame_buffer->height; y++) {
+  const color_rgb565_t* const fbdata = frame_buffer->GetFramebufferData();
+  for (int y = 0; y < frame_buffer->GetHeight(); y++) {
     // Populate this row with each pixel repeated twice
-    for (int x = 0; x < frame_buffer->width; x++) {
-      temp_row[x * 2] = frame_buffer->pixel_data[y * frame_buffer->width + x];
-      temp_row[(x * 2) + 1] =
-          frame_buffer->pixel_data[y * frame_buffer->width + x];
+    for (int x = 0; x < frame_buffer->GetWidth(); x++) {
+      temp_row[x * 2] = fbdata[y * frame_buffer->GetWidth() + x];
+      temp_row[(x * 2) + 1] = fbdata[y * frame_buffer->GetWidth() + x];
     }
     // Send this row to the display twice.
     auto s = transaction.Write(ConstByteSpan(

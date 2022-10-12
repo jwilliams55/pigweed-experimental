@@ -75,4 +75,10 @@ pw::coordinates::Vec3Int GetTouchPoint() {
   return point;
 }
 
+Status InitFramebuffer(FramebufferRgb565* framebuffer) {
+  framebuffer->SetFramebufferData(
+      framebuffer_data, kDisplayWidth, kDisplayHeight);
+  return OkStatus();
+}
+
 }  // namespace pw::display

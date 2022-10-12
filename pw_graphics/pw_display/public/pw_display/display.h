@@ -15,6 +15,7 @@
 
 #include "pw_coordinates/vec_int.h"
 #include "pw_framebuffer/rgb565.h"
+#include "pw_status/status.h"
 
 using namespace pw::framebuffer;
 
@@ -27,6 +28,9 @@ int GetHeight();
 // TODO(tonymd): Add update functions for new framebuffer types or make this a
 // templated class.
 void Update(FramebufferRgb565* framebuffer);
+// Initialize the supplied |framebuffer| to the appropriate size for the
+// display.
+Status InitFramebuffer(FramebufferRgb565* framebuffer);
 void UpdatePixelDouble(FramebufferRgb565* framebuffer);
 bool TouchscreenAvailable();
 bool NewTouchEvent();

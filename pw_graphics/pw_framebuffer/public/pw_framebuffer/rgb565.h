@@ -21,29 +21,33 @@ namespace pw::framebuffer {
 
 class FramebufferRgb565 {
  public:
-  // TODO(tonymd): Add a stride variable. Right now width is being treated as
-  // the stride vale.
-  int width, height;
-  color_rgb565_t* pixel_data;
-  color_rgb565_t pen_color;
-  color_rgb565_t transparent_color;
-
+  // Construct a default framebuffer. The framebuffer will be invalid (i.e.
+  // IsValid() returns false) until SetFramebufferData() is called. Using an
+  // invalid framebuffer will result in a failed PW_CHECK.
   FramebufferRgb565();
 
-  FramebufferRgb565(color_rgb565_t* data,
-                    int desired_width,
-                    int desired_height);
+  // Construct a framebuffer of the specified dimensions which *does not* own
+  // the |data| - i.e. this instance may write to the data, but will never
+  // attempt to free it.
+  FramebufferRgb565(color_rgb565_t* data, int width, int height);
+
+  FramebufferRgb565(const FramebufferRgb565&) = delete;
+  FramebufferRgb565(FramebufferRgb565&& other) = delete;
+
+  FramebufferRgb565& operator=(const FramebufferRgb565&) = delete;
+  FramebufferRgb565& operator=(FramebufferRgb565&&) = delete;
+
+  // Has the framebuffer been properly initialized?
+  bool IsValid() const { return pixel_data_ != nullptr; };
 
   void SetDefaultColors();
 
-  color_rgb565_t* GetFramebufferData();
+  color_rgb565_t* GetFramebufferData() const;
 
-  void SetFramebufferData(color_rgb565_t* data,
-                          int desired_width,
-                          int desired_height);
+  void SetFramebufferData(color_rgb565_t* data, int width, int height);
 
   // Return the RGB565 color at position x, y. Bounds are checked.
-  color_rgb565_t GetPixel(int x, int y);
+  color_rgb565_t GetPixel(int x, int y) const;
 
   // Draw a color at (x, y) if it's a valid positon.
   void SetPixel(int x, int y, color_rgb565_t rgb565_color);
@@ -62,11 +66,24 @@ class FramebufferRgb565 {
 
   void SetPenColor(color_rgb565_t color);
 
-  color_rgb565_t GetPenColor();
+  color_rgb565_t GetPenColor() const;
 
   void SetTransparentColor(color_rgb565_t color);
 
-  color_rgb565_t GetTransparentColor();
+  color_rgb565_t GetTransparentColor() const;
+
+  int GetWidth() const { return width_; }
+
+  int GetHeight() const { return height_; }
+
+ private:
+  // TODO(tonymd): Add a stride variable. Right now width is being treated as
+  // the stride value.
+  color_rgb565_t* pixel_data_;
+  int width_;
+  int height_;
+  color_rgb565_t pen_color;
+  color_rgb565_t transparent_color;
 };
 
 }  // namespace pw::framebuffer

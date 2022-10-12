@@ -85,6 +85,8 @@ constexpr int kDisplayWidth = 320;
 constexpr int kDisplayHeight = 240;
 constexpr int kDisplayDataSize = kDisplayWidth * kDisplayHeight;
 
+uint16_t framebuffer_data[kDisplayDataSize];
+
 // Pico Enviro+ Pack Pins are the same as Display Pack 2
 // https://shop.pimoroni.com/products/pico-enviro-pack
 // --------------------------------------------------------
@@ -298,12 +300,12 @@ void UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer) {
   SendDisplayWriteCommand();
 
   uint16_t temp_row[kDisplayWidth];
-  for (int y = 0; y < frame_buffer->height; y++) {
+  color_rgb565_t* pixel_data = frame_buffer->GetFramebufferData();
+  for (int y = 0; y < frame_buffer->GetHeight(); y++) {
     // Populate this row with each pixel repeated twice
-    for (int x = 0; x < frame_buffer->width; x++) {
-      temp_row[x * 2] = frame_buffer->pixel_data[y * frame_buffer->width + x];
-      temp_row[(x * 2) + 1] =
-          frame_buffer->pixel_data[y * frame_buffer->width + x];
+    for (int x = 0; x < frame_buffer->GetWidth(); x++) {
+      temp_row[x * 2] = pixel_data[y * frame_buffer->GetWidth() + x];
+      temp_row[(x * 2) + 1] = pixel_data[y * frame_buffer->GetHeight() + x];
     }
     // Send this row to the display twice.
     spi_write16_blocking(SPI_PORT, temp_row, kDisplayWidth);
@@ -316,8 +318,8 @@ void UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer) {
 void Update(pw::framebuffer::FramebufferRgb565* frame_buffer) {
   SendDisplayWriteCommand();
 
-  spi_write16_blocking(
-      SPI_PORT, (uint16_t*)frame_buffer->pixel_data, kDisplayDataSize);
+  const uint16_t* pixel_data = frame_buffer->GetFramebufferData();
+  spi_write16_blocking(SPI_PORT, pixel_data, kDisplayDataSize);
   // put the display back into data mode (high).
   ChipSelectDisable();
 }
@@ -332,6 +334,12 @@ pw::coordinates::Vec3Int GetTouchPoint() {
   point.y = 0;
   point.z = 0;
   return point;
+}
+
+Status InitFramebuffer(FramebufferRgb565* framebuffer) {
+  framebuffer->SetFramebufferData(
+      framebuffer_data, kDisplayWidth, kDisplayHeight);
+  return OkStatus();
 }
 
 }  // namespace pw::display
