@@ -24,9 +24,10 @@ config("default_config") {
 
 pw_source_set("pw_framebuffer") {
   public_configs = [ ":default_config" ]
+  deps = [ "$dir_pw_assert" ]
   public_deps = [
-    "$dir_pw_assert",
     "$dir_pw_color",
+    "$dir_pw_result",
   ]
   public = [ "public/pw_framebuffer/rgb565.h" ]
   sources = [ "rgb565.cc" ]

@@ -26,8 +26,8 @@ class TextArea {
   int column_count;
   bool character_wrap_enabled;
   const FontSet* current_font;
-  color_rgb565_t foreground_color;
-  color_rgb565_t background_color;
+  pw::color::color_rgb565_t foreground_color;
+  pw::color::color_rgb565_t background_color;
   pw::framebuffer::FramebufferRgb565* framebuffer;
 
   TextArea(pw::framebuffer::FramebufferRgb565* fb, const FontSet* font);
@@ -41,9 +41,8 @@ class TextArea {
   void DrawCharacter(int character);
   void DrawCharacter(int character, int x, int y);
 
-  void SetForegroundColor(color_rgb565_t color);
-  void SetBackgroundColor(color_rgb565_t color);
-  void SetBackgroundTransparent();
+  void SetForegroundColor(pw::color::color_rgb565_t color);
+  void SetBackgroundColor(pw::color::color_rgb565_t color);
 
   void DrawTestFontSheet(int character_width, int x, int y);
 

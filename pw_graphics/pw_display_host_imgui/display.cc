@@ -39,6 +39,8 @@
 #include "pw_display/display.h"
 #include "pw_framebuffer/rgb565.h"
 
+using pw::color::color_rgb565_t;
+
 namespace {
 
 constexpr int kDisplayWidth = 320;
@@ -90,7 +92,7 @@ void _SetTexturePixel(GLuint x, GLuint y, uint8_t r, uint8_t g, uint8_t b) {
 }
 
 void _SetTexturePixel(GLuint x, GLuint y, color_rgb565_t rgb565) {
-  ColorRGBA c(rgb565);
+  pw::color::ColorRGBA c(rgb565);
   _SetTexturePixel(x, y, c.r, c.g, c.b, 255);
 }
 
@@ -235,13 +237,14 @@ void UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer) {
   int basex, basey;
   for (GLuint y = 0; y < frame_buffer->GetHeight(); y++) {
     for (GLuint x = 0; x < frame_buffer->GetWidth(); x++) {
-      color_rgb565_t c = frame_buffer->GetPixel(x, y);
-      basex = x * 2;
-      basey = y * 2;
-      _SetTexturePixel(basex, basey, c);
-      _SetTexturePixel(basex + 1, basey, c);
-      _SetTexturePixel(basex, basey + 1, c);
-      _SetTexturePixel(basex + 1, basey + 1, c);
+      if (auto c = frame_buffer->GetPixel(x, y); c.ok()) {
+        basex = x * 2;
+        basey = y * 2;
+        _SetTexturePixel(basex, basey, c.value());
+        _SetTexturePixel(basex + 1, basey, c.value());
+        _SetTexturePixel(basex, basey + 1, c.value());
+        _SetTexturePixel(basex + 1, basey + 1, c.value());
+      }
     }
   }
 
@@ -254,8 +257,9 @@ void Update(pw::framebuffer::FramebufferRgb565* frame_buffer) {
   // Copy frame_buffer into lcd_pixel_data
   for (GLuint x = 0; x < kDisplayWidth; x++) {
     for (GLuint y = 0; y < kDisplayHeight; y++) {
-      color_rgb565_t c = frame_buffer->GetPixel(x, y);
-      _SetTexturePixel(x, y, c);
+      if (auto c = frame_buffer->GetPixel(x, y); c.ok()) {
+        _SetTexturePixel(x, y, c.value());
+      }
     }
   }
 

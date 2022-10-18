@@ -20,10 +20,17 @@
 #include "pw_draw/sprite_sheet.h"
 #include "pw_framebuffer/rgb565.h"
 
+using pw::color::color_rgb565_t;
+using pw::framebuffer::FramebufferRgb565;
+
 namespace pw::draw {
 
-void DrawLine(
-    pw::framebuffer::FramebufferRgb565* fb, int x1, int y1, int x2, int y2) {
+void DrawLine(FramebufferRgb565* fb,
+              int x1,
+              int y1,
+              int x2,
+              int y2,
+              color_rgb565_t pen_color) {
   // Bresenham's Line Algorithm
   int16_t steep_gradient = abs(y2 - y1) > abs(x2 - x1);
   // Swap values
@@ -52,9 +59,9 @@ void DrawLine(
 
   for (; x1 <= x2; x1++) {
     if (steep_gradient) {
-      fb->SetPixel(y1, x1);
+      fb->SetPixel(y1, x1, pen_color);
     } else {
-      fb->SetPixel(x1, y1);
+      fb->SetPixel(x1, y1, pen_color);
     }
     error_value -= dy;
     if (error_value < 0) {
@@ -64,22 +71,13 @@ void DrawLine(
   }
 }
 
-void DrawLine(pw::framebuffer::FramebufferRgb565* fb,
-              int x1,
-              int y1,
-              int x2,
-              int y2,
-              pw::color::color_rgb565_t pen_color) {
-  fb->SetPenColor(pen_color);
-  DrawLine(fb, x1, y1, x2, y2);
-}
-
 // Draw a circle at center_x, center_y with given radius and color. Only a
 // one-pixel outline is drawn if filled is false.
-void DrawCircle(pw::framebuffer::FramebufferRgb565* fb,
+void DrawCircle(FramebufferRgb565* fb,
                 int center_x,
                 int center_y,
                 int radius,
+                color_rgb565_t pen_color,
                 bool filled = false) {
   int fx = 0, fy = 0;
   int x = -radius, y = 0;
@@ -92,15 +90,15 @@ void DrawCircle(pw::framebuffer::FramebufferRgb565* fb,
     // Draw each quarter circle
     for (int i = x; i <= fx; i++) {
       // Lower right
-      fb->SetPixel(center_x - i, center_y + y);
+      fb->SetPixel(center_x - i, center_y + y, pen_color);
       // Upper left
-      fb->SetPixel(center_x + i, center_y - y);
+      fb->SetPixel(center_x + i, center_y - y, pen_color);
     }
     for (int i = fy; i <= y; i++) {
       // Lower left
-      fb->SetPixel(center_x - i, center_y - x);
+      fb->SetPixel(center_x - i, center_y - x, pen_color);
       // Upper right
-      fb->SetPixel(center_x + i, center_y + x);
+      fb->SetPixel(center_x + i, center_y + x, pen_color);
     }
     radius = error_value;
     if (radius <= y) {
@@ -113,89 +111,51 @@ void DrawCircle(pw::framebuffer::FramebufferRgb565* fb,
     }
   }
 }
-void DrawCircle(pw::framebuffer::FramebufferRgb565* fb,
-                int center_x,
-                int center_y,
-                int radius,
-                pw::color::color_rgb565_t pen_color,
-                bool filled = false) {
-  fb->SetPenColor(pen_color);
-  DrawCircle(fb, center_x, center_y, radius, filled);
-}
 
-void DrawHLine(pw::framebuffer::FramebufferRgb565* fb, int x1, int x2, int y) {
+void DrawHLine(
+    FramebufferRgb565* fb, int x1, int x2, int y, color_rgb565_t pen_color) {
   for (int i = x1; i <= x2; i++) {
-    fb->SetPixel(i, y);
+    fb->SetPixel(i, y, pen_color);
   }
 }
 
-void DrawHLine(pw::framebuffer::FramebufferRgb565* fb,
-               int x1,
-               int x2,
-               int y,
-               color_rgb565_t pen_color) {
-  fb->SetPenColor(pen_color);
-  DrawHLine(fb, x1, x2, y);
-}
-
-void DrawRect(pw::framebuffer::FramebufferRgb565* fb,
-              int x1,
-              int y1,
-              int x2,
-              int y2,
-              bool filled = false) {
-  // Draw top and bottom lines.
-  DrawHLine(fb, x1, x2, y1);
-  DrawHLine(fb, x1, x2, y2);
-  if (filled) {
-    for (int y = y1 + 1; y < y2; y++) {
-      DrawHLine(fb, x1, x2, y);
-    }
-  } else {
-    for (int y = y1 + 1; y < y2; y++) {
-      fb->SetPixel(x1, y);
-      fb->SetPixel(x2, y);
-    }
-  }
-}
-void DrawRect(pw::framebuffer::FramebufferRgb565* fb,
+void DrawRect(FramebufferRgb565* fb,
               int x1,
               int y1,
               int x2,
               int y2,
               color_rgb565_t pen_color,
               bool filled = false) {
-  fb->SetPenColor(pen_color);
-  DrawRect(fb, x1, y1, x2, y2, filled);
+  // Draw top and bottom lines.
+  DrawHLine(fb, x1, x2, y1, pen_color);
+  DrawHLine(fb, x1, x2, y2, pen_color);
+  if (filled) {
+    for (int y = y1 + 1; y < y2; y++) {
+      DrawHLine(fb, x1, x2, y, pen_color);
+    }
+  } else {
+    for (int y = y1 + 1; y < y2; y++) {
+      fb->SetPixel(x1, y, pen_color);
+      fb->SetPixel(x2, y, pen_color);
+    }
+  }
 }
 
-void DrawRectWH(pw::framebuffer::FramebufferRgb565* fb,
+void DrawRectWH(FramebufferRgb565* fb,
                 int x,
                 int y,
                 int w,
                 int h,
                 color_rgb565_t pen_color,
                 bool filled = false) {
-  fb->SetPenColor(pen_color);
-  DrawRect(fb, x, y, x - 1 + w, y - 1 + h, filled);
-}
-void DrawRectWH(pw::framebuffer::FramebufferRgb565* fb,
-                int x,
-                int y,
-                int w,
-                int h,
-                bool filled = false) {
-  DrawRect(fb, x, y, x - 1 + w, y - 1 + h, filled);
+  DrawRect(fb, x, y, x - 1 + w, y - 1 + h, pen_color, filled);
 }
 
-void Fill(pw::framebuffer::FramebufferRgb565* fb) { fb->Fill(); }
-
-void Fill(pw::framebuffer::FramebufferRgb565* fb, color_rgb565_t pen_color) {
-  fb->SetPenColor(pen_color);
-  fb->Fill();
+void Fill(FramebufferRgb565* fb, color_rgb565_t pen_color) {
+  fb->Fill(pen_color);
 }
 
-void DrawSprite(pw::framebuffer::FramebufferRgb565* fb,
+void DrawSprite(FramebufferRgb565* fb,
                 int x,
                 int y,
                 pw::draw::SpriteSheet* sprite_sheet,
@@ -222,8 +182,8 @@ void DrawSprite(pw::framebuffer::FramebufferRgb565* fb,
   }
 }
 
-void DrawTestPattern(pw::framebuffer::FramebufferRgb565* fb) {
-  color_rgb565_t color = ColorRGBA(0x00, 0xFF, 0xFF).ToRgb565();
+void DrawTestPattern(FramebufferRgb565* fb) {
+  color_rgb565_t color = pw::color::ColorRGBA(0x00, 0xFF, 0xFF).ToRgb565();
   // Create a Test Pattern
   for (int x = 0; x < fb->GetWidth(); x++) {
     for (int y = 0; y < fb->GetHeight(); y++) {

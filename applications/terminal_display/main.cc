@@ -119,19 +119,19 @@ void draw_sprite_and_text_demo(FramebufferRgb565& frame_buffer,
       true);
 
   // Draw the Sun
-  frame_buffer.SetPenColor(colors_pico8_rgb565[COLOR_ORANGE]);
   pw::draw::DrawCircle(
       &frame_buffer,
       sprite_pos_x + (pigweed_farm_sprite_sheet.width * sprite_scale) - 32,
       sprite_pos_y,
       20,
+      colors_pico8_rgb565[COLOR_ORANGE],
       true);
-  frame_buffer.SetPenColor(colors_pico8_rgb565[COLOR_YELLOW]);
   pw::draw::DrawCircle(
       &frame_buffer,
       sprite_pos_x + (pigweed_farm_sprite_sheet.width * sprite_scale) - 32,
       sprite_pos_y,
       18,
+      colors_pico8_rgb565[COLOR_YELLOW],
       true);
 
   // Draw the farm sprite's shadow
@@ -167,7 +167,7 @@ void draw_sprite_and_text_demo(FramebufferRgb565& frame_buffer,
       text_area.DrawCharacter('\n');
     }
     text_area.SetForegroundColor(0);
-    text_area.SetBackgroundColor(colors_endesga32_rgb565[c % 32]);
+    text_area.SetBackgroundColor(pw::color::colors_endesga32_rgb565[c % 32]);
     text_area.DrawCharacter(c);
   }
   // Reset background to black
@@ -251,8 +251,7 @@ int main() {
   g_demo_decoder = &demo_decoder;
 
   // Clear the framebuffer to black
-  frame_buffer.SetPenColor(0);
-  pw::draw::Fill(&frame_buffer);
+  pw::draw::Fill(&frame_buffer, 0);
 
   // Init the display and touchscreen.
   PW_LOG_INFO("pw::display::Init()");

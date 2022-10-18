@@ -25,9 +25,12 @@
 
 using namespace pw::draw;
 using namespace pw::framebuffer;
+using pw::color::color_rgb565_t;
 
 namespace pw::draw {
 namespace {
+
+constexpr color_rgb565_t kBlack = 0x0;
 
 void PrintFramebufferAsANSI(FramebufferRgb565* fb) {
   pw::StringBuffer<4096> line;
@@ -38,13 +41,13 @@ void PrintFramebufferAsANSI(FramebufferRgb565* fb) {
 
     for (int x = 0; x < fb->GetWidth(); x++) {
       color_string.clear();
-      ColorRGBA row1(fb->GetPixel(x, y));
-      color_rgb565_t row2_color = fb->GetPixel(x, y + 1);
-
-      if (row2_color == fb->GetTransparentColor()) {
+      auto row1_color = fb->GetPixel(x, y);
+      pw::color::ColorRGBA row1(row1_color.ok() ? row1_color.value() : kBlack);
+      auto row2_color = fb->GetPixel(x, y + 1);
+      if (!row2_color.ok()) {
         color_string.Format("[m[38;2;%d;%d;%dm▀", row1.r, row1.g, row1.b);
       } else {
-        ColorRGBA row2(row2_color);
+        pw::color::ColorRGBA row2(row2_color.value());
         color_string.Format("[m[38;2;%d;%d;%dm[48;2;%d;%d;%dm▀",
                             row1.r,
                             row1.g,
@@ -65,7 +68,7 @@ void PrintFramebufferAsANSI(FramebufferRgb565* fb) {
 TEST(DrawLine, Diagonal) {
   uint16_t data[4 * 4];
   FramebufferRgb565 fb(data, 4, 4);
-  color_rgb565_t indigo = colors_pico8_rgb565[12];
+  color_rgb565_t indigo = color::colors_pico8_rgb565[12];
 
   fb.Fill(0);
 
@@ -73,12 +76,16 @@ TEST(DrawLine, Diagonal) {
   PrintFramebufferAsANSI(&fb);
 
   // Check the diagonal is set to indigo, everything else should be 0.
+  Result<color_rgb565_t> c;
   for (int x = 0; x < fb.GetWidth(); x++) {
     for (int y = 0; y < fb.GetHeight(); y++) {
-      if (x == y)
-        EXPECT_EQ(fb.GetPixel(x, y), indigo);
-      else
-        EXPECT_EQ(fb.GetPixel(x, y), 0);
+      c = fb.GetPixel(x, y);
+      ASSERT_TRUE(c.ok());
+      if (x == y) {
+        EXPECT_EQ(c.value(), indigo);
+      } else {
+        EXPECT_EQ(c.value(), 0);
+      }
     }
   }
 }
@@ -86,7 +93,7 @@ TEST(DrawLine, Diagonal) {
 TEST(DrawHLine, Top) {
   uint16_t data[4 * 4];
   FramebufferRgb565 fb(data, 4, 4);
-  color_rgb565_t indigo = colors_pico8_rgb565[12];
+  color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   fb.Fill(0);
 
   // Horizonal line at y = 0
@@ -94,139 +101,292 @@ TEST(DrawHLine, Top) {
   PrintFramebufferAsANSI(&fb);
 
   // Check color at y = 0 is indigo, y = 1 should be 0.
+  Result<color_rgb565_t> c;
   for (int x = 0; x < fb.GetWidth(); x++) {
-    EXPECT_EQ(fb.GetPixel(x, 0), indigo);
-    EXPECT_EQ(fb.GetPixel(x, 1), 0);
+    c = fb.GetPixel(x, 0);
+    ASSERT_TRUE(c.ok());
+    EXPECT_EQ(c.value(), indigo);
+    c = fb.GetPixel(x, 1);
+    ASSERT_TRUE(c.ok());
+    EXPECT_EQ(c.value(), 0);
   }
 }
 
 TEST(DrawRect, Empty) {
   uint16_t data[5 * 5];
   FramebufferRgb565 fb(data, 5, 5);
-  color_rgb565_t indigo = colors_pico8_rgb565[12];
+  color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   fb.Fill(0);
 
   // 4x4 rectangle, not filled
   DrawRect(&fb, 0, 0, 3, 3, indigo, false);
   PrintFramebufferAsANSI(&fb);
 
-  EXPECT_EQ(fb.GetPixel(0, 0), indigo);
-  EXPECT_EQ(fb.GetPixel(1, 0), indigo);
-  EXPECT_EQ(fb.GetPixel(2, 0), indigo);
-  EXPECT_EQ(fb.GetPixel(3, 0), indigo);
-  EXPECT_EQ(fb.GetPixel(4, 0), 0);
+  Result<color_rgb565_t> c;
+  c = fb.GetPixel(0, 0);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(1, 0);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(2, 0);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(3, 0);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(4, 0);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
 
-  EXPECT_EQ(fb.GetPixel(0, 1), indigo);
-  EXPECT_EQ(fb.GetPixel(1, 1), 0);
-  EXPECT_EQ(fb.GetPixel(2, 1), 0);
-  EXPECT_EQ(fb.GetPixel(3, 1), indigo);
-  EXPECT_EQ(fb.GetPixel(4, 1), 0);
+  c = fb.GetPixel(0, 1);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(1, 1);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(2, 1);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(3, 1);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(4, 1);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
 
-  EXPECT_EQ(fb.GetPixel(0, 2), indigo);
-  EXPECT_EQ(fb.GetPixel(1, 2), 0);
-  EXPECT_EQ(fb.GetPixel(2, 2), 0);
-  EXPECT_EQ(fb.GetPixel(3, 2), indigo);
-  EXPECT_EQ(fb.GetPixel(4, 2), 0);
+  c = fb.GetPixel(0, 2);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(1, 2);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(2, 2);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(3, 2);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(4, 2);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
 
-  EXPECT_EQ(fb.GetPixel(0, 3), indigo);
-  EXPECT_EQ(fb.GetPixel(1, 3), indigo);
-  EXPECT_EQ(fb.GetPixel(2, 3), indigo);
-  EXPECT_EQ(fb.GetPixel(3, 3), indigo);
-  EXPECT_EQ(fb.GetPixel(4, 3), 0);
+  c = fb.GetPixel(0, 3);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(1, 3);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(2, 3);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(3, 3);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(4, 3);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
 
-  EXPECT_EQ(fb.GetPixel(0, 4), 0);
-  EXPECT_EQ(fb.GetPixel(1, 4), 0);
-  EXPECT_EQ(fb.GetPixel(2, 4), 0);
-  EXPECT_EQ(fb.GetPixel(3, 4), 0);
-  EXPECT_EQ(fb.GetPixel(4, 4), 0);
+  c = fb.GetPixel(0, 4);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(1, 4);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(2, 4);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(3, 4);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(4, 4);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
 }
 
 TEST(DrawRect, Filled) {
   uint16_t data[5 * 5];
   FramebufferRgb565 fb(data, 5, 5);
-  color_rgb565_t indigo = colors_pico8_rgb565[12];
+  color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   fb.Fill(0);
 
   // 4x4 rectangle, filled
   DrawRect(&fb, 0, 0, 3, 3, indigo, true);
   PrintFramebufferAsANSI(&fb);
 
-  EXPECT_EQ(fb.GetPixel(0, 0), indigo);
-  EXPECT_EQ(fb.GetPixel(1, 0), indigo);
-  EXPECT_EQ(fb.GetPixel(2, 0), indigo);
-  EXPECT_EQ(fb.GetPixel(3, 0), indigo);
-  EXPECT_EQ(fb.GetPixel(4, 0), 0);
+  Result<color_rgb565_t> c;
+  c = fb.GetPixel(0, 0);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(1, 0);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(2, 0);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(3, 0);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(4, 0);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
 
-  EXPECT_EQ(fb.GetPixel(0, 1), indigo);
-  EXPECT_EQ(fb.GetPixel(1, 1), indigo);
-  EXPECT_EQ(fb.GetPixel(2, 1), indigo);
-  EXPECT_EQ(fb.GetPixel(3, 1), indigo);
-  EXPECT_EQ(fb.GetPixel(4, 1), 0);
+  c = fb.GetPixel(0, 1);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(1, 1);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(2, 1);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(3, 1);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(4, 1);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
 
-  EXPECT_EQ(fb.GetPixel(0, 2), indigo);
-  EXPECT_EQ(fb.GetPixel(1, 2), indigo);
-  EXPECT_EQ(fb.GetPixel(2, 2), indigo);
-  EXPECT_EQ(fb.GetPixel(3, 2), indigo);
-  EXPECT_EQ(fb.GetPixel(4, 2), 0);
+  c = fb.GetPixel(0, 2);
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(1, 2);
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(2, 2);
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(3, 2);
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(4, 2);
+  EXPECT_EQ(c.value(), 0);
 
-  EXPECT_EQ(fb.GetPixel(0, 3), indigo);
-  EXPECT_EQ(fb.GetPixel(1, 3), indigo);
-  EXPECT_EQ(fb.GetPixel(2, 3), indigo);
-  EXPECT_EQ(fb.GetPixel(3, 3), indigo);
-  EXPECT_EQ(fb.GetPixel(4, 3), 0);
+  c = fb.GetPixel(0, 3);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(1, 3);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(2, 3);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(3, 3);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(4, 3);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
 
-  EXPECT_EQ(fb.GetPixel(0, 4), 0);
-  EXPECT_EQ(fb.GetPixel(1, 4), 0);
-  EXPECT_EQ(fb.GetPixel(2, 4), 0);
-  EXPECT_EQ(fb.GetPixel(3, 4), 0);
-  EXPECT_EQ(fb.GetPixel(4, 4), 0);
+  c = fb.GetPixel(0, 4);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(1, 4);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(2, 4);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(3, 4);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(4, 4);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
 }
 
 TEST(DrawRectWH, WidthHeightCorrect) {
   uint16_t data[5 * 5];
   FramebufferRgb565 fb(data, 5, 5);
-  color_rgb565_t indigo = colors_pico8_rgb565[12];
+  color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   fb.Fill(0);
 
   // 4x4 rectangle, not filled
   DrawRectWH(&fb, 0, 0, 4, 4, indigo, false);
   PrintFramebufferAsANSI(&fb);
 
-  EXPECT_EQ(fb.GetPixel(0, 0), indigo);
-  EXPECT_EQ(fb.GetPixel(1, 0), indigo);
-  EXPECT_EQ(fb.GetPixel(2, 0), indigo);
-  EXPECT_EQ(fb.GetPixel(3, 0), indigo);
-  EXPECT_EQ(fb.GetPixel(4, 0), 0);
+  Result<color_rgb565_t> c;
+  c = fb.GetPixel(0, 0);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(1, 0);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(2, 0);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(3, 0);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(4, 0);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
 
-  EXPECT_EQ(fb.GetPixel(0, 1), indigo);
-  EXPECT_EQ(fb.GetPixel(1, 1), 0);
-  EXPECT_EQ(fb.GetPixel(2, 1), 0);
-  EXPECT_EQ(fb.GetPixel(3, 1), indigo);
-  EXPECT_EQ(fb.GetPixel(4, 1), 0);
+  c = fb.GetPixel(0, 1);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(1, 1);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(2, 1);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(3, 1);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(4, 1);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
 
-  EXPECT_EQ(fb.GetPixel(0, 2), indigo);
-  EXPECT_EQ(fb.GetPixel(1, 2), 0);
-  EXPECT_EQ(fb.GetPixel(2, 2), 0);
-  EXPECT_EQ(fb.GetPixel(3, 2), indigo);
-  EXPECT_EQ(fb.GetPixel(4, 2), 0);
+  c = fb.GetPixel(0, 2);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(1, 2);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(2, 2);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(3, 2);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(4, 2);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
 
-  EXPECT_EQ(fb.GetPixel(0, 3), indigo);
-  EXPECT_EQ(fb.GetPixel(1, 3), indigo);
-  EXPECT_EQ(fb.GetPixel(2, 3), indigo);
-  EXPECT_EQ(fb.GetPixel(3, 3), indigo);
-  EXPECT_EQ(fb.GetPixel(4, 3), 0);
+  c = fb.GetPixel(0, 3);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(1, 3);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(2, 3);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(3, 3);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(4, 3);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
 
-  EXPECT_EQ(fb.GetPixel(0, 4), 0);
-  EXPECT_EQ(fb.GetPixel(1, 4), 0);
-  EXPECT_EQ(fb.GetPixel(2, 4), 0);
-  EXPECT_EQ(fb.GetPixel(3, 4), 0);
-  EXPECT_EQ(fb.GetPixel(4, 4), 0);
+  c = fb.GetPixel(0, 4);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(1, 4);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(2, 4);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(3, 4);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(4, 4);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
 }
 
 TEST(DrawCircle, Empty) {
   uint16_t data[7 * 7];
   FramebufferRgb565 fb(data, 7, 7);
-  color_rgb565_t indigo = colors_pico8_rgb565[12];
+  color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   fb.Fill(0);
 
   DrawCircle(&fb, 3, 3, 3, indigo, false);
@@ -241,61 +401,160 @@ TEST(DrawCircle, Empty) {
   // .x...x.
   // ..xxx..
 
-  EXPECT_EQ(fb.GetPixel(0, 0), 0);
-  EXPECT_EQ(fb.GetPixel(1, 0), 0);
-  EXPECT_EQ(fb.GetPixel(2, 0), indigo);
-  EXPECT_EQ(fb.GetPixel(3, 0), indigo);
-  EXPECT_EQ(fb.GetPixel(4, 0), indigo);
-  EXPECT_EQ(fb.GetPixel(5, 0), 0);
-  EXPECT_EQ(fb.GetPixel(6, 0), 0);
+  Result<color_rgb565_t> c;
+  c = fb.GetPixel(0, 0);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(1, 0);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(2, 0);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(3, 0);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(4, 0);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(5, 0);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(6, 0);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
 
-  EXPECT_EQ(fb.GetPixel(0, 1), 0);
-  EXPECT_EQ(fb.GetPixel(1, 1), indigo);
-  EXPECT_EQ(fb.GetPixel(2, 1), 0);
-  EXPECT_EQ(fb.GetPixel(3, 1), 0);
-  EXPECT_EQ(fb.GetPixel(4, 1), 0);
-  EXPECT_EQ(fb.GetPixel(5, 1), indigo);
-  EXPECT_EQ(fb.GetPixel(6, 1), 0);
+  c = fb.GetPixel(0, 1);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(1, 1);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(2, 1);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(3, 1);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(4, 1);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(5, 1);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(6, 1);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
 
-  EXPECT_EQ(fb.GetPixel(0, 2), indigo);
-  EXPECT_EQ(fb.GetPixel(1, 2), 0);
-  EXPECT_EQ(fb.GetPixel(2, 2), 0);
-  EXPECT_EQ(fb.GetPixel(3, 2), 0);
-  EXPECT_EQ(fb.GetPixel(4, 2), 0);
-  EXPECT_EQ(fb.GetPixel(5, 2), 0);
-  EXPECT_EQ(fb.GetPixel(6, 2), indigo);
+  c = fb.GetPixel(0, 2);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(1, 2);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(2, 2);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(3, 2);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(4, 2);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(5, 2);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(6, 2);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
 
-  EXPECT_EQ(fb.GetPixel(0, 3), indigo);
-  EXPECT_EQ(fb.GetPixel(1, 3), 0);
-  EXPECT_EQ(fb.GetPixel(2, 3), 0);
-  EXPECT_EQ(fb.GetPixel(3, 3), 0);
-  EXPECT_EQ(fb.GetPixel(4, 3), 0);
-  EXPECT_EQ(fb.GetPixel(5, 3), 0);
-  EXPECT_EQ(fb.GetPixel(6, 3), indigo);
+  c = fb.GetPixel(0, 3);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(1, 3);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(2, 3);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(3, 3);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(4, 3);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(5, 3);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(6, 3);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
 
-  EXPECT_EQ(fb.GetPixel(0, 4), indigo);
-  EXPECT_EQ(fb.GetPixel(1, 4), 0);
-  EXPECT_EQ(fb.GetPixel(2, 4), 0);
-  EXPECT_EQ(fb.GetPixel(3, 4), 0);
-  EXPECT_EQ(fb.GetPixel(4, 4), 0);
-  EXPECT_EQ(fb.GetPixel(5, 4), 0);
-  EXPECT_EQ(fb.GetPixel(6, 4), indigo);
+  c = fb.GetPixel(0, 4);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(1, 4);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(2, 4);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(3, 4);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(4, 4);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(5, 4);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(6, 4);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
 
-  EXPECT_EQ(fb.GetPixel(0, 5), 0);
-  EXPECT_EQ(fb.GetPixel(1, 5), indigo);
-  EXPECT_EQ(fb.GetPixel(2, 5), 0);
-  EXPECT_EQ(fb.GetPixel(3, 5), 0);
-  EXPECT_EQ(fb.GetPixel(4, 5), 0);
-  EXPECT_EQ(fb.GetPixel(5, 5), indigo);
-  EXPECT_EQ(fb.GetPixel(6, 5), 0);
+  c = fb.GetPixel(0, 5);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(1, 5);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(2, 5);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(3, 5);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(4, 5);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(5, 5);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(6, 5);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
 
-  EXPECT_EQ(fb.GetPixel(0, 6), 0);
-  EXPECT_EQ(fb.GetPixel(1, 6), 0);
-  EXPECT_EQ(fb.GetPixel(2, 6), indigo);
-  EXPECT_EQ(fb.GetPixel(3, 6), indigo);
-  EXPECT_EQ(fb.GetPixel(4, 6), indigo);
-  EXPECT_EQ(fb.GetPixel(5, 6), 0);
-  EXPECT_EQ(fb.GetPixel(6, 6), 0);
+  c = fb.GetPixel(0, 6);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(1, 6);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(2, 6);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(3, 6);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(4, 6);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(5, 6);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(6, 6);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
 }
 
 TEST(DrawText, WithFgBg) {
@@ -304,7 +563,7 @@ TEST(DrawText, WithFgBg) {
   fb.Fill(0);
 
   pw::draw::TextArea text_area(&fb, &font6x8);
-  text_area.SetForegroundColor(colors_pico8_rgb565[COLOR_PINK]);
+  text_area.SetForegroundColor(color::colors_pico8_rgb565[COLOR_PINK]);
   text_area.SetBackgroundColor(0);
   text_area.DrawText("Hell\noT\nhere.\nWorld");
 

@@ -5,7 +5,7 @@
 #include "pw_color/color.h"
 #include "pw_draw/sprite_sheet.h"
 
-const color_rgb565_t pigweed_farm_sprite_data[] = {
+const pw::color::color_rgb565_t pigweed_farm_sprite_data[] = {
 
     // Sprite 0
     0xf81f,  // #ff00ff

@@ -18,6 +18,7 @@
 #include "pw_framebuffer/rgb565.h"
 #include "pw_spin_delay/delay.h"
 
+using pw::color::color_rgb565_t;
 using pw::digital_io::State;
 using pw::spi::ChipSelectBehavior;
 using pw::spi::Device;

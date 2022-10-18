@@ -19,6 +19,8 @@
 #include "pw_draw/font_set.h"
 #include "pw_framebuffer/rgb565.h"
 
+using pw::color::color_rgb565_t;
+
 namespace pw::draw {
 
 TextArea::TextArea(pw::framebuffer::FramebufferRgb565* fb,
@@ -49,10 +51,6 @@ void TextArea::SetBackgroundColor(color_rgb565_t color) {
   background_color = color;
 }
 
-void TextArea::SetBackgroundTransparent() {
-  background_color = framebuffer->GetTransparentColor();
-}
-
 void TextArea::SetCharacterWrap(bool new_setting) {
   character_wrap_enabled = new_setting;
 }
@@ -77,10 +75,8 @@ void TextArea::DrawSpace() {
   for (int font_row = 0; font_row < current_font->height; font_row++) {
     for (int font_column = 0; font_column < current_font->width;
          font_column++) {
-      if (background_color != framebuffer->GetTransparentColor()) {
-        framebuffer->SetPixel(
-            cursor_x + font_column, cursor_y + font_row, background_color);
-      }
+      framebuffer->SetPixel(
+          cursor_x + font_column, cursor_y + font_row, background_color);
     }
   }
 }
@@ -122,7 +118,7 @@ void TextArea::DrawCharacter(int character) {
       if (pixel_on) {
         framebuffer->SetPixel(
             cursor_x + font_column, cursor_y + font_row, foreground_color);
-      } else if (background_color != framebuffer->GetTransparentColor()) {
+      } else {
         framebuffer->SetPixel(
             cursor_x + font_column, cursor_y + font_row, background_color);
       }
@@ -186,13 +182,14 @@ void TextArea::ScrollUp(int lines) {
   int start_x = 0;
   int start_y = pixel_height;
 
-  color_rgb565_t pixel_color;
   for (int current_x = 0; current_x < framebuffer->GetWidth(); current_x++) {
     for (int current_y = start_y; current_y < framebuffer->GetHeight();
          current_y++) {
-      pixel_color = framebuffer->GetPixel(current_x, current_y);
-      framebuffer->SetPixel(
-          start_x + current_x, current_y - start_y, pixel_color);
+      if (auto pixel_color = framebuffer->GetPixel(current_x, current_y);
+          pixel_color.ok()) {
+        framebuffer->SetPixel(
+            start_x + current_x, current_y - start_y, *pixel_color);
+      }
     }
   }
 

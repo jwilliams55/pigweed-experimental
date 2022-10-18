@@ -13,6 +13,8 @@
 // the License.
 #include "pw_draw/sprite_sheet.h"
 
+using pw::color::color_rgb565_t;
+
 namespace pw::draw {
 
 color_rgb565_t SpriteSheet::GetColor(int x, int y, int sprite_index = 0) {

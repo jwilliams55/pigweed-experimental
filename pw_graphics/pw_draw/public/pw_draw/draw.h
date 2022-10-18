@@ -22,9 +22,6 @@
 
 namespace pw::draw {
 
-void DrawLine(
-    pw::framebuffer::FramebufferRgb565* fb, int x1, int y1, int x2, int y2);
-
 void DrawLine(pw::framebuffer::FramebufferRgb565* fb,
               int x1,
               int y1,
@@ -38,34 +35,21 @@ void DrawCircle(pw::framebuffer::FramebufferRgb565* fb,
                 int center_x,
                 int center_y,
                 int radius,
-                bool filled);
-
-void DrawCircle(pw::framebuffer::FramebufferRgb565* fb,
-                int center_x,
-                int center_y,
-                int radius,
                 pw::color::color_rgb565_t pen_color,
                 bool filled);
 
-void DrawHLine(pw::framebuffer::FramebufferRgb565* fb, int x1, int x2, int y);
 void DrawHLine(pw::framebuffer::FramebufferRgb565* fb,
                int x1,
                int x2,
                int y,
-               color_rgb565_t pen_color);
-void DrawRect(pw::framebuffer::FramebufferRgb565* fb,
-              int x1,
-              int y1,
-              int x2,
-              int y2,
-              bool filled);
+               pw::color::color_rgb565_t pen_color);
 
 void DrawRect(pw::framebuffer::FramebufferRgb565* fb,
               int x1,
               int y1,
               int x2,
               int y2,
-              color_rgb565_t pen_color,
+              pw::color::color_rgb565_t pen_color,
               bool filled);
 
 void DrawRectWH(pw::framebuffer::FramebufferRgb565* fb,
@@ -73,19 +57,11 @@ void DrawRectWH(pw::framebuffer::FramebufferRgb565* fb,
                 int y,
                 int w,
                 int h,
-                color_rgb565_t pen_color,
+                pw::color::color_rgb565_t pen_color,
                 bool filled);
 
-void DrawRectWH(pw::framebuffer::FramebufferRgb565* fb,
-                int x,
-                int y,
-                int w,
-                int h,
-                bool filled);
-
-void Fill(pw::framebuffer::FramebufferRgb565* fb);
-
-void Fill(pw::framebuffer::FramebufferRgb565* fb, color_rgb565_t pen_color);
+void Fill(pw::framebuffer::FramebufferRgb565* fb,
+          pw::color::color_rgb565_t pen_color);
 
 void DrawSprite(pw::framebuffer::FramebufferRgb565* fb,
                 int x,

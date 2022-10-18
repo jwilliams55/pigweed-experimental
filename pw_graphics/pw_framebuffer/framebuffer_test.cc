@@ -21,6 +21,8 @@
 #include "pw_framebuffer/rgb565.h"
 #include "pw_log/log.h"
 
+using pw::color::color_rgb565_t;
+
 namespace pw::framebuffer {
 namespace {
 
@@ -56,16 +58,26 @@ TEST(FramebufferRgb565, SetPixelGetPixel) {
   EXPECT_EQ(pixel_data[1], 0);
   EXPECT_EQ(pixel_data[8 * 8 - 2], 0);
   EXPECT_EQ(pixel_data[8 * 8 - 1], indigo);
-  EXPECT_EQ(fb.GetPixel(0, 0), indigo);
-  EXPECT_EQ(fb.GetPixel(0, 1), 0);
-  EXPECT_EQ(fb.GetPixel(6, 7), 0);
-  EXPECT_EQ(fb.GetPixel(7, 7), indigo);
+
+  Result<color_rgb565_t> c;
+  c = fb.GetPixel(0, 0);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
+  c = fb.GetPixel(0, 1);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(6, 7);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), 0);
+  c = fb.GetPixel(7, 7);
+  ASSERT_TRUE(c.ok());
+  EXPECT_EQ(c.value(), indigo);
 }
 
 TEST(FramebufferRgb565, Blit) {
   uint16_t data[8 * 8];
   FramebufferRgb565 fb(data, 8, 8);
-  color_rgb565_t indigo = colors_pico8_rgb565[12];
+  color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   fb.Fill(indigo);
   color_rgb565_t* const pixel_data = fb.GetFramebufferData();
   // First pixel

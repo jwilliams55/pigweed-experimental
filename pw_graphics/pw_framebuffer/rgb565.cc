@@ -16,9 +16,8 @@
 #include <cstddef>
 
 #include "pw_assert/assert.h"
-#include "pw_color/color.h"
 
-using namespace pw::color;
+using pw::color::color_rgb565_t;
 
 namespace pw::framebuffer {
 
@@ -28,18 +27,7 @@ FramebufferRgb565::FramebufferRgb565()
 FramebufferRgb565::FramebufferRgb565(color_rgb565_t* data,
                                      int width,
                                      int height)
-    : pixel_data_(data), width_(width), height_(height) {
-  SetDefaultColors();
-}
-
-void FramebufferRgb565::SetDefaultColors() {
-  pen_color = ColorRGBA(0xff, 0xff, 0xff).ToRgb565();          // White
-  transparent_color = ColorRGBA(0xff, 0x00, 0xff).ToRgb565();  // Magenta
-}
-
-color_rgb565_t* FramebufferRgb565::GetFramebufferData() const {
-  return pixel_data_;
-}
+    : pixel_data_(data), width_(width), height_(height) {}
 
 void FramebufferRgb565::SetFramebufferData(color_rgb565_t* data,
                                            int width,
@@ -50,16 +38,15 @@ void FramebufferRgb565::SetFramebufferData(color_rgb565_t* data,
 }
 
 // Return the RGB565 color at position x, y. Bounds are checked.
-color_rgb565_t FramebufferRgb565::GetPixel(int x, int y) const {
+Result<color_rgb565_t> FramebufferRgb565::GetPixel(int x, int y) const {
   PW_ASSERT(IsValid());
-  color_rgb565_t value = transparent_color;
   if (x >= 0 && x < width_ && y >= 0 && y < height_) {
-    value = pixel_data_[y * width_ + x];
+    return pixel_data_[y * width_ + x];
   }
-  return value;
+  return Status::OutOfRange();
 }
 
-// Draw a color at (x, y) if it's a valid positon.
+// Draw a color at (x, y) if it's a valid position.
 void FramebufferRgb565::SetPixel(int x, int y, color_rgb565_t rgb565_color) {
   PW_ASSERT(IsValid());
   if (x >= 0 && x < width_ && y >= 0 && y < height_) {
@@ -67,18 +54,14 @@ void FramebufferRgb565::SetPixel(int x, int y, color_rgb565_t rgb565_color) {
   }
 }
 
-// Draw the current pen color at x, y. Check that x, y is a valid positon.
-void FramebufferRgb565::SetPixel(int x, int y) { SetPixel(x, y, pen_color); }
-
 // Copy the colors from another framebuffer into this one at position x, y.
 void FramebufferRgb565::Blit(FramebufferRgb565* fb, int x, int y) {
   PW_ASSERT(fb->IsValid());
   for (int current_x = 0; current_x < fb->width_; current_x++) {
     for (int current_y = 0; current_y < fb->height_; current_y++) {
-      color_rgb565_t pixel_color = fb->GetPixel(current_x, current_y);
-      if (pixel_color != fb->transparent_color &&
-          pixel_color != transparent_color) {
-        SetPixel(x + current_x, y + current_y, pixel_color);
+      if (auto pixel_color = fb->GetPixel(current_x, current_y);
+          pixel_color.ok()) {
+        SetPixel(x + current_x, y + current_y, pixel_color.value());
       }
     }
   }
@@ -90,26 +73,6 @@ void FramebufferRgb565::Fill(color_rgb565_t color) {
   for (int i = 0; i < width_ * height_; i++) {
     pixel_data_[i] = color;
   }
-}
-
-// Fill the entire buffer with the pen color.
-void FramebufferRgb565::Fill() {
-  PW_ASSERT(IsValid());
-  for (int i = 0; i < width_ * height_; i++) {
-    pixel_data_[i] = pen_color;
-  }
-}
-
-void FramebufferRgb565::SetPenColor(color_rgb565_t color) { pen_color = color; }
-
-color_rgb565_t FramebufferRgb565::GetPenColor() const { return pen_color; }
-
-void FramebufferRgb565::SetTransparentColor(color_rgb565_t color) {
-  transparent_color = color;
-}
-
-color_rgb565_t FramebufferRgb565::GetTransparentColor() const {
-  return transparent_color;
 }
 
 }  // namespace pw::framebuffer
