@@ -37,6 +37,7 @@ from pw_presubmit import (
     git_repo,
     inclusive_language,
     install_hook,
+    keep_sorted,
     python_checks,
     PresubmitContext,
 )
@@ -109,10 +110,12 @@ QUICK = (
 )
 
 LINTFORMAT = (
-    # Use the upstream formatting checks, with custom path filters applied.
-    format_code.presubmit_checks(),
-    python_checks.gn_python_lint,
+    # keep-sorted: start
     cpp_checks.pragma_once,
+    format_code.presubmit_checks(),
+    keep_sorted.keep_sorted,
+    python_checks.gn_python_lint,
+    # keep-sorted: end
 )
 
 FULL = (
@@ -123,10 +126,12 @@ FULL = (
 )
 
 PROGRAMS = pw_presubmit.Programs(
-    quick=QUICK,
+    # keep-sorted: start
     full=FULL,
     lintformat=LINTFORMAT,
     other_checks=OTHER_CHECKS,
+    quick=QUICK,
+    # keep-sorted: end
 )
 
 
