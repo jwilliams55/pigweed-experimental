@@ -19,6 +19,9 @@
 // https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples
 #include "pw_display/display.h"
 
+// To silence large number of warnings (at least on macOS).
+#define GL_SILENCE_DEPRECATION
+
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <GLES2/gl2.h>
 #endif
