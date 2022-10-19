@@ -17,7 +17,7 @@
 // https://github.com/ocornut/imgui/tree/master/examples/example_glfw_opengl3
 // As well as the wiki page:
 // https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples
-#include "pw_display/display.h"
+#include "pw_display/display_backend.h"
 
 // To silence large number of warnings (at least on macOS).
 #define GL_SILENCE_DEPRECATION
@@ -43,6 +43,9 @@
 #include "pw_framebuffer/rgb565.h"
 
 using pw::color::color_rgb565_t;
+using pw::framebuffer::FramebufferRgb565;
+
+namespace pw::display::backend {
 
 namespace {
 
@@ -158,16 +161,15 @@ static void glfw_error_callback(int error, const char* description) {
 
 }  // namespace
 
-namespace pw::display {
+int Display::GetWidth() const { return kDisplayWidth; }
 
-int GetWidth() { return kDisplayWidth; }
-int GetHeight() { return kDisplayHeight; }
+int Display::GetHeight() const { return kDisplayHeight; }
 
-void Init() {
+Status Display::Init() {
   // Setup window
   glfwSetErrorCallback(glfw_error_callback);
   if (!glfwInit())
-    return;
+    return Status::Internal();
 
     // Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -195,7 +197,7 @@ void Init() {
   // Create window with graphics context
   window = glfwCreateWindow(1280, 800, "pw_display", NULL, NULL);
   if (window == NULL)
-    return;
+    return Status::Internal();
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1);  // Enable vsync
 
@@ -221,6 +223,7 @@ void Init() {
   ImGui_ImplOpenGL3_Init(glsl_version);
 
   SetupLcdTexture(&lcd_texture);
+  return OkStatus();
 }
 
 void RecreateLcdTexture() {
@@ -233,7 +236,11 @@ void RecreateLcdTexture() {
 
 void Render();
 
-void UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer) {
+Display::Display() = default;
+
+Display::~Display() = default;
+
+void UpdatePixelDouble(FramebufferRgb565* frame_buffer) {
   RecreateLcdTexture();
 
   // Copy frame_buffer into lcd_pixel_data
@@ -254,13 +261,13 @@ void UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer) {
   Render();
 }
 
-void Update(pw::framebuffer::FramebufferRgb565* frame_buffer) {
+void Display::Update(FramebufferRgb565& frame_buffer) {
   RecreateLcdTexture();
 
   // Copy frame_buffer into lcd_pixel_data
   for (GLuint x = 0; x < kDisplayWidth; x++) {
     for (GLuint y = 0; y < kDisplayHeight; y++) {
-      if (auto c = frame_buffer->GetPixel(x, y); c.ok()) {
+      if (auto c = frame_buffer.GetPixel(x, y); c.ok()) {
         _SetTexturePixel(x, y, c.value());
       }
     }
@@ -369,11 +376,11 @@ void Render() {
   }
 }
 
-bool TouchscreenAvailable() { return true; }
+bool Display::TouchscreenAvailable() const { return true; }
 
-bool NewTouchEvent() { return left_mouse_pressed; }
+bool Display::NewTouchEvent() { return left_mouse_pressed; }
 
-pw::coordinates::Vec3Int GetTouchPoint() {
+pw::coordinates::Vec3Int Display::GetTouchPoint() {
   pw::coordinates::Vec3Int point;
   point.x = 0;
   point.y = 0;
@@ -388,10 +395,10 @@ pw::coordinates::Vec3Int GetTouchPoint() {
   return point;
 }
 
-Status InitFramebuffer(FramebufferRgb565* framebuffer) {
+Status Display::InitFramebuffer(FramebufferRgb565* framebuffer) {
   framebuffer->SetFramebufferData(
       framebuffer_data, kDisplayWidth, kDisplayHeight);
   return OkStatus();
 }
 
-}  // namespace pw::display
+}  // namespace pw::display::backend

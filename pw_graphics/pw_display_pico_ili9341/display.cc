@@ -12,13 +12,13 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-#include "pw_display/display.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 
 #include <cinttypes>
 #include <cstdint>
+
+#include "pw_display/display_backend.h"
 
 #define LIB_CMSIS_CORE 0
 #define LIB_PICO_STDIO_USB 0
@@ -39,7 +39,7 @@
 
 using pw::display_driver::DisplayDriverILI9341;
 
-namespace pw::display {
+namespace pw::display::backend {
 
 namespace {
 
@@ -82,21 +82,22 @@ class InstanceData {
         },
         display_driver_(driver_config_) {}
 
-  void Init() {
+  Status Init() {
     InitGPIO();
     InitSPI();
     InitDisplayDriver();
+    return OkStatus();
   }
 
-  void Update(pw::framebuffer::FramebufferRgb565* frame_buffer) {
-    display_driver_.Update(frame_buffer);
+  void Update(pw::framebuffer::FramebufferRgb565& frame_buffer) {
+    display_driver_.Update(&frame_buffer);
   }
 
   void UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer) {
     display_driver_.UpdatePixelDouble(frame_buffer);
   }
 
-  Status InitFramebuffer(FramebufferRgb565* framebuffer) {
+  Status InitFramebuffer(pw::framebuffer::FramebufferRgb565* framebuffer) {
     framebuffer->SetFramebufferData(
         framebuffer_data_, kDisplayWidth, kDisplayHeight);
     return OkStatus();
@@ -149,30 +150,31 @@ InstanceData s_instance_data;
 
 }  // namespace
 
-void Init() { s_instance_data.Init(); }
+Display::Display() = default;
 
-int GetWidth() { return kDisplayWidth; }
+Display::~Display() = default;
 
-int GetHeight() { return kDisplayHeight; }
+Status Display::Init() { return s_instance_data.Init(); }
 
-void Update(pw::framebuffer::FramebufferRgb565* frame_buffer) {
+int Display::GetWidth() const { return kDisplayWidth; }
+
+int Display::GetHeight() const { return kDisplayHeight; }
+
+void Display::Update(pw::framebuffer::FramebufferRgb565& frame_buffer) {
   s_instance_data.Update(frame_buffer);
 }
 
-void UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer) {
-  s_instance_data.UpdatePixelDouble(frame_buffer);
-}
+bool Display::TouchscreenAvailable() const { return false; }
 
-bool TouchscreenAvailable() { return false; }
+bool Display::NewTouchEvent() { return false; }
 
-bool NewTouchEvent() { return false; }
-
-pw::coordinates::Vec3Int GetTouchPoint() {
+pw::coordinates::Vec3Int Display::GetTouchPoint() {
   return pw::coordinates::Vec3Int{0, 0, 0};
 }
 
-Status InitFramebuffer(FramebufferRgb565* framebuffer) {
+Status Display::InitFramebuffer(
+    pw::framebuffer::FramebufferRgb565* framebuffer) {
   return s_instance_data.InitFramebuffer(framebuffer);
 }
 
-}  // namespace pw::display
+}  // namespace pw::display::backend

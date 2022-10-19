@@ -16,8 +16,15 @@ import("//build_overrides/pigweed.gni")
 
 import("$dir_pw_build/target_types.gni")
 
+config("backend_config") {
+  include_dirs = [ "public_overrides" ]
+  visibility = [ ":*" ]
+}
+
 pw_source_set("pw_display_null") {
+  public_configs = [ ":backend_config" ]
   deps = [ "$dir_pw_display:pw_display.facade" ]
+  public = [ "public_overrides/pw_display/display_backend.h" ]
   sources = [ "display.cc" ]
   remove_configs = [ "$dir_pw_build:strict_warnings" ]
 }

@@ -12,8 +12,6 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-#include "pw_display/display.h"
-
 #include <Arduino.h>
 
 #include <cinttypes>
@@ -21,9 +19,10 @@
 
 #include "ILI9341_t3n.h"
 #include "pw_color/color.h"
+#include "pw_display/display_backend.h"
 #include "pw_framebuffer/rgb565.h"
 
-namespace pw::display {
+namespace pw::display::backend {
 
 namespace {
 
@@ -42,7 +41,11 @@ ILI9341_t3n tft = ILI9341_t3n(TFT_CS, TFT_DC, TFT_RST);
 
 }  // namespace
 
-void Init() {
+Display::Display() = default;
+
+Display::~Display() = default;
+
+void Display::Init() {
   // SPI Clock: 30MHz writes & 20MHz reads.
   // Lower write speed if the display doesn't work.
   tft.begin(30000000u, 2000000);
@@ -51,23 +54,24 @@ void Init() {
   tft.setCursor(0, 0);
 }
 
-int GetWidth() { return tft.width(); }
-int GetHeight() { return tft.height(); }
+int Display::GetWidth() { return tft.width(); }
+int Display::GetHeight() { return tft.height(); }
 
-void UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer) {
+void Display::UpdatePixelDouble(
+    pw::framebuffer::FramebufferRgb565* frame_buffer) {
   // Not implemented.
 }
 
-void Update(pw::framebuffer::FramebufferRgb565* frame_buffer) {
+void Display::Update(pw::framebuffer::FramebufferRgb565* frame_buffer) {
   tft.setFrameBuffer(frame_buffer->pixel_data);
   tft.updateScreen();
 }
 
-bool TouchscreenAvailable() { return false; }
+bool Display::TouchscreenAvailable() { return false; }
 
-bool NewTouchEvent() { return false; }
+bool Display::NewTouchEvent() { return false; }
 
-pw::coordinates::Vec3Int GetTouchPoint() {
+pw::coordinates::Vec3Int Display::GetTouchPoint() {
   pw::coordinates::Vec3Int point;
   point.x = 0;
   point.y = 0;
@@ -75,10 +79,10 @@ pw::coordinates::Vec3Int GetTouchPoint() {
   return point;
 }
 
-Status InitFramebuffer(FramebufferRgb565* framebuffer) {
+Status Display::InitFramebuffer(FramebufferRgb565* framebuffer) {
   framebuffer->SetFramebufferData(
       framebuffer_data, kDisplayWidth, kDisplayHeight);
   return OkStatus();
 }
 
-}  // namespace pw::display
+}  // namespace pw::display::backend

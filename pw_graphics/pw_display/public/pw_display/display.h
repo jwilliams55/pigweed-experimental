@@ -17,23 +17,35 @@
 #include "pw_framebuffer/rgb565.h"
 #include "pw_status/status.h"
 
-using namespace pw::framebuffer;
-
 namespace pw::display {
 
-void Init();
-// TODO(tonymd): Add a DPI or physical size value.
-int GetWidth();
-int GetHeight();
-// TODO(tonymd): Add update functions for new framebuffer types or make this a
-// templated class.
-void Update(FramebufferRgb565* framebuffer);
-// Initialize the supplied |framebuffer| to the appropriate size for the
-// display.
-Status InitFramebuffer(FramebufferRgb565* framebuffer);
-void UpdatePixelDouble(FramebufferRgb565* framebuffer);
-bool TouchscreenAvailable();
-bool NewTouchEvent();
-pw::coordinates::Vec3Int GetTouchPoint();
+// Defines an interface that all display backends must implement.
+class Display {
+ public:
+  virtual ~Display() = default;
+
+  // Initialize the display.
+  virtual Status Init() = 0;
+
+  // Initialize the supplied |framebuffer| to the appropriate size for the
+  // display.
+  virtual Status InitFramebuffer(
+      pw::framebuffer::FramebufferRgb565* framebuffer) = 0;
+
+  // TODO(tonymd): Add a DPI or physical size value.
+  virtual int GetWidth() const = 0;
+  virtual int GetHeight() const = 0;
+
+  // TODO(tonymd): Add update functions for new framebuffer types or make this a
+  // templated class.
+  virtual void Update(pw::framebuffer::FramebufferRgb565& framebuffer) = 0;
+
+  virtual bool TouchscreenAvailable() const = 0;
+  virtual bool NewTouchEvent() = 0;
+  virtual pw::coordinates::Vec3Int GetTouchPoint() = 0;
+
+ protected:
+  Display() = default;
+};
 
 }  // namespace pw::display

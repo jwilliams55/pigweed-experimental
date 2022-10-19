@@ -12,41 +12,43 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-#include "pw_display/display.h"
-
 #include <cinttypes>
 
-namespace pw::display {
+#include "pw_display/display_backend.h"
+
+using pw::framebuffer::FramebufferRgb565;
+
+namespace pw::display::backend {
 
 namespace {
 
 constexpr int kDisplayWidth = 320;
 constexpr int kDisplayHeight = 240;
-constexpr int kDisplayDataSize = kDisplayWidth * kDisplayHeight;
 
 }  // namespace
 
-void Init() {}
+Display::Display() = default;
 
-int GetWidth() { return kDisplayWidth; }
-int GetHeight() { return kDisplayHeight; }
+Display::~Display() = default;
 
-void Update(pw::framebuffer::FramebufferRgb565* frame_buffer) {}
+Status Display::Init() { return OkStatus(); }
 
-void UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer) {}
+int Display::GetWidth() const { return kDisplayWidth; }
 
-bool TouchscreenAvailable() { return false; }
+int Display::GetHeight() const { return kDisplayHeight; }
 
-bool NewTouchEvent() { return false; }
+void Display::Update(pw::framebuffer::FramebufferRgb565& frame_buffer) {}
 
-pw::coordinates::Vec3Int GetTouchPoint() {
-  pw::coordinates::Vec3Int point;
-  point.x = 0;
-  point.y = 0;
-  point.z = 0;
-  return point;
+bool Display::TouchscreenAvailable() const { return false; }
+
+bool Display::NewTouchEvent() { return false; }
+
+pw::coordinates::Vec3Int Display::GetTouchPoint() {
+  return pw::coordinates::Vec3Int{0, 0, 0};
 }
 
-Status InitFramebuffer(FramebufferRgb565* framebuffer) { return OkStatus(); }
+Status Display::InitFramebuffer(FramebufferRgb565* framebuffer) {
+  return OkStatus();
+}
 
-}  // namespace pw::display
+}  // namespace pw::display::backend

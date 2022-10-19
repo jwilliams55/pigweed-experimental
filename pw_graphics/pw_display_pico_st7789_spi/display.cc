@@ -12,8 +12,6 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-#include "pw_display/display.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -24,9 +22,12 @@
 #include "hardware/spi.h"
 #include "pico/stdlib.h"
 #include "pw_color/color.h"
+#include "pw_display/display_backend.h"
 #include "pw_framebuffer/rgb565.h"
 
-namespace pw::display {
+using pw::framebuffer::FramebufferRgb565;
+
+namespace pw::display::backend {
 
 namespace {
 
@@ -111,38 +112,38 @@ uint16_t framebuffer_data[kDisplayDataSize];
 
 // SPI Functions
 // TODO(tonymd): move to pw_spi
-static inline void ChipSelectEnable() {
+inline void ChipSelectEnable() {
   asm volatile("nop \n nop \n nop");
   gpio_put(TFT_CS, 0);
   asm volatile("nop \n nop \n nop");
 }
 
-static inline void ChipSelectDisable() {
+inline void ChipSelectDisable() {
   asm volatile("nop \n nop \n nop");
   gpio_put(TFT_CS, 1);
   asm volatile("nop \n nop \n nop");
 }
 
-static inline void DataCommandEnable() {
+inline void DataCommandEnable() {
   asm volatile("nop \n nop \n nop");
   gpio_put(TFT_DC, 0);
   asm volatile("nop \n nop \n nop");
 }
 
-static inline void DataCommandDisable() {
+inline void DataCommandDisable() {
   asm volatile("nop \n nop \n nop");
   gpio_put(TFT_DC, 1);
   asm volatile("nop \n nop \n nop");
 }
 
-static void inline SPISendByte(uint8_t data) {
+void inline SPISendByte(uint8_t data) {
   ChipSelectEnable();
   DataCommandDisable();
   spi_write_blocking(SPI_PORT, &data, 1);
   ChipSelectDisable();
 }
 
-static void inline SPISendShort(uint16_t data) {
+void inline SPISendShort(uint16_t data) {
   ChipSelectEnable();
   DataCommandDisable();
 
@@ -156,7 +157,7 @@ static void inline SPISendShort(uint16_t data) {
   ChipSelectDisable();
 }
 
-static void inline SPISendCommand(uint8_t command) {
+void inline SPISendCommand(uint8_t command) {
   // set data/command to command mode (low).
   DataCommandEnable();
   ChipSelectEnable();
@@ -169,9 +170,9 @@ static void inline SPISendCommand(uint8_t command) {
   ChipSelectDisable();
 }
 
-static void inline SPISendCommand(uint8_t command,
-                                  size_t data_length,
-                                  const char* data) {
+void inline SPISendCommand(uint8_t command,
+                           size_t data_length,
+                           const char* data) {
   // set data/command to command mode (low).
   DataCommandEnable();
   ChipSelectEnable();
@@ -188,7 +189,11 @@ static void inline SPISendCommand(uint8_t command,
 
 }  // namespace
 
-void Init() {
+Display::Display() = default;
+
+Display::~Display() = default;
+
+Status Display::Init() {
   stdio_init_all();
   // TODO: This should be a facade
   setup_default_uart();
@@ -279,10 +284,12 @@ void Init() {
   SPISendCommand(ST7789_MADCTL, 1, (char*)&madctl);
 
   sleep_ms(50);
+  return OkStatus();
 }
 
-int GetWidth() { return kDisplayWidth; }
-int GetHeight() { return kDisplayHeight; }
+int Display::GetWidth() const { return kDisplayWidth; }
+
+int Display::GetHeight() const { return kDisplayHeight; }
 
 void SendDisplayWriteCommand() {
   uint8_t command = ST7789_RAMWR;
@@ -315,20 +322,20 @@ void UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer) {
   ChipSelectDisable();
 }
 
-void Update(pw::framebuffer::FramebufferRgb565* frame_buffer) {
+void Display::Update(FramebufferRgb565& frame_buffer) {
   SendDisplayWriteCommand();
 
-  const uint16_t* pixel_data = frame_buffer->GetFramebufferData();
+  const uint16_t* pixel_data = frame_buffer.GetFramebufferData();
   spi_write16_blocking(SPI_PORT, pixel_data, kDisplayDataSize);
   // put the display back into data mode (high).
   ChipSelectDisable();
 }
 
-bool TouchscreenAvailable() { return false; }
+bool Display::TouchscreenAvailable() const { return false; }
 
-bool NewTouchEvent() { return false; }
+bool Display::NewTouchEvent() { return false; }
 
-pw::coordinates::Vec3Int GetTouchPoint() {
+pw::coordinates::Vec3Int Display::GetTouchPoint() {
   pw::coordinates::Vec3Int point;
   point.x = 0;
   point.y = 0;
@@ -336,10 +343,10 @@ pw::coordinates::Vec3Int GetTouchPoint() {
   return point;
 }
 
-Status InitFramebuffer(FramebufferRgb565* framebuffer) {
+Status Display::InitFramebuffer(FramebufferRgb565* framebuffer) {
   framebuffer->SetFramebufferData(
       framebuffer_data, kDisplayWidth, kDisplayHeight);
   return OkStatus();
 }
 
-}  // namespace pw::display
+}  // namespace pw::display::backend

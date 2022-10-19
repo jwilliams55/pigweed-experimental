@@ -23,7 +23,7 @@
 #include "pw_color/colors_pico8.h"
 #include "pw_coordinates/vec2.h"
 #include "pw_coordinates/vec_int.h"
-#include "pw_display/display.h"
+#include "pw_display/display_backend.h"
 #include "pw_draw/draw.h"
 #include "pw_draw/font_set.h"
 #include "pw_draw/pigweed_farm.h"
@@ -36,6 +36,7 @@
 #include "pw_touchscreen/touchscreen.h"
 
 using pw::color::colors_pico8_rgb565;
+using pw::display::backend::Display;
 using pw::draw::TextArea;
 using pw::framebuffer::FramebufferRgb565;
 
@@ -186,25 +187,6 @@ void draw_sprite_and_text_demo(FramebufferRgb565& frame_buffer,
   text_area.DrawCharacter('\n');
 }
 
-bool_function_pointer touch_screen_available_func;
-vec3int_function_pointer get_touch_screen_point_func;
-bool_function_pointer new_touch_event_func;
-bool touch_screen_exists = false;
-
-void setup_touchscreen_functions() {
-  // Default to using pw::touchscreen but use pw::display if it's supported.
-  touch_screen_available_func = &pw::touchscreen::Available;
-  get_touch_screen_point_func = &pw::touchscreen::GetTouchPoint;
-  new_touch_event_func = &pw::touchscreen::NewTouchEvent;
-  // Check if pw::display implements touchscreen functions
-  if (pw::display::TouchscreenAvailable()) {
-    touch_screen_available_func = &pw::display::TouchscreenAvailable;
-    get_touch_screen_point_func = &pw::display::GetTouchPoint;
-    new_touch_event_func = &pw::display::NewTouchEvent;
-  }
-  touch_screen_exists = (*touch_screen_available_func)();
-}
-
 void create_demo_log_messages() {
   // Create some demo log messages.
   PW_LOG_CRITICAL("An irrecoverable error has occurred!");
@@ -239,8 +221,9 @@ int main() {
 
   pw::board_led::Init();
 
+  Display display;
   FramebufferRgb565 frame_buffer;
-  pw::display::InitFramebuffer(&frame_buffer).IgnoreError();
+  display.InitFramebuffer(&frame_buffer).IgnoreError();
   TextArea log_text_area(&frame_buffer, &pw::draw::font6x8);
   DemoDecoder demo_decoder = DemoDecoder(log_text_area);
 
@@ -255,16 +238,13 @@ int main() {
 
   // Init the display and touchscreen.
   PW_LOG_INFO("pw::display::Init()");
-  pw::display::Init();
+  display.Init();
   PW_LOG_INFO("pw::touchscreen::Init()");
   pw::touchscreen::Init();
 
   // Change log output function to write_log_to_screen.
   log_text_area.SetBackgroundColor(0);
   pw::log_basic::SetOutput(*write_log_to_screen);
-
-  // Touchscreen Functions
-  setup_touchscreen_functions();
 
   // Touch event variables
   Vec2 screen_center =
@@ -278,7 +258,7 @@ int main() {
 
   draw_sprite_and_text_demo(frame_buffer, log_text_area);
   // Push the frame buffer to the screen.
-  pw::display::Update(&frame_buffer);
+  display.Update(frame_buffer);
 
   // Setup the log message button position variables.
   TextArea button_text_area(&frame_buffer, &pw::draw::font6x8);
@@ -297,9 +277,9 @@ int main() {
     // Input Update Phase
     time_start_button_check = pw::spin_delay::Millis();
 
-    pw::coordinates::Vec3Int point = (*get_touch_screen_point_func)();
+    pw::coordinates::Vec3Int point = display.GetTouchPoint();
     // Check for touchscreen events.
-    if (touch_screen_exists && (*new_touch_event_func)()) {
+    if (display.TouchscreenAvailable() && display.NewTouchEvent()) {
       if (point.z > 0) {
         bool button_just_pressed = false;
         if (point.z != last_frame_touch_state.z)
@@ -358,7 +338,7 @@ int main() {
     // Display Write Phase
     time_start_screen_spi_update = pw::spin_delay::Millis();
 
-    pw::display::Update(&frame_buffer);
+    display.Update(frame_buffer);
 
     // End Display Write Phase
     delta_screen_spi_update =

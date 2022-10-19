@@ -18,6 +18,11 @@ import("$dir_pw_build/target_types.gni")
 import("glfw.gni")
 import("imgui.gni")
 
+config("backend_config") {
+  include_dirs = [ "public_overrides" ]
+  visibility = [ ":*" ]
+}
+
 if (dir_pw_third_party_imgui != "") {
   config("imgui") {
     include_dirs = [
@@ -86,7 +91,11 @@ if (dir_pw_third_party_imgui != "") {
   ]
 
   pw_source_set("pw_display_host_imgui") {
-    public_configs = [ ":imgui" ]
+    public_configs = [
+      ":imgui",
+      ":backend_config",
+    ]
+    public = [ "public_overrides/pw_display/display_backend.h" ]
     deps = [ "$dir_pw_display:pw_display.facade" ]
     sources = [ "display.cc" ] + _imgui_sources
     remove_configs = [ "$dir_pw_build:strict_warnings" ]
