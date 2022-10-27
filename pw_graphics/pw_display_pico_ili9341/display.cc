@@ -98,8 +98,10 @@ class InstanceData {
   }
 
   Status InitFramebuffer(pw::framebuffer::FramebufferRgb565* framebuffer) {
-    framebuffer->SetFramebufferData(
-        framebuffer_data_, kDisplayWidth, kDisplayHeight);
+    framebuffer->SetFramebufferData(framebuffer_data_,
+                                    kDisplayWidth,
+                                    kDisplayHeight,
+                                    kDisplayWidth * sizeof(uint16_t));
     return OkStatus();
   }
 

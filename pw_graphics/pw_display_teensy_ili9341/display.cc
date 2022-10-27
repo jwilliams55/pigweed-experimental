@@ -80,8 +80,10 @@ pw::coordinates::Vec3Int Display::GetTouchPoint() {
 }
 
 Status Display::InitFramebuffer(FramebufferRgb565* framebuffer) {
-  framebuffer->SetFramebufferData(
-      framebuffer_data, kDisplayWidth, kDisplayHeight);
+  framebuffer->SetFramebufferData(framebuffer_data,
+                                  kDisplayWidth,
+                                  kDisplayHeight,
+                                  kDisplayWidth * sizeof(uint16_t));
   return OkStatus();
 }
 

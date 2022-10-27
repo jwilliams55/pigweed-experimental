@@ -22,18 +22,24 @@ using pw::color::color_rgb565_t;
 namespace pw::framebuffer {
 
 FramebufferRgb565::FramebufferRgb565()
-    : pixel_data_(nullptr), width_(0), height_(0) {}
+    : pixel_data_(nullptr), width_(0), height_(0), row_bytes_(0) {}
 
 FramebufferRgb565::FramebufferRgb565(color_rgb565_t* data,
                                      int width,
-                                     int height)
-    : pixel_data_(data), width_(width), height_(height) {}
+                                     int height,
+                                     int row_bytes)
+    : pixel_data_(data),
+      width_(width),
+      height_(height),
+      row_bytes_(row_bytes) {}
 
 void FramebufferRgb565::SetFramebufferData(color_rgb565_t* data,
                                            int width,
-                                           int height) {
+                                           int height,
+                                           int row_bytes) {
   width_ = width;
   height_ = height;
+  row_bytes_ = row_bytes;
   pixel_data_ = data;
 }
 

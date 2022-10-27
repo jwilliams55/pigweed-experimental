@@ -67,7 +67,7 @@ void PrintFramebufferAsANSI(FramebufferRgb565* fb) {
 
 TEST(DrawLine, Diagonal) {
   uint16_t data[4 * 4];
-  FramebufferRgb565 fb(data, 4, 4);
+  FramebufferRgb565 fb(data, 4, 4, 4 * sizeof(data[0]));
   color_rgb565_t indigo = color::colors_pico8_rgb565[12];
 
   fb.Fill(0);
@@ -92,7 +92,7 @@ TEST(DrawLine, Diagonal) {
 
 TEST(DrawHLine, Top) {
   uint16_t data[4 * 4];
-  FramebufferRgb565 fb(data, 4, 4);
+  FramebufferRgb565 fb(data, 4, 4, 4 * sizeof(data[0]));
   color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   fb.Fill(0);
 
@@ -114,7 +114,7 @@ TEST(DrawHLine, Top) {
 
 TEST(DrawRect, Empty) {
   uint16_t data[5 * 5];
-  FramebufferRgb565 fb(data, 5, 5);
+  FramebufferRgb565 fb(data, 5, 5, 5 * sizeof(data[0]));
   color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   fb.Fill(0);
 
@@ -206,7 +206,7 @@ TEST(DrawRect, Empty) {
 
 TEST(DrawRect, Filled) {
   uint16_t data[5 * 5];
-  FramebufferRgb565 fb(data, 5, 5);
+  FramebufferRgb565 fb(data, 5, 5, 5 * sizeof(data[0]));
   color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   fb.Fill(0);
 
@@ -293,7 +293,7 @@ TEST(DrawRect, Filled) {
 
 TEST(DrawRectWH, WidthHeightCorrect) {
   uint16_t data[5 * 5];
-  FramebufferRgb565 fb(data, 5, 5);
+  FramebufferRgb565 fb(data, 5, 5, 5 * sizeof(data[0]));
   color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   fb.Fill(0);
 
@@ -385,7 +385,7 @@ TEST(DrawRectWH, WidthHeightCorrect) {
 
 TEST(DrawCircle, Empty) {
   uint16_t data[7 * 7];
-  FramebufferRgb565 fb(data, 7, 7);
+  FramebufferRgb565 fb(data, 7, 7, 7 * sizeof(data[0]));
   color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   fb.Fill(0);
 
@@ -559,7 +559,7 @@ TEST(DrawCircle, Empty) {
 
 TEST(DrawText, WithFgBg) {
   uint16_t data[(5 * 6) * (3 * 8)];
-  FramebufferRgb565 fb(data, 5 * 6, 3 * 8);
+  FramebufferRgb565 fb(data, 5 * 6, 3 * 8, (5 * 6) * sizeof(data[0]));
   fb.Fill(0);
 
   pw::draw::TextArea text_area(&fb, &font6x8);

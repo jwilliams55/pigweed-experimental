@@ -28,7 +28,10 @@ class FramebufferRgb565 {
   // Construct a framebuffer of the specified dimensions which *does not* own
   // the |data| - i.e. this instance may write to the data, but will never
   // attempt to free it.
-  FramebufferRgb565(pw::color::color_rgb565_t* data, int width, int height);
+  FramebufferRgb565(pw::color::color_rgb565_t* data,
+                    int width,
+                    int height,
+                    int row_bytes);
 
   FramebufferRgb565(const FramebufferRgb565&) = delete;
   FramebufferRgb565(FramebufferRgb565&& other) = delete;
@@ -43,7 +46,8 @@ class FramebufferRgb565 {
 
   void SetFramebufferData(pw::color::color_rgb565_t* data,
                           int width,
-                          int height);
+                          int height,
+                          int row_bytes);
 
   // Return the RGB565 color at position x, y. Bounds are checked.
   Result<pw::color::color_rgb565_t> GetPixel(int x, int y) const;
@@ -63,12 +67,14 @@ class FramebufferRgb565 {
   // Return framebuffer height in pixels.
   int GetHeight() const { return height_; }
 
+  // Return the number of bytes per row of pixel data.
+  int GetRowBytes() const { return row_bytes_; }
+
  private:
-  // TODO(tonymd): Add a stride variable. Right now width is being treated as
-  // the stride value.
   pw::color::color_rgb565_t* pixel_data_;
   int width_;
   int height_;
+  int row_bytes_;
 };
 
 }  // namespace pw::framebuffer

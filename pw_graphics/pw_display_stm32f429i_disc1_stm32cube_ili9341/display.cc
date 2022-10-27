@@ -106,8 +106,10 @@ void Display::Update(FramebufferRgb565& frame_buffer) {
 }
 
 Status Display::InitFramebuffer(FramebufferRgb565* framebuffer) {
-  framebuffer->SetFramebufferData(
-      framebuffer_data_, kDisplayWidth, kDisplayHeight);
+  framebuffer->SetFramebufferData(framebuffer_data_,
+                                  kDisplayWidth,
+                                  kDisplayHeight,
+                                  kDisplayWidth * sizeof(uint16_t));
   return OkStatus();
 }
 
