@@ -49,7 +49,10 @@ pw_executable("terminal_demo") {
     "//pw_board_led",
     "//pw_spin_delay",
   ]
-  remove_configs = [ "$dir_pw_build:strict_warnings" ]
+  remove_configs = [
+    "$dir_pw_build:strict_warnings",
+    "//third_party/pigweed/pw_toolchain/host_clang:linux_sysroot",
+  ]
 
   if (pw_build_EXECUTABLE_TARGET_TYPE == "arduino_executable" ||
       pw_build_EXECUTABLE_TARGET_TYPE == "pico_executable" ||

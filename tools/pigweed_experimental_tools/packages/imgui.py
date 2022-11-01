@@ -26,7 +26,7 @@ class Imgui(pw_package.git_repo.GitRepo):
         super().__init__(*args,
                          name='imgui',
                          url='https://github.com/ocornut/imgui.git',
-                         commit='c71a50deb5ddf1ea386b91e60fa2e4a26d080074',
+                         commit='ced92d9c52398f10fa152f78f52d0ca51d5d1d5b',
                          **kwargs)
 
     def info(self, path: pathlib.Path) -> Sequence[str]:
