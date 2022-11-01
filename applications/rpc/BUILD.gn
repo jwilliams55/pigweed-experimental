@@ -27,7 +27,11 @@ group("all") {
   deps = [ ":rpc" ]
 
   # Build tokenizer_database for elf binaries only
-  if (host_os == "linux" || current_toolchain != "//targets/host:host_debug") {
+  # TODO(b/256272529): Figure out why this needs to be disabled on
+  #                    mimxrt595_evk.
+  if (host_os == "linux" ||
+      (pw_build_EXECUTABLE_TARGET_TYPE != "mimxrt595_executable" &&
+       current_toolchain != "//targets/host:host_debug")) {
     deps += [ ":tokenizer_database" ]
   }
 }

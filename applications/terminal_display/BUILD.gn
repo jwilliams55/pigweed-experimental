@@ -23,7 +23,11 @@ group("all") {
   deps = [ ":terminal_demo" ]
 
   # Build tokenizer_database for elf binaries only
-  if (host_os == "linux" || current_toolchain != "//targets/host:host_debug") {
+  # TODO(b/256272529): Figure out why this needs to be disabled on
+  #                    mimxrt595_evk.
+  if (host_os == "linux" ||
+      (pw_build_EXECUTABLE_TARGET_TYPE != "mimxrt595_executable" &&
+       current_toolchain != "//targets/host:host_debug")) {
     deps += [ ":tokenizer_database" ]
   }
 }
@@ -48,7 +52,8 @@ pw_executable("terminal_demo") {
   remove_configs = [ "$dir_pw_build:strict_warnings" ]
 
   if (pw_build_EXECUTABLE_TARGET_TYPE == "arduino_executable" ||
-      pw_build_EXECUTABLE_TARGET_TYPE == "pico_executable") {
+      pw_build_EXECUTABLE_TARGET_TYPE == "pico_executable" ||
+      pw_build_EXECUTABLE_TARGET_TYPE == "mimxrt595_executable") {
     ldflags = [ "-Wl,--print-memory-usage" ]
   }
 }

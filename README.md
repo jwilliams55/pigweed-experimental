@@ -139,3 +139,29 @@ ninja -C out
   ```sh
   ~/apps/openocd/bin/openocd -f ~/apps/openocd/share/openocd/scripts/interface/picoprobe.cfg -f ~/apps/openocd/share/openocd/scripts/target/rp2040.cfg -c 'program out/rp2040/obj/applications/terminal_display/bin/terminal_demo.elf verify reset exit'
   ```
+
+#### **[MIMXRT595-EVK](https://www.nxp.com/design/development-boards/i-mx-evaluation-and-development-boards/i-mx-rt595-evaluation-kit:MIMXRT595-EVK) Connected to an external MIPI display**
+
+**Setup NXP SDK:**
+
+1. Build a NXP SDK
+2. Download SDK
+3. Extract SDK's zip file to //environment/SDK_2_12_1_EVK-MIMXRT595
+
+**Compile:**
+
+```sh
+gn gen out --export-compile-commands --args="
+  pw_MIMXRT595_EVK_SDK=\"//environment/SDK_2_12_1_EVK-MIMXRT595\"
+  pw_target_mimxrt595_evk_MANIFEST=\"//environment/SDK_2_12_1_EVK-MIMXRT595/EVK-MIMXRT595_manifest_v3_10.xml\"
+  pw_third_party_mcuxpresso_SDK=\"//targets/mimxrt595_evk:mimxrt595_sdk\"
+"
+
+ninja -C out
+```
+
+**Flash the MIMXRT595-EVK:**
+
+Follow the instructions to flash the MIMXRT595-EVK with the SEGGER J-Link
+firmware and using `arm-none-eabi-gdb` at
+https://pigweed.dev/targets/mimxrt595_evk/target_docs.html#running-and-debugging.

@@ -19,6 +19,7 @@ import("$dir_pw_arduino_build/arduino.gni")
 import("$dir_pw_build/python.gni")
 import("$dir_pw_build/python_dist.gni")
 import("$dir_pw_build/python_venv.gni")
+import("$dir_pw_third_party/mcuxpresso/mcuxpresso.gni")
 import("$dir_pw_third_party/stm32cube/stm32cube.gni")
 import("$dir_pw_tokenizer/database.gni")
 import("$dir_pw_unit_test/test.gni")
@@ -29,6 +30,7 @@ group("default") {
     ":applications",
     ":arduino",
     ":host",
+    ":mimxrt595_evk",
     ":pico",
     ":python.lint",
     ":python.tests",
@@ -75,6 +77,12 @@ group("pico") {
       ":pico_tests(//targets/rp2040)",
       "//applications/terminal_display:all(//targets/rp2040)",
     ]
+  }
+}
+
+group("mimxrt595_evk") {
+  if (pw_third_party_mcuxpresso_SDK != "") {
+    deps = [ "//applications/terminal_display:all(//targets/mimxrt595_evk:mimxrt595_evk_debug)" ]
   }
 }
 
@@ -182,6 +190,16 @@ group("applications") {
     ]
   }
 
+  # MIMXRT595-EVK application steps.
+  if (pw_third_party_mcuxpresso_SDK != "") {
+    deps += [
+      ":applications_tests(//targets/mimxrt595_evk:mimxrt595_evk_debug)",
+      "//applications/blinky:blinky(//targets/mimxrt595_evk:mimxrt595_evk_debug)",
+      "//applications/rpc:all(//targets/mimxrt595_evk:mimxrt595_evk_debug)",
+      "//applications/strings:all(//targets/mimxrt595_evk:mimxrt595_evk_debug)",
+    ]
+  }
+
   # STMicroelectronics STM32F429I-DISC1 applications steps.
   deps += [
     ":applications_tests(//targets/stm32f429i_disc1:stm32f429i_disc1_debug_tests)",
@@ -239,6 +257,7 @@ foreach(test_group,
         [
           "arduino",
           "pico",
+          "mimxrt595_evk",
           "host",
           "applications",
         ]) {
