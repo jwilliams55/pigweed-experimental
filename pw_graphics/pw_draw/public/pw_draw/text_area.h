@@ -55,7 +55,6 @@ class TextArea {
   void DrawText(const wchar_t* str, int x, int y);
 
   void MoveCursorRightOnce();
-  void DrawSpace();
   void InsertLineBreak();
 };
 

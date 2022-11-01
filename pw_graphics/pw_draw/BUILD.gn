@@ -37,7 +37,11 @@ pw_source_set("pw_draw") {
     "public/pw_draw/sprite_sheet.cc",
     "public/pw_draw/text_area.cc",
   ]
-  public_deps = [ "$dir_pw_framebuffer" ]
+  public_deps = [
+    "$dir_pw_color",
+    "$dir_pw_coordinates",
+    "$dir_pw_framebuffer",
+  ]
 }
 
 pw_test("draw_test") {

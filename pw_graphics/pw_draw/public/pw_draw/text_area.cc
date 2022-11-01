@@ -20,6 +20,7 @@
 #include "pw_framebuffer/rgb565.h"
 
 using pw::color::color_rgb565_t;
+using pw::coordinates::Vector2;
 
 namespace pw::draw {
 
@@ -71,25 +72,9 @@ void TextArea::InsertLineBreak() {
   }
 }
 
-void TextArea::DrawSpace() {
-  for (int font_row = 0; font_row < current_font->height; font_row++) {
-    for (int font_column = 0; font_column < current_font->width;
-         font_column++) {
-      framebuffer->SetPixel(
-          cursor_x + font_column, cursor_y + font_row, background_color);
-    }
-  }
-}
-
 void TextArea::DrawCharacter(int character) {
   if (character == '\n') {
     InsertLineBreak();
-    return;
-  }
-
-  if (character == ' ') {
-    DrawSpace();
-    MoveCursorRightOnce();
     return;
   }
 
@@ -105,25 +90,13 @@ void TextArea::DrawCharacter(int character) {
     InsertLineBreak();
   }
 
-  int character_index = (int)character - current_font->starting_character;
-  uint8_t pixel_on;
+  pw::draw::DrawCharacter(character,
+                          Vector2<int>{cursor_x, cursor_y},
+                          foreground_color,
+                          background_color,
+                          *current_font,
+                          *framebuffer);
 
-  for (int font_row = 0; font_row < current_font->height; font_row++) {
-    for (int font_column = 0; font_column < current_font->width;
-         font_column++) {
-      pixel_on = PW_FONT_BIT(
-          current_font->width - font_column - 1,
-          current_font
-              ->data[current_font->height * character_index + font_row]);
-      if (pixel_on) {
-        framebuffer->SetPixel(
-            cursor_x + font_column, cursor_y + font_row, foreground_color);
-      } else {
-        framebuffer->SetPixel(
-            cursor_x + font_column, cursor_y + font_row, background_color);
-      }
-    }
-  }
   // Move cursor to the right by 1 glyph.
   MoveCursorRightOnce();
 }

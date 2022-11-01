@@ -16,6 +16,7 @@
 #include <math.h>
 
 #include "pw_color/color.h"
+#include "pw_coordinates/vec_int.h"
 #include "pw_draw/font_set.h"
 #include "pw_draw/sprite_sheet.h"
 #include "pw_framebuffer/rgb565.h"
@@ -70,5 +71,21 @@ void DrawSprite(pw::framebuffer::FramebufferRgb565* fb,
                 int integer_scale);
 
 void DrawTestPattern();
+
+pw::coordinates::Size<int> DrawCharacter(
+    int ch,
+    pw::coordinates::Vector2<int> pos,
+    pw::color::color_rgb565_t fg_color,
+    pw::color::color_rgb565_t bg_color,
+    const FontSet& font,
+    pw::framebuffer::FramebufferRgb565& framebuffer);
+
+pw::coordinates::Size<int> DrawString(
+    std::wstring_view str,
+    pw::coordinates::Vector2<int> pos,
+    pw::color::color_rgb565_t fg_color,
+    pw::color::color_rgb565_t bg_color,
+    const FontSet& font,
+    pw::framebuffer::FramebufferRgb565& framebuffer);
 
 }  // namespace pw::draw

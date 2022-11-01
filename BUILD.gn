@@ -245,7 +245,10 @@ group("applications") {
 
 # Group the different modules tests together.
 pw_test_group("tests") {
-  group_deps = [ "//applications/strings:tests" ]
+  group_deps = [
+    "//applications/strings:tests",
+    "//applications/terminal_display:tests",
+  ]
 
   if (pw_arduino_build_CORE_NAME == "teensy") {
     group_deps += []

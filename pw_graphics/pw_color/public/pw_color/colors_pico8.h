@@ -19,7 +19,7 @@
 
 namespace pw::color {
 
-const color_rgb565_t colors_pico8_rgb565[] = {
+constexpr color_rgb565_t colors_pico8_rgb565[] = {
     0x0000,  // #000000 0 BLACK
     0x194a,  // #1d2b53 1 DARK_BLUE
     0x792a,  // #7e2553 2 DARK_PURPLE
@@ -38,7 +38,7 @@ const color_rgb565_t colors_pico8_rgb565[] = {
     0xfe75,  // #ffccaa 15 PEACH
 };
 
-const color_rgba8888_t colors_pico8_rgba8888[] = {
+constexpr color_rgba8888_t colors_pico8_rgba8888[] = {
     0xff000000,  // #000000 0  BLACK
     0xff532b1d,  // #1d2b53 1  DARK_BLUE
     0xff53257e,  // #7e2553 2  DARK_PURPLE

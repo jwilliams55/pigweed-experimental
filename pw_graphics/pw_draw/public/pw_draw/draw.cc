@@ -21,9 +21,28 @@
 #include "pw_framebuffer/rgb565.h"
 
 using pw::color::color_rgb565_t;
+using pw::coordinates::Size;
+using pw::coordinates::Vector2;
 using pw::framebuffer::FramebufferRgb565;
 
 namespace pw::draw {
+
+namespace {
+
+// Erase a rectangle the size of a font glyph to the background color.
+Size<int> DrawSpace(Vector2<int> pos,
+                    color_rgb565_t bg_color,
+                    const FontSet& font,
+                    FramebufferRgb565& framebuffer) {
+  for (int font_row = 0; font_row < font.height; font_row++) {
+    for (int font_column = 0; font_column < font.width; font_column++) {
+      framebuffer.SetPixel(pos.x + font_column, pos.y + font_row, bg_color);
+    }
+  }
+  return Size<int>{font.width, font.height};
+}
+
+}  // namespace
 
 void DrawLine(FramebufferRgb565* fb,
               int x1,
@@ -192,6 +211,50 @@ void DrawTestPattern(FramebufferRgb565* fb) {
       }
     }
   }
+}
+
+Size<int> DrawCharacter(int ch,
+                        Vector2<int> pos,
+                        color_rgb565_t fg_color,
+                        color_rgb565_t bg_color,
+                        const FontSet& font,
+                        FramebufferRgb565& framebuffer) {
+  if (ch == ' ' || ch == '\0') {
+    // The font doesn't have a space glyph (why?), so special-case this.
+    return DrawSpace(pos, bg_color, font, framebuffer);
+  }
+  if (ch < font.starting_character || ch > font.ending_character) {
+    return Size<int>{0, font.height};
+  }
+  const int character_index = (int)ch - font.starting_character;
+
+  for (int font_row = 0; font_row < font.height; font_row++) {
+    for (int font_column = 0; font_column < font.width; font_column++) {
+      const bool pixel_on =
+          PW_FONT_BIT(font.width - font_column - 1,
+                      font.data[font.height * character_index + font_row]);
+      framebuffer.SetPixel(pos.x + font_column,
+                           pos.y + font_row,
+                           pixel_on ? fg_color : bg_color);
+    }
+  }
+  return Size<int>{font.width, font.height};
+}
+
+Size<int> DrawString(std::wstring_view str,
+                     Vector2<int> pos,
+                     color_rgb565_t fg_color,
+                     color_rgb565_t bg_color,
+                     const FontSet& font,
+                     FramebufferRgb565& framebuffer) {
+  Size<int> string_dimensions{0, font.height};
+  for (const wchar_t& ch : str) {
+    auto char_dimensions =
+        DrawCharacter(ch, pos, fg_color, bg_color, font, framebuffer);
+    pos.x += char_dimensions.width;
+    string_dimensions.width += char_dimensions.width;
+  }
+  return string_dimensions;
 }
 
 }  // namespace pw::draw

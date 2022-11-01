@@ -32,9 +32,22 @@ group("all") {
   }
 }
 
+pw_source_set("text_buffer") {
+  public_deps = [
+    "$dir_pw_color",
+    "$dir_pw_coordinates",
+    "$dir_pw_result",
+  ]
+  sources = [
+    "text_buffer.cc",
+    "text_buffer.h",
+  ]
+}
+
 pw_executable("terminal_demo") {
   sources = [ "main.cc" ]
   deps = [
+    ":text_buffer",
     "$dir_pw_color",
     "$dir_pw_containers:vector",
     "$dir_pw_coordinates",
@@ -64,4 +77,17 @@ pw_executable("terminal_demo") {
 pw_tokenizer_database("tokenizer_database") {
   database = "tokenizer_database.csv"
   targets = [ ":terminal_demo" ]
+}
+
+pw_test("text_buffer_test") {
+  deps = [
+    ":text_buffer",
+    "$dir_pw_color",
+    "$dir_pw_unit_test",
+  ]
+  sources = [ "text_buffer_test.cc" ]
+}
+
+pw_test_group("tests") {
+  tests = [ ":text_buffer_test" ]
 }

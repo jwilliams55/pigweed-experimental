@@ -23,4 +23,16 @@ struct Vec3Int {
   int z;
 };
 
+template <typename T>
+struct Vector2 {
+  T x;
+  T y;
+};
+
+template <typename T>
+struct Size {
+  T width;
+  T height;
+};
+
 }  // namespace pw::coordinates
