@@ -99,7 +99,7 @@ PATH_EXCLUSIONS = (
 #
 OTHER_CHECKS = (
     build.gn_gen_check,
-    inclusive_language.inclusive_language.with_filter(exclude=PATH_EXCLUSIONS),
+    inclusive_language.presubmit_check.with_filter(exclude=PATH_EXCLUSIONS),
 )
 
 QUICK = (
@@ -113,7 +113,7 @@ LINTFORMAT = (
     # keep-sorted: start
     cpp_checks.pragma_once,
     format_code.presubmit_checks(),
-    keep_sorted.keep_sorted,
+    keep_sorted.presubmit_check,
     python_checks.gn_python_lint,
     # keep-sorted: end
 )
