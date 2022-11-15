@@ -125,8 +125,11 @@ FULL = (
     python_checks.gn_python_check,
 )
 
+CI_CQ = (default_build, )
+
 PROGRAMS = pw_presubmit.Programs(
     # keep-sorted: start
+    ci_cq=CI_CQ,
     full=FULL,
     lintformat=LINTFORMAT,
     other_checks=OTHER_CHECKS,
