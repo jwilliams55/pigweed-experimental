@@ -26,16 +26,7 @@
 
 #include "hardware/gpio.h"
 #include "pico/stdlib.h"
-#include "pw_color/color.h"
-#include "pw_digital_io_pico/digital_io.h"
-#include "pw_display_driver_ili9341/display_driver.h"
-#include "pw_framebuffer/rgb565.h"
 #include "pw_log/log.h"
-#include "pw_spi_pico/chip_selector.h"
-#include "pw_spi_pico/initiator.h"
-#include "pw_spin_delay/delay.h"
-#include "pw_sync/borrow.h"
-#include "pw_sync/mutex.h"
 
 using pw::display_driver::DisplayDriverILI9341;
 
@@ -48,14 +39,11 @@ namespace {
 constexpr int TFT_SCLK = 18;  // SPI0 SCK
 constexpr int TFT_MOSI = 19;  // SPI0 TX
 // Unused
-// const int TFT_MISO = 4;   // SPI0 RX
+// constexpr int TFT_MISO = 4;   // SPI0 RX
 constexpr int TFT_CS = 9;    // SPI0 CSn
 constexpr int TFT_DC = 10;   // GP10
 constexpr int TFT_RST = 11;  // GP11
 
-constexpr int kDisplayWidth = 320;
-constexpr int kDisplayHeight = 240;
-constexpr int kNumDisplayPixels = kDisplayWidth * kDisplayHeight;
 constexpr uint32_t kBaudRate = 31'250'000;
 
 constexpr pw::spi::Config kSpiConfig{
@@ -65,106 +53,82 @@ constexpr pw::spi::Config kSpiConfig{
     .bit_order = pw::spi::BitOrder::kMsbFirst,
 };
 
-class InstanceData {
- public:
-  InstanceData()
-      : chip_selector_gpio_(TFT_CS),
-        data_cmd_gpio_(TFT_DC),
-        reset_gpio_(TFT_RST),
-        spi_chip_selector_(chip_selector_gpio_),
-        spi_initiator_(SPI_PORT, kBaudRate),
-        borrowable_spi_initiator_(spi_initiator_, spi_initiator_mutex_),
-        spi_device_(borrowable_spi_initiator_, kSpiConfig, spi_chip_selector_),
-        driver_config_{
-            .data_cmd_gpio = data_cmd_gpio_,
-            .reset_gpio = &reset_gpio_,
-            .spi_device = spi_device_,
-        },
-        display_driver_(driver_config_) {}
-
-  Status Init() {
-    InitGPIO();
-    InitSPI();
-    InitDisplayDriver();
-    return OkStatus();
-  }
-
-  void Update(pw::framebuffer::FramebufferRgb565& frame_buffer) {
-    display_driver_.Update(&frame_buffer);
-  }
-
-  void UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer) {
-    display_driver_.UpdatePixelDouble(frame_buffer);
-  }
-
-  Status InitFramebuffer(pw::framebuffer::FramebufferRgb565* framebuffer) {
-    framebuffer->SetFramebufferData(framebuffer_data_,
-                                    kDisplayWidth,
-                                    kDisplayHeight,
-                                    kDisplayWidth * sizeof(uint16_t));
-    return OkStatus();
-  }
-
- private:
-  void InitGPIO() {
-    stdio_init_all();
-
-    chip_selector_gpio_.Enable();
-    data_cmd_gpio_.Enable();
-    reset_gpio_.Enable();
-  }
-
-  void InitSPI() {
-    uint actual_baudrate = spi_init(SPI_PORT, kBaudRate);
-    PW_LOG_DEBUG("Actual Baudrate: %u", actual_baudrate);
-
-    // Not currently used (not yet reading from display).
-    // gpio_set_function(TFT_MISO, GPIO_FUNC_SPI);
-    gpio_set_function(TFT_SCLK, GPIO_FUNC_SPI);
-    gpio_set_function(TFT_MOSI, GPIO_FUNC_SPI);
-  }
-
-  Status InitDisplayDriver() {
-    auto s = display_driver_.Init();
-    if (!s.ok())
-      return s;
-    // From hereafter only display pixel updates are made, so switch to 16-bit
-    // mode which is expected by DisplayDriver::Update();
-    // TODO(b/251033990): Switch to pw_spi way to change word size.
-    spi_initiator_.SetOverrideBitsPerWord(pw::spi::BitsPerWord(16));
-    return OkStatus();
-  }
-
-  pw::digital_io::PicoDigitalOut chip_selector_gpio_;
-  pw::digital_io::PicoDigitalOut data_cmd_gpio_;
-  pw::digital_io::PicoDigitalOut reset_gpio_;
-  pw::spi::PicoChipSelector spi_chip_selector_;
-  pw::spi::PicoInitiator spi_initiator_;
-  pw::sync::VirtualMutex spi_initiator_mutex_;
-  pw::sync::Borrowable<pw::spi::Initiator> borrowable_spi_initiator_;
-  pw::spi::Device spi_device_;
-  DisplayDriverILI9341::Config driver_config_;
-  DisplayDriverILI9341 display_driver_;
-  uint16_t framebuffer_data_[kNumDisplayPixels];
-};  // namespace
-
-InstanceData s_instance_data;
-
 }  // namespace
 
-Display::Display() = default;
+Display::Display()
+    : chip_selector_gpio_(TFT_CS),
+      data_cmd_gpio_(TFT_DC),
+      reset_gpio_(TFT_RST),
+      spi_chip_selector_(chip_selector_gpio_),
+      spi_initiator_(SPI_PORT, kBaudRate),
+      borrowable_spi_initiator_(spi_initiator_, spi_initiator_mutex_),
+      spi_device_(borrowable_spi_initiator_, kSpiConfig, spi_chip_selector_),
+      driver_config_{
+          .data_cmd_gpio = data_cmd_gpio_,
+          .reset_gpio = &reset_gpio_,
+          .spi_device = spi_device_,
+      },
+      display_driver_(driver_config_) {}
 
 Display::~Display() = default;
 
-Status Display::Init() { return s_instance_data.Init(); }
+Status Display::Init() {
+  InitGPIO();
+  InitSPI();
+  InitDisplayDriver();
+  return OkStatus();
+}
+
+void Display::Update(pw::framebuffer::FramebufferRgb565& frame_buffer) {
+  display_driver_.Update(&frame_buffer);
+}
+
+void Display::UpdatePixelDouble(
+    pw::framebuffer::FramebufferRgb565* frame_buffer) {
+  display_driver_.UpdatePixelDouble(frame_buffer);
+}
+
+Status Display::InitFramebuffer(
+    pw::framebuffer::FramebufferRgb565* framebuffer) {
+  framebuffer->SetFramebufferData(framebuffer_data_,
+                                  kDisplayWidth,
+                                  kDisplayHeight,
+                                  kDisplayWidth * sizeof(uint16_t));
+  return OkStatus();
+}
+
+void Display::InitGPIO() {
+  stdio_init_all();
+
+  chip_selector_gpio_.Enable();
+  data_cmd_gpio_.Enable();
+  reset_gpio_.Enable();
+}
+
+void Display::InitSPI() {
+  uint actual_baudrate = spi_init(SPI_PORT, kBaudRate);
+  PW_LOG_DEBUG("Actual Baudrate: %u", actual_baudrate);
+
+  // Not currently used (not yet reading from display).
+  // gpio_set_function(TFT_MISO, GPIO_FUNC_SPI);
+  gpio_set_function(TFT_SCLK, GPIO_FUNC_SPI);
+  gpio_set_function(TFT_MOSI, GPIO_FUNC_SPI);
+}
+
+Status Display::InitDisplayDriver() {
+  auto s = display_driver_.Init();
+  if (!s.ok())
+    return s;
+  // From hereafter only display pixel updates are made, so switch to 16-bit
+  // mode which is expected by DisplayDriver::Update();
+  // TODO(b/251033990): Switch to pw_spi way to change word size.
+  spi_initiator_.SetOverrideBitsPerWord(pw::spi::BitsPerWord(16));
+  return OkStatus();
+}
 
 int Display::GetWidth() const { return kDisplayWidth; }
 
 int Display::GetHeight() const { return kDisplayHeight; }
-
-void Display::Update(pw::framebuffer::FramebufferRgb565& frame_buffer) {
-  s_instance_data.Update(frame_buffer);
-}
 
 bool Display::TouchscreenAvailable() const { return false; }
 
@@ -172,11 +136,6 @@ bool Display::NewTouchEvent() { return false; }
 
 pw::coordinates::Vec3Int Display::GetTouchPoint() {
   return pw::coordinates::Vec3Int{0, 0, 0};
-}
-
-Status Display::InitFramebuffer(
-    pw::framebuffer::FramebufferRgb565* framebuffer) {
-  return s_instance_data.InitFramebuffer(framebuffer);
 }
 
 }  // namespace pw::display::backend

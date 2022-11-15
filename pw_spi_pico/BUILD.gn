@@ -26,11 +26,13 @@ pw_source_set("pw_spi_pico") {
     "public/pw_spi_pico/chip_selector.h",
     "public/pw_spi_pico/initiator.h",
   ]
-  public_deps = [ "$dir_pw_status" ]
+  public_deps = [
+    "$PICO_ROOT/src/rp2_common/hardware_spi",
+    "$dir_pw_status",
+  ]
   deps = [
     "$PICO_ROOT/src/common/pico_base",
     "$PICO_ROOT/src/common/pico_stdlib",
-    "$PICO_ROOT/src/rp2_common/hardware_spi",
     "$dir_pw_digital_io",
     "$dir_pw_log",
     "$dir_pw_spi:chip_selector",
