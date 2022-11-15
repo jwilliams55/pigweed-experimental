@@ -388,21 +388,6 @@ int main() {
   uint32_t frames = 0;
   int frames_per_second = 0;
 
-  uint32_t time_start_delta = 0;
-  uint32_t delta_time = 30000;  // Initial guess
-
-  uint32_t time_start_button_check = pw::spin_delay::Millis();
-  uint32_t delta_button_check = pw::spin_delay::Millis();
-
-  uint32_t time_start_game_logic = 0;
-  uint32_t delta_game_logic = 0;
-
-  uint32_t time_start_draw_screen = 0;
-  uint32_t delta_screen_draw = 0;
-
-  uint32_t time_start_screen_spi_update = 0;
-  uint32_t delta_screen_spi_update = 0;
-
   pw::board_led::Init();
 
   Display display;
@@ -427,11 +412,6 @@ int main() {
 
   // The display loop.
   while (1) {
-    time_start_delta = pw::spin_delay::Millis();
-
-    // Input Update Phase
-    time_start_button_check = pw::spin_delay::Millis();
-
     pw::coordinates::Vec3Int point = display.GetTouchPoint();
     // Check for touchscreen events.
     if (display.TouchscreenAvailable() && display.NewTouchEvent()) {
@@ -454,35 +434,10 @@ int main() {
     last_frame_touch_state.y = point.y;
     last_frame_touch_state.z = point.z;
 
-    // End Input Update Phase
-    delta_button_check = pw::spin_delay::Millis() - time_start_button_check;
-
-    // Game Logic Phase
-    time_start_game_logic = pw::spin_delay::Millis();
-
-    // End Game Logic Phase
-    delta_game_logic = pw::spin_delay::Millis() - time_start_game_logic;
-
-    // Draw Phase
-    time_start_draw_screen = pw::spin_delay::Millis();
-
     pw::draw::Fill(&frame_buffer, kBlack);
     DrawFrame(frame_buffer);
 
-    // End Draw Phase
-    delta_screen_draw = pw::spin_delay::Millis() - time_start_draw_screen;
-
-    // Display Write Phase
-    time_start_screen_spi_update = pw::spin_delay::Millis();
-
     display.Update(frame_buffer);
-
-    // End Display Write Phase
-    delta_screen_spi_update =
-        pw::spin_delay::Millis() - time_start_screen_spi_update;
-
-    // FPS Count Update
-    delta_time = pw::spin_delay::Millis() - time_start_delta;
 
     // Every second make a log message.
     frames++;
