@@ -25,6 +25,7 @@
 #include "pw_display/display_backend.h"
 #include "pw_framebuffer/rgb565.h"
 
+using pw::color::color_rgb565_t;
 using pw::framebuffer::FramebufferRgb565;
 
 namespace pw::display::backend {
