@@ -57,13 +57,13 @@ class DemoDecoder : public AnsiDecoder {
       : log_text_buffer_(log_text_buffer) {}
 
  protected:
-  virtual void SetFgColor(uint8_t r, uint8_t g, uint8_t b) {
+  void SetFgColor(uint8_t r, uint8_t g, uint8_t b) override {
     fg_color_ = pw::color::ColorRGBA(r, g, b).ToRgb565();
   }
-  virtual void SetBgColor(uint8_t r, uint8_t g, uint8_t b) {
+  void SetBgColor(uint8_t r, uint8_t g, uint8_t b) override {
     bg_color_ = pw::color::ColorRGBA(r, g, b).ToRgb565();
   }
-  virtual void EmitChar(char c) {
+  void EmitChar(char c) override {
     log_text_buffer_.DrawCharacter(TextBuffer::Char{c, fg_color_, bg_color_});
   }
 
