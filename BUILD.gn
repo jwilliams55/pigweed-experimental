@@ -171,7 +171,8 @@ group("applications") {
       "//applications/strings:all(//targets/arduino:arduino_debug)",
     ]
 
-    if (pw_arduino_build_CORE_NAME == "teensy") {
+    # TODO(b/258827934): Fix size report and reenable.
+    if (pw_arduino_build_CORE_NAME == "teensy-<disabled>") {
       deps += [
         "//applications/tls_example:boringssl_teensy_ethernet(//targets/arduino:arduino_debug)",
         "//applications/tls_example:mbedtls_teensy_ethernet(//targets/arduino:arduino_debug)",
