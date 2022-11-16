@@ -63,11 +63,11 @@ pw::hdlc::RpcChannelOutput hdlc_channel_output(sys_io_writer,
 
 // A pw::rpc::Server can have multiple channels (e.g. a UART and a BLE
 // connection). In this case, there is only one (HDLC over UART).
-pw::rpc::Channel channels[] = {
+pw::rpc::Channel rpc_channels[] = {
     pw::rpc::Channel::Create<1>(&hdlc_channel_output)};
 
 // Declare the pw_rpc server with the HDLC channel.
-pw::rpc::Server server(channels);
+pw::rpc::Server server(rpc_channels);
 
 // Declare a buffer for decoding incoming HDLC frames.
 std::array<std::byte, kMaxTransmissionUnit> input_buffer;
