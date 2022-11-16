@@ -99,6 +99,8 @@ Status Display::InitFramebuffer(
 
 void Display::InitGPIO() {
   stdio_init_all();
+  // TODO: This should be a facade
+  setup_default_uart();
 
   chip_selector_gpio_.Enable();
   data_cmd_gpio_.Enable();

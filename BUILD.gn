@@ -32,8 +32,9 @@ group("default") {
     ":host",
     ":mimxrt595_evk",
     ":pico",
-    ":python.lint",
-    ":python.tests",
+    ":pw_experimental_python.lint",
+    ":pw_experimental_python.tests",
+    ":python.install",
   ]
 }
 
@@ -121,6 +122,10 @@ _pigweed_python_packages = [
 
 _all_python_packages =
     _pw_experimental_python_packages + _pigweed_python_packages
+
+pw_python_group("pw_experimental_python") {
+  python_deps = _pw_experimental_python_packages
+}
 
 # The default venv for Python actions in GN
 # Set this gn arg in a declare_args block in this file 'BUILD.gn' or in '.gn' to
