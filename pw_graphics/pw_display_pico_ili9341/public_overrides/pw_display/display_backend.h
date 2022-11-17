@@ -32,12 +32,14 @@ class Display : pw::display::Display {
   Status Init() override;
   Status InitFramebuffer(
       pw::framebuffer::FramebufferRgb565* framebuffer) override;
-  int GetWidth() const override;
-  int GetHeight() const override;
+  int GetWidth() const override { return kDisplayWidth; }
+  int GetHeight() const override { return kDisplayHeight; }
   void Update(pw::framebuffer::FramebufferRgb565& framebuffer) override;
-  bool TouchscreenAvailable() const override;
-  bool NewTouchEvent() override;
-  pw::coordinates::Vec3Int GetTouchPoint() override;
+  bool TouchscreenAvailable() const override { return false; }
+  bool NewTouchEvent() override { return false; }
+  pw::coordinates::Vec3Int GetTouchPoint() override {
+    return pw::coordinates::Vec3Int{0, 0, 0};
+  }
 
  private:
   constexpr static int kDisplayWidth = 320;

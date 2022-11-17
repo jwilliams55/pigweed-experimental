@@ -28,8 +28,6 @@
 #include "pico/stdlib.h"
 #include "pw_log/log.h"
 
-using pw::display_driver::DisplayDriverILI9341;
-
 namespace pw::display::backend {
 
 namespace {
@@ -75,17 +73,16 @@ Display::~Display() = default;
 Status Display::Init() {
   InitGPIO();
   InitSPI();
-  InitDisplayDriver();
-  return OkStatus();
+  return InitDisplayDriver();
 }
 
 void Display::Update(pw::framebuffer::FramebufferRgb565& frame_buffer) {
-  display_driver_.Update(&frame_buffer);
+  display_driver_.Update(&frame_buffer).IgnoreError();
 }
 
 void Display::UpdatePixelDouble(
     pw::framebuffer::FramebufferRgb565* frame_buffer) {
-  display_driver_.UpdatePixelDouble(frame_buffer);
+  display_driver_.UpdatePixelDouble(frame_buffer).IgnoreError();
 }
 
 Status Display::InitFramebuffer(
@@ -126,18 +123,6 @@ Status Display::InitDisplayDriver() {
   // TODO(b/251033990): Switch to pw_spi way to change word size.
   spi_initiator_.SetOverrideBitsPerWord(pw::spi::BitsPerWord(16));
   return OkStatus();
-}
-
-int Display::GetWidth() const { return kDisplayWidth; }
-
-int Display::GetHeight() const { return kDisplayHeight; }
-
-bool Display::TouchscreenAvailable() const { return false; }
-
-bool Display::NewTouchEvent() { return false; }
-
-pw::coordinates::Vec3Int Display::GetTouchPoint() {
-  return pw::coordinates::Vec3Int{0, 0, 0};
 }
 
 }  // namespace pw::display::backend
