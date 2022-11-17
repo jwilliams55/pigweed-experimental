@@ -40,8 +40,6 @@ class DisplayDriverILI9341 : public DisplayDriver {
   // DisplayDriver implementation:
   // The SPI bus must be in 8-bit mode before calling this function.
   Status Init() override;
-  int GetWidth() const override;
-  int GetHeight() const override;
   // The SPI bus must be in 16-bit mode before calling this function.
   Status Update(pw::framebuffer::FramebufferRgb565* framebuffer);
   Status UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer);

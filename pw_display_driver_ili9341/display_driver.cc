@@ -282,10 +282,6 @@ Status DisplayDriverILI9341::Init() {
   return OkStatus();
 }
 
-int DisplayDriverILI9341::GetWidth() const { return kDisplayWidth; }
-
-int DisplayDriverILI9341::GetHeight() const { return kDisplayHeight; }
-
 Status DisplayDriverILI9341::Update(
     pw::framebuffer::FramebufferRgb565* frame_buffer) {
   auto transaction =

@@ -32,12 +32,6 @@ class DisplayDriver {
   // Initialize the display controller.
   virtual Status Init() = 0;
 
-  // Return the width supported by the display controller.
-  virtual int GetWidth() const = 0;
-
-  // Return the height supported by the display controller.
-  virtual int GetHeight() const = 0;
-
   // Send all pixels in the supplied |framebuffer| to the display controller
   // for display.
   virtual Status Update(pw::framebuffer::FramebufferRgb565* framebuffer) = 0;
