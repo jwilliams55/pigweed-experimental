@@ -22,7 +22,7 @@ template("stm32f207zg_executable") {
     if (!defined(deps)) {
       deps = []
     }
-    deps += [ "//targets/stm32f207zg-nucleo:pre_init" ]
+    deps += [ "$dir_pigweed_experimental/targets/stm32f207zg-nucleo:pre_init" ]
     if (pw_malloc_BACKEND != "") {
       if (!defined(configs)) {
         configs = []

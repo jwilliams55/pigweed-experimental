@@ -22,7 +22,7 @@ template("stm32h753zi_executable") {
     if (!defined(deps)) {
       deps = []
     }
-    deps += [ "//targets/stm32h753zi-nucleo:pre_init" ]
+    deps += [ "$dir_pigweed_experimental/targets/stm32h753zi-nucleo:pre_init" ]
     if (pw_malloc_BACKEND != "") {
       if (!defined(configs)) {
         configs = []

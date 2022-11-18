@@ -58,8 +58,7 @@ _target_config = {
       "$dir_pw_sync_baremetal:interrupt_spin_lock"
   pw_log_BACKEND = dir_pw_log_basic
   pw_sys_io_BACKEND = dir_pw_sys_io_stm32cube
-  pw_sys_io_stm32cube_CONFIG =
-      "//targets/stm32f439zi_nucleo:module_config_overrides"
+  pw_sys_io_stm32cube_CONFIG = "$dir_pigweed_experimental/targets/stm32f439zi_nucleo:module_config_overrides"
 
   #TODO: remove dependency on stm32f429i-disc1 rpc server.
   pw_rpc_system_server_BACKEND =
@@ -77,11 +76,10 @@ _target_config = {
 
   dir_pw_third_party_stm32cube = dir_pw_third_party_stm32cube_f4
   pw_third_party_stm32cube_PRODUCT = "STM32F439xx"
-  pw_third_party_stm32cube_CONFIG =
-      "//targets/stm32f439zi_nucleo:stm32f4xx_hal_config"
+  pw_third_party_stm32cube_CONFIG = "$dir_pigweed_experimental/targets/stm32f439zi_nucleo:stm32f4xx_hal_config"
 
   pw_third_party_freertos_CONFIG =
-      "//targets/stm32f439zi_nucleo:freertos_config"
+      "$dir_pigweed_experimental/targets/stm32f439zi_nucleo:freertos_config"
   pw_third_party_freertos_PORT = "//third_party/freertos:arm_cm4f_freertos_port"
 }
 

@@ -26,7 +26,8 @@ group("all") {
   #                    mimxrt595_evk.
   if (host_os == "linux" ||
       (pw_build_EXECUTABLE_TARGET_TYPE != "mimxrt595_executable" &&
-       current_toolchain != "//targets/host:host_debug")) {
+       current_toolchain !=
+       "$dir_pigweed_experimental/targets/host:host_debug")) {
     deps += [ ":tokenizer_database" ]
   }
 }

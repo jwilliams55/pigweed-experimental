@@ -86,7 +86,7 @@ but passing in a different `.elf`.
    All tests are set to use plain text logging. This is specified by the
    `pw_log_BACKEND` variable in the `target_toolchain.gni` files. For example
    the `arduino_debug_tests` toolchain in
-   [`//targets/arduino/target_toolchains.gni`](/targets/arduino/target_toolchains.gni)
+   [`$dir_pigweed_experimental/targets/arduino/target_toolchains.gni`](/targets/arduino/target_toolchains.gni)
    defines: `pw_log_BACKEND = "$dir_pw_log_basic"`
 
 ## Exercise

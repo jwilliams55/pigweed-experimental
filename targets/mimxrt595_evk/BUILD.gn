@@ -115,7 +115,8 @@ if (pw_third_party_mcuxpresso_SDK != "") {
   }
 }
 
-if (pw_third_party_mcuxpresso_SDK == "//targets/mimxrt595_evk:mimxrt595_sdk") {
+if (pw_third_party_mcuxpresso_SDK ==
+    "$dir_pigweed_experimental/targets/mimxrt595_evk:mimxrt595_sdk") {
   pw_mcuxpresso_sdk("mimxrt595_sdk") {
     manifest = pw_target_mimxrt595_evk_MANIFEST
     include = [
