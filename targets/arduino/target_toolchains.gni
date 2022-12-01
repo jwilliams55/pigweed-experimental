@@ -41,7 +41,7 @@ target_toolchain_arduino = {
 
       # Configure backend for pw_display
       # pw_display_null does nothing.
-      pw_display_BACKEND = "$dir_pw_display_null"
+      pw_display_BACKEND = "$dir_pw_display_teensy_ili9341"
 
       # See //pw_display_teensy_ili9341/README.md for instructions.
       # pw_display_BACKEND = "$dir_pw_display_teensy_ili9341"

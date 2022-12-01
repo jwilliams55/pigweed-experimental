@@ -22,21 +22,24 @@
 #include "pw_display/display_backend.h"
 #include "pw_framebuffer/rgb565.h"
 
+using pw::framebuffer::FramebufferRgb565;
+
 namespace pw::display::backend {
 
 namespace {
 
-constexpr int TFT_DC = 10;    // stm32f429i-disc1: PD13
-constexpr int TFT_CS = 9;     // stm32f429i-disc1: PC2
-constexpr int TFT_RST = 8;    // stm32f429i-disc1: NRST
-constexpr int TFT_MOSI = 11;  // stm32f429i-disc1: PF9
-constexpr int TFT_SCLK = 13;  // stm32f429i-disc1: PF7
-constexpr int TFT_MISO = 12;  // stm32f429i-disc1: PF8
+constexpr int TFT_DC = 9;
+constexpr int TFT_CS = 32;
+constexpr int TFT_RST = 3;
+constexpr int TFT_MOSI = 11;
+constexpr int TFT_SCLK = 13;
+constexpr int TFT_MISO = 12;
 
 constexpr int kDisplayWidth = 320;
 constexpr int kDisplayHeight = 240;
 constexpr int kDisplayDataSize = kDisplayWidth * kDisplayHeight;
 
+uint16_t framebuffer_data[kDisplayDataSize];
 ILI9341_t3n tft = ILI9341_t3n(TFT_CS, TFT_DC, TFT_RST);
 
 }  // namespace
@@ -45,29 +48,25 @@ Display::Display() = default;
 
 Display::~Display() = default;
 
-void Display::Init() {
+Status Display::Init() {
   // SPI Clock: 30MHz writes & 20MHz reads.
   // Lower write speed if the display doesn't work.
   tft.begin(30000000u, 2000000);
   tft.useFrameBuffer(1);
   tft.setRotation(3);
   tft.setCursor(0, 0);
+  return OkStatus();
 }
 
-int Display::GetWidth() { return tft.width(); }
-int Display::GetHeight() { return tft.height(); }
+int Display::GetWidth() const { return tft.width(); }
+int Display::GetHeight() const { return tft.height(); }
 
-void Display::UpdatePixelDouble(
-    pw::framebuffer::FramebufferRgb565* frame_buffer) {
-  // Not implemented.
-}
-
-void Display::Update(pw::framebuffer::FramebufferRgb565* frame_buffer) {
-  tft.setFrameBuffer(frame_buffer->pixel_data);
+void Display::Update(FramebufferRgb565& frame_buffer) {
+  tft.setFrameBuffer(frame_buffer.GetFramebufferData());
   tft.updateScreen();
 }
 
-bool Display::TouchscreenAvailable() { return false; }
+bool Display::TouchscreenAvailable() const { return false; }
 
 bool Display::NewTouchEvent() { return false; }
 
