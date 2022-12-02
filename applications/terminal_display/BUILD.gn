@@ -26,9 +26,8 @@ group("all") {
   # TODO(b/256272529): Figure out why this needs to be disabled on
   #                    mimxrt595_evk.
   if (host_os == "linux" ||
-      (pw_build_EXECUTABLE_TARGET_TYPE != "mimxrt595_executable" &&
-       current_toolchain !=
-       "$dir_pigweed_experimental/targets/host:host_debug")) {
+      (get_label_info(current_toolchain, "name") != "host_debug" &&
+       pw_build_EXECUTABLE_TARGET_TYPE != "mimxrt595_executable")) {
     deps += [ ":tokenizer_database" ]
   }
 }
