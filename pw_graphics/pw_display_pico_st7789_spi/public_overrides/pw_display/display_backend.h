@@ -13,9 +13,33 @@
 // the License.
 #pragma once
 
+#include "pw_digital_io_pico/digital_io.h"
 #include "pw_display/display.h"
+#include "pw_display_driver_st7789/display_driver.h"
+#include "pw_spi_pico/chip_selector.h"
+#include "pw_spi_pico/initiator.h"
+#include "pw_sync/borrow.h"
+#include "pw_sync/mutex.h"
 
 namespace pw::display::backend {
+
+class SPIHelperST7789 : public pw::display_driver::SPIHelper {
+ public:
+  SPIHelperST7789(pw::digital_io::DigitalOut& cs_pin);
+
+  Status Init();
+  pw::spi::Device& GetDevice() { return spi_device_; }
+
+  // pw::display_driver::SPIHelper implementation:
+  Status SetDataBits(uint8_t data_bits) override;
+
+ private:
+  pw::spi::PicoChipSelector spi_chip_selector_;
+  pw::spi::PicoInitiator spi_initiator_;
+  pw::sync::VirtualMutex spi_initiator_mutex_;
+  pw::sync::Borrowable<pw::spi::Initiator> borrowable_spi_initiator_;
+  pw::spi::Device spi_device_;
+};
 
 class Display : pw::display::Display {
  public:
@@ -32,6 +56,21 @@ class Display : pw::display::Display {
   bool TouchscreenAvailable() const override;
   bool NewTouchEvent() override;
   pw::coordinates::Vec3Int GetTouchPoint() override;
+
+ private:
+  constexpr static int kDisplayWidth = 320;
+  constexpr static int kDisplayHeight = 240;
+  constexpr static int kNumDisplayPixels = kDisplayWidth * kDisplayHeight;
+
+  void InitGPIO();
+  void InitSPI();
+
+  pw::digital_io::PicoDigitalOut chip_selector_gpio_;
+  pw::digital_io::PicoDigitalOut data_cmd_gpio_;
+  SPIHelperST7789 spi_helper_;
+  pw::display_driver::DisplayDriverST7789::Config driver_config_;
+  pw::display_driver::DisplayDriverST7789 display_driver_;
+  uint16_t framebuffer_data_[kNumDisplayPixels];
 };
 
 }  // namespace pw::display::backend

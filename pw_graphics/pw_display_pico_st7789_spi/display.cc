@@ -18,179 +18,86 @@
 #include <cinttypes>
 #include <cstdint>
 
-#include "hardware/pwm.h"
-#include "hardware/spi.h"
-#include "pico/stdlib.h"
-#include "pw_color/color.h"
 #include "pw_display/display_backend.h"
-#include "pw_framebuffer/rgb565.h"
 
-using pw::color::color_rgb565_t;
-using pw::framebuffer::FramebufferRgb565;
+#define LIB_CMSIS_CORE 0
+#define LIB_PICO_STDIO_USB 0
+#define LIB_PICO_STDIO_SEMIHOSTING 0
+
+#include "hardware/gpio.h"
+#include "hardware/pwm.h"
+#include "pico/stdlib.h"
+#include "pw_log/log.h"
+#include "pw_status/try.h"
 
 namespace pw::display::backend {
 
 namespace {
 
-// ST7789 Display Registers
-#define ST7789_SWRESET 0x01
-#define ST7789_TEOFF 0x34
-#define ST7789_TEON 0x35
-#define ST7789_MADCTL 0x36
-#define ST7789_COLMOD 0x3A
-#define ST7789_GCTRL 0xB7
-#define ST7789_VCOMS 0xBB
-#define ST7789_LCMCTRL 0xC0
-#define ST7789_VDVVRHEN 0xC2
-#define ST7789_VRHS 0xC3
-#define ST7789_VDVS 0xC4
-#define ST7789_FRCTRL2 0xC6
-#define ST7789_PWCTRL1 0xD0
-#define ST7789_PORCTRL 0xB2
-#define ST7789_GMCTRP1 0xE0
-#define ST7789_GMCTRN1 0xE1
-#define ST7789_INVOFF 0x20
-#define ST7789_SLPOUT 0x11
-#define ST7789_DISPON 0x29
-#define ST7789_GAMSET 0x26
-#define ST7789_DISPOFF 0x28
-#define ST7789_RAMWR 0x2C
-#define ST7789_INVON 0x21
-#define ST7789_CASET 0x2A
-#define ST7789_RASET 0x2B
-
-// MADCTL Bits (See page 215: MADCTL (36h): Memory Data Access Control)
-#define ST7789_MADCTL_ROW_ORDER 0b10000000
-#define ST7789_MADCTL_COL_ORDER 0b01000000
-#define ST7789_MADCTL_SWAP_XY 0b00100000
-#define ST7789_MADCTL_SCAN_ORDER 0b00010000
-#define ST7789_MADCTL_RGB_BGR 0b00001000
-#define ST7789_MADCTL_HORIZ_ORDER 0b00000100
-
 // Pico Display Pack 2 Pins
 // https://shop.pimoroni.com/products/pico-display-pack-2-0
 // --------------------------------------------------------
 constexpr int BACKLIGHT_EN = 20;
-// spi0 Pins
+// Pico spi0 Pins
 #define SPI_PORT spi0
 constexpr int TFT_SCLK = 18;  // SPI0 SCK
 constexpr int TFT_MOSI = 19;  // SPI0 TX
-// Unconnected
-// const int TFT_MISO = 4;  // SPI0 RX
+// Unused
+// constexpr int TFT_MISO = 4;   // SPI0 RX
 constexpr int TFT_CS = 17;  // SPI0 CSn
-constexpr int TFT_DC = 16;  // GP16
+constexpr int TFT_DC = 16;  // GP10
 // Reset pin is connected to the Pico reset pin (RUN #30)
 // constexpr int TFT_RST = 19;
 
-// Pico Display Pack 2 Size
-constexpr int kDisplayWidth = 320;
-constexpr int kDisplayHeight = 240;
-constexpr int kDisplayDataSize = kDisplayWidth * kDisplayHeight;
+constexpr uint32_t kBaudRate = 62'500'000;
 
-uint16_t framebuffer_data[kDisplayDataSize];
-
-// Pico Enviro+ Pack Pins are the same as Display Pack 2
-// https://shop.pimoroni.com/products/pico-enviro-pack
-// --------------------------------------------------------
-
-// Pico Enviro+ Pack Size
-// constexpr int kDisplayWidth = 240;
-// constexpr int kDisplayHeight = 240;
-// constexpr int kDisplayDataSize = kDisplayWidth * kDisplayHeight;
-
-// PicoSystem
-// https://shop.pimoroni.com/products/picosystem
-// --------------------------------------------------------
-// constexpr int BACKLIGHT_EN = 12;
-// #define SPI_PORT spi0
-// constexpr int TFT_SCLK = 6;  // SPI0 SCK
-// constexpr int TFT_MOSI = 7;  // SPI0 TX
-// Unconnected
-// const int TFT_MISO = 4;  // SPI0 RX
-// constexpr int TFT_CS = 5;  // SPI0 CSn
-// constexpr int TFT_DC = 9;  // GP16
-// constexpr int TFT_RST = 4;
-
-// SPI Functions
-// TODO(tonymd): move to pw_spi
-inline void ChipSelectEnable() {
-  asm volatile("nop \n nop \n nop");
-  gpio_put(TFT_CS, 0);
-  asm volatile("nop \n nop \n nop");
-}
-
-inline void ChipSelectDisable() {
-  asm volatile("nop \n nop \n nop");
-  gpio_put(TFT_CS, 1);
-  asm volatile("nop \n nop \n nop");
-}
-
-inline void DataCommandEnable() {
-  asm volatile("nop \n nop \n nop");
-  gpio_put(TFT_DC, 0);
-  asm volatile("nop \n nop \n nop");
-}
-
-inline void DataCommandDisable() {
-  asm volatile("nop \n nop \n nop");
-  gpio_put(TFT_DC, 1);
-  asm volatile("nop \n nop \n nop");
-}
-
-void inline SPISendByte(uint8_t data) {
-  ChipSelectEnable();
-  DataCommandDisable();
-  spi_write_blocking(SPI_PORT, &data, 1);
-  ChipSelectDisable();
-}
-
-void inline SPISendShort(uint16_t data) {
-  ChipSelectEnable();
-  DataCommandDisable();
-
-  uint8_t shortBuffer[2];
-
-  shortBuffer[0] = (uint8_t)(data >> 8);
-  shortBuffer[1] = (uint8_t)data;
-
-  spi_write_blocking(SPI_PORT, shortBuffer, 2);
-
-  ChipSelectDisable();
-}
-
-void inline SPISendCommand(uint8_t command) {
-  // set data/command to command mode (low).
-  DataCommandEnable();
-  ChipSelectEnable();
-
-  // send the command to the display.
-  spi_write_blocking(SPI_PORT, &command, 1);
-
-  // put the display back into data mode (high).
-  DataCommandDisable();
-  ChipSelectDisable();
-}
-
-void inline SPISendCommand(uint8_t command,
-                           size_t data_length,
-                           const char* data) {
-  // set data/command to command mode (low).
-  DataCommandEnable();
-  ChipSelectEnable();
-
-  // send the command to the display.
-  spi_write_blocking(SPI_PORT, &command, 1);
-
-  // put the display back into data mode (high).
-  DataCommandDisable();
-  spi_write_blocking(SPI_PORT, (const uint8_t*)data, data_length);
-
-  ChipSelectDisable();
-}
+constexpr pw::spi::Config kSpiConfig{
+    .polarity = pw::spi::ClockPolarity::kActiveHigh,
+    .phase = pw::spi::ClockPhase::kFallingEdge,
+    .bits_per_word = pw::spi::BitsPerWord(8),
+    .bit_order = pw::spi::BitOrder::kMsbFirst,
+};
 
 }  // namespace
 
-Display::Display() = default;
+SPIHelperST7789::SPIHelperST7789(pw::digital_io::DigitalOut& cs_pin)
+    : spi_chip_selector_(cs_pin),
+      spi_initiator_(SPI_PORT, kBaudRate),
+      borrowable_spi_initiator_(spi_initiator_, spi_initiator_mutex_),
+      spi_device_(borrowable_spi_initiator_, kSpiConfig, spi_chip_selector_) {}
+
+Status SPIHelperST7789::SetDataBits(uint8_t data_bits) {
+  PW_ASSERT(data_bits == 8 || data_bits == 16);
+  spi_set_format(SPI_PORT, data_bits, SPI_CPOL_1, SPI_CPHA_1, SPI_MSB_FIRST);
+  spi_initiator_.SetOverrideBitsPerWord(pw::spi::BitsPerWord(data_bits));
+  return OkStatus();
+}
+
+Status SPIHelperST7789::Init() {
+  uint actual_baudrate = spi_init(SPI_PORT, kBaudRate);
+  PW_LOG_DEBUG("Actual Baudrate: %u", actual_baudrate);
+
+  // Not currently used (not yet reading from display).
+  // gpio_set_function(TFT_MISO, GPIO_FUNC_SPI);
+  gpio_set_function(TFT_SCLK, GPIO_FUNC_SPI);
+  gpio_set_function(TFT_MOSI, GPIO_FUNC_SPI);
+
+  return OkStatus();
+}
+
+Display::Display()
+    : chip_selector_gpio_(TFT_CS),
+      data_cmd_gpio_(TFT_DC),
+      spi_helper_(chip_selector_gpio_),
+      driver_config_{
+          .data_cmd_gpio = data_cmd_gpio_,
+          .reset_gpio = nullptr,
+          .spi_device = spi_helper_.GetDevice(),
+          .spi_helper = spi_helper_,
+          .screen_width = kDisplayWidth,
+          .screen_height = kDisplayHeight,
+      },
+      display_driver_(driver_config_) {}
 
 Display::~Display() = default;
 
@@ -199,12 +106,7 @@ Status Display::Init() {
   // TODO: This should be a facade
   setup_default_uart();
 
-  uint actual_baudrate = spi_init(SPI_PORT, 62'500'000);
-  // NOTE: If the display isn't working try a slower SPI baudrate:
-  // uint actual_baudrate = spi_init(SPI_PORT, 31'250'000);
-
-  // Set 8 bit SPI writes.
-  spi_set_format(SPI_PORT, 8, (spi_cpol_t)1, (spi_cpha_t)1, SPI_MSB_FIRST);
+  InitGPIO();
 
   // Init backlight PWM
   pwm_config cfg = pwm_get_default_config();
@@ -214,142 +116,47 @@ Status Display::Init() {
   // Full Brightness
   pwm_set_gpio_level(BACKLIGHT_EN, 65535);
 
-  // Init Pico SPI
-  // gpio_set_function(TFT_MISO, GPIO_FUNC_SPI);  // Unused
-  gpio_set_function(TFT_SCLK, GPIO_FUNC_SPI);
-  gpio_set_function(TFT_MOSI, GPIO_FUNC_SPI);
+  PW_TRY(spi_helper_.Init());
+  PW_TRY(display_driver_.Init());
 
+  return OkStatus();
+}
+
+void Display::Update(pw::framebuffer::FramebufferRgb565& frame_buffer) {
+  display_driver_.Update(&frame_buffer);
+}
+
+Status Display::InitFramebuffer(
+    pw::framebuffer::FramebufferRgb565* framebuffer) {
+  framebuffer->SetFramebufferData(framebuffer_data_,
+                                  kDisplayWidth,
+                                  kDisplayHeight,
+                                  kDisplayWidth * sizeof(uint16_t));
+  return OkStatus();
+}
+
+void Display::InitGPIO() {
   gpio_init(TFT_CS);
   gpio_init(TFT_DC);
   // gpio_init(TFT_RST); // Unused
 
   gpio_set_dir(TFT_CS, GPIO_OUT);
   gpio_set_dir(TFT_DC, GPIO_OUT);
-  // gpio_set_dir(TFT_RST, GPIO_OUT);  // Unused
-  gpio_put(TFT_CS, 1);
-  gpio_put(TFT_DC, 0);
-  // gpio_put(TFT_RST, 0);  // Unused
 
-  // Init Display
-  SPISendCommand(ST7789_SWRESET);  // Software reset
-
-  sleep_ms(150);
-
-  SPISendCommand(ST7789_TEON);
-  SPISendCommand(ST7789_COLMOD, 1, "\x05");
-
-  SPISendCommand(ST7789_PORCTRL, 5, "\x0c\x0c\x00\x33\x33");
-  SPISendCommand(ST7789_LCMCTRL, 1, "\x2c");
-  SPISendCommand(ST7789_VDVVRHEN, 1, "\x01");
-  SPISendCommand(ST7789_VRHS, 1, "\x12");
-  SPISendCommand(ST7789_VDVS, 1, "\x20");
-  SPISendCommand(ST7789_PWCTRL1, 2, "\xa4\xa1");
-  SPISendCommand(ST7789_FRCTRL2, 1, "\x0f");
-
-  SPISendCommand(ST7789_INVON);
-  SPISendCommand(ST7789_SLPOUT);
-  SPISendCommand(ST7789_DISPON);
-
-  uint8_t madctl = 0;
-  bool rotate_180 = false;
-
-  if (kDisplayWidth == 240 && kDisplayHeight == 240) {
-    // Column Address Set
-    SPISendCommand(ST7789_CASET);
-    SPISendShort(0);
-    SPISendShort(kDisplayWidth - 1);
-    // Page Address Set
-    SPISendCommand(ST7789_RASET);
-    SPISendShort(0);
-    SPISendShort(kDisplayHeight - 1);
-    // TODO: Figure out 240x240 square display MADCTL values for rotation.
-    madctl = ST7789_MADCTL_HORIZ_ORDER;
-  } else if (kDisplayWidth == 320 && kDisplayHeight == 240) {
-    // Landscape drawing
-    // Column Address Set
-    SPISendCommand(ST7789_CASET);
-    SPISendShort(0);
-    SPISendShort(kDisplayWidth - 1);
-    // Page Address Set
-    SPISendCommand(ST7789_RASET);
-    SPISendShort(0);
-    SPISendShort(kDisplayHeight - 1);
-
-    madctl = ST7789_MADCTL_COL_ORDER;
-    if (rotate_180)
-      madctl = ST7789_MADCTL_ROW_ORDER;
-
-    madctl |= ST7789_MADCTL_SWAP_XY | ST7789_MADCTL_SCAN_ORDER;
-  }
-
-  SPISendCommand(ST7789_MADCTL, 1, (char*)&madctl);
-
-  sleep_ms(50);
-  return OkStatus();
+  chip_selector_gpio_.Enable();
+  data_cmd_gpio_.Enable();
 }
 
 int Display::GetWidth() const { return kDisplayWidth; }
 
 int Display::GetHeight() const { return kDisplayHeight; }
 
-void SendDisplayWriteCommand() {
-  uint8_t command = ST7789_RAMWR;
-  // Switch to 8 bit writes.
-  spi_set_format(SPI_PORT, 8, (spi_cpol_t)1, (spi_cpha_t)1, SPI_MSB_FIRST);
-  DataCommandEnable();
-  ChipSelectEnable();
-  spi_write_blocking(SPI_PORT, &command, 1);
-  DataCommandDisable();
-  // Switch to 16 bit writes.
-  spi_set_format(SPI_PORT, 16, (spi_cpol_t)1, (spi_cpha_t)1, SPI_MSB_FIRST);
-}
-
-void UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer) {
-  SendDisplayWriteCommand();
-
-  uint16_t temp_row[kDisplayWidth];
-  color_rgb565_t* pixel_data = frame_buffer->GetFramebufferData();
-  for (int y = 0; y < frame_buffer->GetHeight(); y++) {
-    // Populate this row with each pixel repeated twice
-    for (int x = 0; x < frame_buffer->GetWidth(); x++) {
-      temp_row[x * 2] = pixel_data[y * frame_buffer->GetWidth() + x];
-      temp_row[(x * 2) + 1] = pixel_data[y * frame_buffer->GetHeight() + x];
-    }
-    // Send this row to the display twice.
-    spi_write16_blocking(SPI_PORT, temp_row, kDisplayWidth);
-    spi_write16_blocking(SPI_PORT, temp_row, kDisplayWidth);
-  }
-
-  ChipSelectDisable();
-}
-
-void Display::Update(FramebufferRgb565& frame_buffer) {
-  SendDisplayWriteCommand();
-
-  const uint16_t* pixel_data = frame_buffer.GetFramebufferData();
-  spi_write16_blocking(SPI_PORT, pixel_data, kDisplayDataSize);
-  // put the display back into data mode (high).
-  ChipSelectDisable();
-}
-
 bool Display::TouchscreenAvailable() const { return false; }
 
 bool Display::NewTouchEvent() { return false; }
 
 pw::coordinates::Vec3Int Display::GetTouchPoint() {
-  pw::coordinates::Vec3Int point;
-  point.x = 0;
-  point.y = 0;
-  point.z = 0;
-  return point;
-}
-
-Status Display::InitFramebuffer(FramebufferRgb565* framebuffer) {
-  framebuffer->SetFramebufferData(framebuffer_data,
-                                  kDisplayWidth,
-                                  kDisplayHeight,
-                                  kDisplayWidth * sizeof(uint16_t));
-  return OkStatus();
+  return pw::coordinates::Vec3Int{0, 0, 0};
 }
 
 }  // namespace pw::display::backend

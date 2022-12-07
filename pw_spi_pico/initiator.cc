@@ -76,6 +76,7 @@ void PicoInitiator::SetOverrideBitsPerWord(BitsPerWord bits_per_word) {
   // TODO(b/251033990): Remove once changing SPI device config is added.
   desired_bits_per_word_ = bits_per_word;
   override_bits_per_word_ = true;
+  config_.bits_per_word = bits_per_word;
 }
 
 Status PicoInitiator::LazyInit() {
