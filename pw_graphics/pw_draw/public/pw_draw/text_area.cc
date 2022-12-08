@@ -106,12 +106,13 @@ void TextArea::DrawCharacter(int character, int x, int y) {
   DrawCharacter(character);
 }
 
-void TextArea::DrawTestFontSheet(int character_width, int x, int y) {
+void TextArea::DrawTestFontSheet(int character_column_width, int x, int y) {
   SetCursor(x, y);
   for (int c = current_font->starting_character;
        c <= current_font->ending_character;
        c++) {
-    if (c % character_width == 0) {
+    int index = c - current_font->starting_character;
+    if (index > 0 && index % character_column_width == 0) {
       DrawCharacter('\n');
     }
     DrawCharacter(c);
@@ -121,13 +122,9 @@ void TextArea::DrawTestFontSheet(int character_width, int x, int y) {
 // DrawText at x, y (upper left pixel of font). Carriage returns will move
 // text to the next line.
 void TextArea::DrawText(const char* str) {
-  int character_index = 0;
-  int character;
-  do {
-    character = str[character_index];
-    DrawCharacter(character);
-    character_index++;
-  } while (character != '\0');
+  for (const char* ch = str; *ch != '\0'; ch++) {
+    DrawCharacter(*ch);
+  }
 }
 
 void TextArea::DrawText(const char* str, int x, int y) {
@@ -136,13 +133,9 @@ void TextArea::DrawText(const char* str, int x, int y) {
 }
 
 void TextArea::DrawText(const wchar_t* str) {
-  int character_index = 0;
-  int character;
-  do {
-    character = str[character_index];
-    DrawCharacter(character);
-    character_index++;
-  } while (character != '\0');
+  for (const wchar_t* ch = str; *ch != L'\0'; ch++) {
+    DrawCharacter(*ch);
+  }
 }
 
 void TextArea::DrawText(const wchar_t* str, int x, int y) {
