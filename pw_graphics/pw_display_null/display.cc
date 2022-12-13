@@ -31,13 +31,15 @@ Display::Display() = default;
 
 Display::~Display() = default;
 
-Status Display::Init() { return OkStatus(); }
+Status Display::Init() { return display_driver_.Init(); }
 
 int Display::GetWidth() const { return kDisplayWidth; }
 
 int Display::GetHeight() const { return kDisplayHeight; }
 
-void Display::Update(pw::framebuffer::FramebufferRgb565& frame_buffer) {}
+void Display::Update(pw::framebuffer::FramebufferRgb565& frame_buffer) {
+  display_driver_.Update(&frame_buffer).IgnoreError();
+}
 
 bool Display::TouchscreenAvailable() const { return false; }
 

@@ -14,6 +14,7 @@
 #pragma once
 
 #include "pw_display/display.h"
+#include "pw_display_driver_null/display_driver.h"
 
 namespace pw::display::backend {
 
@@ -32,6 +33,9 @@ class Display : pw::display::Display {
   bool TouchscreenAvailable() const override;
   bool NewTouchEvent() override;
   pw::coordinates::Vec3Int GetTouchPoint() override;
+
+ private:
+  pw::display_driver::DisplayDriverNULL display_driver_;
 };
 
 }  // namespace pw::display::backend
