@@ -106,17 +106,18 @@ struct Stm32CubeInitiator::PrivateInstanceData {
             .bits_per_word = desired_bits_per_word_,
             .bit_order = BitOrder::kMsbFirst,
         },
-        spi_handle {
-    .Instance = SPI5, .Init {
-      .Mode = SPI_MODE_MASTER, .Direction = SPI_DIRECTION_2LINES,
-      .DataSize = SPI_DATASIZE_8BIT, .CLKPolarity = SPI_POLARITY_LOW,
-      .CLKPhase = SPI_PHASE_1EDGE, .NSS = SPI_NSS_SOFT,
-      .BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2,
-      .FirstBit = SPI_FIRSTBIT_MSB, .TIMode = SPI_TIMODE_DISABLE,
-      .CRCCalculation = SPI_CRCCALCULATION_DISABLE, .CRCPolynomial = 7
-    }
-  }
-  {}
+        spi_handle{.Instance = SPI5,
+                   .Init{.Mode = SPI_MODE_MASTER,
+                         .Direction = SPI_DIRECTION_2LINES,
+                         .DataSize = SPI_DATASIZE_8BIT,
+                         .CLKPolarity = SPI_POLARITY_LOW,
+                         .CLKPhase = SPI_PHASE_1EDGE,
+                         .NSS = SPI_NSS_SOFT,
+                         .BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2,
+                         .FirstBit = SPI_FIRSTBIT_MSB,
+                         .TIMode = SPI_TIMODE_DISABLE,
+                         .CRCCalculation = SPI_CRCCALCULATION_DISABLE,
+                         .CRCPolynomial = 7}} {}
 
   Status InitSpi() {
     auto s = HAL_SPI_Init(&spi_handle);
