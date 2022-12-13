@@ -13,11 +13,4 @@
 # the License.
 
 import("//build_overrides/pigweed.gni")
-
-declare_args() {
-  # Since the GN build lives in Pigweed for now, PICO_ROOT is
-  # Always relative to Pigweed's root.
-  PICO_ROOT = "${dir_pw_third_party}/pico_sdk"
-}
-
-import("${PICO_ROOT}/pi_pico.gni")
+import("$dir_pigweed/build_overrides/pi_pico.gni")

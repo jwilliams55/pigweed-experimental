@@ -75,6 +75,28 @@ def default_build(ctx: PresubmitContext):
     build.ninja(ctx)
 
 
+def pico_build(ctx: PresubmitContext):
+    build.install_package(ctx, 'pico_sdk')
+    build.gn_gen(
+        ctx,
+        PICO_SRC_DIR='"{}"'.format(str(ctx.package_root / 'pico_sdk')),
+    )
+    build.ninja(ctx)
+
+
+def stm32cube_f4_build(ctx: PresubmitContext):
+    build.install_package(ctx, 'freertos')
+    build.install_package(ctx, 'stm32cube_f4')
+    build.gn_gen(
+        ctx,
+        dir_pw_third_party_freertos='"{}"'.format(ctx.package_root /
+                                                  'freertos'),
+        dir_pw_third_party_stm32cube_f4='"{}"'.format(ctx.package_root /
+                                                      'stm32cube_f4'),
+    )
+    build.ninja(ctx)
+
+
 def check_for_git_changes(_: PresubmitContext):
     """Checks that repositories have all changes commited."""
     checked_repos = (PIGWEED_ROOT, *REPOS)
@@ -123,9 +145,11 @@ FULL = (
     QUICK,  # Add all checks from the 'quick' program
     # Use the upstream Python checks, with custom path filters applied.
     python_checks.gn_python_check,
+    pico_build,
+    stm32cube_f4_build,
 )
 
-CI_CQ = (default_build, )
+CI_CQ = (default_build, pico_build)
 
 PROGRAMS = pw_presubmit.Programs(
     # keep-sorted: start
