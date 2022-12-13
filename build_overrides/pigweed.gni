@@ -58,6 +58,9 @@ declare_args() {
   dir_pw_display_driver_ili9341 =
       get_path_info("$dir_pigweed_experimental/pw_display_driver_ili9341",
                     "abspath")
+  dir_pw_display_driver_imgui =
+      get_path_info("$dir_pigweed_experimental/pw_display_driver_imgui",
+                    "abspath")
   dir_pw_display_driver_null =
       get_path_info("$dir_pigweed_experimental/pw_display_driver_null",
                     "abspath")

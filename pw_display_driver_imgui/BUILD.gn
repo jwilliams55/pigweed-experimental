@@ -16,20 +16,20 @@ import("//build_overrides/pigweed.gni")
 
 import("$dir_pw_build/target_types.gni")
 
-config("backend_config") {
-  include_dirs = [ "public_overrides" ]
-  visibility = [ ":*" ]
+config("default_config") {
+  include_dirs = [ "public" ]
 }
 
-pw_source_set("pw_display_host_imgui") {
-  public_configs = [ ":backend_config" ]
-  public = [ "public_overrides/pw_display/display_backend.h" ]
-  deps = [ "$dir_pw_display:pw_display.facade" ]
-  public_deps = [
+pw_source_set("pw_display_driver_imgui") {
+  public_configs = [ ":default_config" ]
+  public = [ "public/pw_display_driver_imgui/display_driver.h" ]
+  deps = [
+    "$dir_pigweed_experimental/third_party/glfw",
+    "$dir_pigweed_experimental/third_party/imgui",
     "$dir_pw_coordinates",
-    "$dir_pw_display_driver_imgui",
-    "$dir_pw_framebuffer",
-    "$dir_pw_status",
+    "$dir_pw_log",
   ]
-  sources = [ "display.cc" ]
+  public_deps = [ "$dir_pw_display_driver:display_driver" ]
+  sources = [ "display_driver.cc" ]
+  remove_configs = [ "$dir_pw_build:strict_warnings" ]
 }
