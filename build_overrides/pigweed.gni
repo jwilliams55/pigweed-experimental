@@ -45,6 +45,9 @@ declare_args() {
   dir_pw_coordinates =
       get_path_info("$dir_pigweed_experimental/pw_graphics/pw_coordinates",
                     "abspath")
+  dir_pw_digital_io_arduino =
+      get_path_info("$dir_pigweed_experimental/pw_digital_io_arduino",
+                    "abspath")
   dir_pw_digital_io_pico =
       get_path_info("$dir_pigweed_experimental/pw_digital_io_pico", "abspath")
   dir_pw_digital_io_stm32cube =
@@ -94,6 +97,8 @@ declare_args() {
   dir_pw_framebuffer =
       get_path_info("$dir_pigweed_experimental/pw_graphics/pw_framebuffer",
                     "abspath")
+  dir_pw_spi_arduino =
+      get_path_info("$dir_pigweed_experimental/pw_spi_arduino", "abspath")
   dir_pw_spi_pico =
       get_path_info("$dir_pigweed_experimental/pw_spi_pico", "abspath")
   dir_pw_spi_stm32f429i_disc1_stm32cube =

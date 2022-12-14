@@ -12,15 +12,10 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-#include <Arduino.h>
-
 #include <cinttypes>
 #include <cstdint>
 
-#include "ILI9341_t3n.h"
-#include "pw_color/color.h"
 #include "pw_display/display_backend.h"
-#include "pw_framebuffer/rgb565.h"
 
 using pw::framebuffer::FramebufferRgb565;
 
@@ -31,39 +26,69 @@ namespace {
 constexpr int TFT_DC = 9;
 constexpr int TFT_CS = 32;
 constexpr int TFT_RST = 3;
-constexpr int TFT_MOSI = 11;
-constexpr int TFT_SCLK = 13;
-constexpr int TFT_MISO = 12;
 
-constexpr int kDisplayWidth = 320;
-constexpr int kDisplayHeight = 240;
-constexpr int kDisplayDataSize = kDisplayWidth * kDisplayHeight;
+constexpr pw::spi::Config kSpiConfig8Bit{
+    .polarity = pw::spi::ClockPolarity::kActiveHigh,
+    .phase = pw::spi::ClockPhase::kFallingEdge,
+    .bits_per_word = pw::spi::BitsPerWord(8),
+    .bit_order = pw::spi::BitOrder::kMsbFirst,
+};
 
-uint16_t framebuffer_data[kDisplayDataSize];
-ILI9341_t3n tft = ILI9341_t3n(TFT_CS, TFT_DC, TFT_RST);
+constexpr pw::spi::Config kSpiConfig16Bit{
+    .polarity = pw::spi::ClockPolarity::kActiveHigh,
+    .phase = pw::spi::ClockPhase::kFallingEdge,
+    .bits_per_word = pw::spi::BitsPerWord(16),
+    .bit_order = pw::spi::BitOrder::kMsbFirst,
+};
 
 }  // namespace
 
-Display::Display() = default;
+Display::SpiValues::SpiValues(pw::spi::Config config,
+                              pw::spi::ChipSelector& selector,
+                              pw::sync::VirtualMutex& initiator_mutex)
+    : borrowable_initiator_(initiator_, initiator_mutex),
+      device_(borrowable_initiator_, config, selector) {}
+
+Display::Display()
+    : chip_selector_gpio_(TFT_CS),
+      data_cmd_gpio_(TFT_DC),
+      reset_gpio_(TFT_RST),
+      spi_chip_selector_(chip_selector_gpio_),
+      spi_8_bit_(kSpiConfig8Bit, spi_chip_selector_, spi_initiator_mutex_),
+      spi_16_bit_(kSpiConfig16Bit, spi_chip_selector_, spi_initiator_mutex_),
+      display_driver_({
+          .data_cmd_gpio = data_cmd_gpio_,
+          .reset_gpio = &reset_gpio_,
+          .spi_device_8_bit = spi_8_bit_.device_,
+          .spi_device_16_bit = spi_16_bit_.device_,
+      }) {}
 
 Display::~Display() = default;
 
-Status Display::Init() {
-  // SPI Clock: 30MHz writes & 20MHz reads.
-  // Lower write speed if the display doesn't work.
-  tft.begin(30000000u, 2000000);
-  tft.useFrameBuffer(1);
-  tft.setRotation(3);
-  tft.setCursor(0, 0);
-  return OkStatus();
+void Display::InitGPIO() {
+  chip_selector_gpio_.Enable();
+  data_cmd_gpio_.Enable();
+  reset_gpio_.Enable();
 }
 
-int Display::GetWidth() const { return tft.width(); }
-int Display::GetHeight() const { return tft.height(); }
+void Display::InitSPI() { SPI.begin(); }
+
+Status Display::Init() {
+  InitGPIO();
+  InitSPI();
+  return display_driver_.Init();
+}
 
 void Display::Update(FramebufferRgb565& frame_buffer) {
-  tft.setFrameBuffer(frame_buffer.GetFramebufferData());
-  tft.updateScreen();
+  display_driver_.Update(&frame_buffer);
+}
+
+Status Display::InitFramebuffer(FramebufferRgb565* framebuffer) {
+  framebuffer->SetFramebufferData(framebuffer_data_,
+                                  kDisplayWidth,
+                                  kDisplayHeight,
+                                  kDisplayWidth * sizeof(uint16_t));
+  return OkStatus();
 }
 
 bool Display::TouchscreenAvailable() const { return false; }
@@ -71,19 +96,7 @@ bool Display::TouchscreenAvailable() const { return false; }
 bool Display::NewTouchEvent() { return false; }
 
 pw::coordinates::Vec3Int Display::GetTouchPoint() {
-  pw::coordinates::Vec3Int point;
-  point.x = 0;
-  point.y = 0;
-  point.z = 0;
-  return point;
-}
-
-Status Display::InitFramebuffer(FramebufferRgb565* framebuffer) {
-  framebuffer->SetFramebufferData(framebuffer_data,
-                                  kDisplayWidth,
-                                  kDisplayHeight,
-                                  kDisplayWidth * sizeof(uint16_t));
-  return OkStatus();
+  return pw::coordinates::Vec3Int{0, 0, 0};
 }
 
 }  // namespace pw::display::backend
