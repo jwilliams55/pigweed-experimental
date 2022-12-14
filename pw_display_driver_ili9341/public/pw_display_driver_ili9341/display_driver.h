@@ -19,8 +19,7 @@
 #include "pw_display_driver/display_driver.h"
 #include "pw_spi/device.h"
 
-namespace pw {
-namespace display_driver {
+namespace pw::display_driver {
 
 class DisplayDriverILI9341 : public DisplayDriver {
  public:
@@ -31,16 +30,18 @@ class DisplayDriverILI9341 : public DisplayDriver {
     pw::digital_io::DigitalOut& data_cmd_gpio;
     // Optional GPIO line to reset the display controller.
     pw::digital_io::DigitalOut* reset_gpio;
-    // The SPI device to which the display controller is connected.
-    pw::spi::Device& spi_device;
+    // The SPI device to which the display controller is connected for 8-bit
+    // data.
+    pw::spi::Device& spi_device_8_bit;
+    // The SPI device to which the display controller is connected for 16-bit
+    // data.
+    pw::spi::Device& spi_device_16_bit;
   };
 
   DisplayDriverILI9341(const Config& config);
 
   // DisplayDriver implementation:
-  // The SPI bus must be in 8-bit mode before calling this function.
   Status Init() override;
-  // The SPI bus must be in 16-bit mode before calling this function.
   Status Update(pw::framebuffer::FramebufferRgb565* framebuffer);
   Status UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer);
 
@@ -65,10 +66,7 @@ class DisplayDriverILI9341 : public DisplayDriver {
   Status WriteCommand(pw::spi::Device::Transaction& transaction,
                       const Command& command);
 
-  pw::digital_io::DigitalOut& data_cmd_gpio_;  // Pin to specify D/CX mode.
-  pw::digital_io::DigitalOut* reset_gpio_;     // Optional to reset controller.
-  pw::spi::Device& spi_device_;  // SPI device connected to controller.
+  Config config_;
 };
 
-}  // namespace display_driver
-}  // namespace pw
+}  // namespace pw::display_driver

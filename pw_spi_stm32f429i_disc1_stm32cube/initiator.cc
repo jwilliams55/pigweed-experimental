@@ -93,19 +93,11 @@ constexpr uint32_t GetPolarity(ClockPolarity polarity) {
 struct Stm32CubeInitiator::PrivateInstanceData {
   bool initialized = false;
   Status init_status;  // The saved LazyInit() status.
-  Config config_;
   BitsPerWord desired_bits_per_word_;
-  bool override_bits_per_word_ = false;
   SPI_HandleTypeDef spi_handle;
 
   PrivateInstanceData()
       : desired_bits_per_word_(8),
-        config_{
-            .polarity = ClockPolarity::kActiveHigh,
-            .phase = ClockPhase::kRisingEdge,
-            .bits_per_word = desired_bits_per_word_,
-            .bit_order = BitOrder::kMsbFirst,
-        },
         spi_handle{.Instance = SPI5,
                    .Init{.Mode = SPI_MODE_MASTER,
                          .Direction = SPI_DIRECTION_2LINES,
@@ -142,28 +134,11 @@ Status Stm32CubeInitiator::LazyInit() {
   return instance_data_->init_status;
 }
 
-void Stm32CubeInitiator::SetOverrideBitsPerWord(BitsPerWord bits_per_word) {
-  // TODO(b/251033990): Remove once changing SPI device config is added.
-  instance_data_->desired_bits_per_word_ = bits_per_word;
-  instance_data_->override_bits_per_word_ = true;
-  instance_data_->initialized = false;
-}
-
 Status Stm32CubeInitiator::Configure(const Config& config) {
-  instance_data_->config_ = config;
-  // TODO(b/251033990): Remove once changing SPI device config is added.
-  if (instance_data_->override_bits_per_word_) {
-    instance_data_->config_.bits_per_word =
-        instance_data_->desired_bits_per_word_;
-  }
-  instance_data_->spi_handle.Init.DataSize =
-      GetDataSize(instance_data_->config_.bits_per_word);
-  instance_data_->spi_handle.Init.FirstBit =
-      GetBitOrder(instance_data_->config_.bit_order);
-  instance_data_->spi_handle.Init.CLKPhase =
-      GetPhase(instance_data_->config_.phase);
-  instance_data_->spi_handle.Init.CLKPolarity =
-      GetPolarity(instance_data_->config_.polarity);
+  instance_data_->spi_handle.Init.DataSize = GetDataSize(config.bits_per_word);
+  instance_data_->spi_handle.Init.FirstBit = GetBitOrder(config.bit_order);
+  instance_data_->spi_handle.Init.CLKPhase = GetPhase(config.phase);
+  instance_data_->spi_handle.Init.CLKPolarity = GetPolarity(config.polarity);
   PW_TRY(LazyInit());
 
   return OkStatus();

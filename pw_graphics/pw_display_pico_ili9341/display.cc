@@ -21,7 +21,6 @@
 #include "pw_display/display_backend.h"
 
 #define LIB_CMSIS_CORE 0
-#define LIB_PICO_STDIO_USB 0
 #define LIB_PICO_STDIO_SEMIHOSTING 0
 
 #include "hardware/gpio.h"
@@ -44,36 +43,49 @@ constexpr int TFT_RST = 11;  // GP11
 
 constexpr uint32_t kBaudRate = 31'250'000;
 
-constexpr pw::spi::Config kSpiConfig{
+constexpr pw::spi::Config kSpiConfig8Bit{
     .polarity = pw::spi::ClockPolarity::kActiveHigh,
     .phase = pw::spi::ClockPhase::kFallingEdge,
     .bits_per_word = pw::spi::BitsPerWord(8),
     .bit_order = pw::spi::BitOrder::kMsbFirst,
 };
 
+constexpr pw::spi::Config kSpiConfig16Bit{
+    .polarity = pw::spi::ClockPolarity::kActiveHigh,
+    .phase = pw::spi::ClockPhase::kFallingEdge,
+    .bits_per_word = pw::spi::BitsPerWord(16),
+    .bit_order = pw::spi::BitOrder::kMsbFirst,
+};
+
 }  // namespace
+
+Display::SpiValues::SpiValues(pw::spi::Config config,
+                              pw::spi::ChipSelector& selector,
+                              pw::sync::VirtualMutex& initiator_mutex)
+    : initiator_(SPI_PORT, kBaudRate),
+      borrowable_initiator_(initiator_, initiator_mutex),
+      device_(borrowable_initiator_, config, selector) {}
 
 Display::Display()
     : chip_selector_gpio_(TFT_CS),
       data_cmd_gpio_(TFT_DC),
       reset_gpio_(TFT_RST),
       spi_chip_selector_(chip_selector_gpio_),
-      spi_initiator_(SPI_PORT, kBaudRate),
-      borrowable_spi_initiator_(spi_initiator_, spi_initiator_mutex_),
-      spi_device_(borrowable_spi_initiator_, kSpiConfig, spi_chip_selector_),
-      driver_config_{
+      spi_8_bit_(kSpiConfig8Bit, spi_chip_selector_, spi_initiator_mutex_),
+      spi_16_bit_(kSpiConfig16Bit, spi_chip_selector_, spi_initiator_mutex_),
+      display_driver_({
           .data_cmd_gpio = data_cmd_gpio_,
           .reset_gpio = &reset_gpio_,
-          .spi_device = spi_device_,
-      },
-      display_driver_(driver_config_) {}
+          .spi_device_8_bit = spi_8_bit_.device_,
+          .spi_device_16_bit = spi_16_bit_.device_,
+      }) {}
 
 Display::~Display() = default;
 
 Status Display::Init() {
   InitGPIO();
   InitSPI();
-  return InitDisplayDriver();
+  return display_driver_.Init();
 }
 
 void Display::Update(pw::framebuffer::FramebufferRgb565& frame_buffer) {
@@ -112,17 +124,6 @@ void Display::InitSPI() {
   // gpio_set_function(TFT_MISO, GPIO_FUNC_SPI);
   gpio_set_function(TFT_SCLK, GPIO_FUNC_SPI);
   gpio_set_function(TFT_MOSI, GPIO_FUNC_SPI);
-}
-
-Status Display::InitDisplayDriver() {
-  auto s = display_driver_.Init();
-  if (!s.ok())
-    return s;
-  // From hereafter only display pixel updates are made, so switch to 16-bit
-  // mode which is expected by DisplayDriver::Update();
-  // TODO(b/251033990): Switch to pw_spi way to change word size.
-  spi_initiator_.SetOverrideBitsPerWord(pw::spi::BitsPerWord(16));
-  return OkStatus();
 }
 
 }  // namespace pw::display::backend

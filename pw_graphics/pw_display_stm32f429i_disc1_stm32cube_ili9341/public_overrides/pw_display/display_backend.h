@@ -56,18 +56,25 @@ class Display : public pw::display::Display {
   pw::coordinates::Vec3Int GetTouchPoint() override;
 
  private:
+  struct SpiValues {
+    SpiValues(pw::spi::Config config,
+              pw::spi::ChipSelector& selector,
+              pw::sync::VirtualMutex& initiator_mutex);
+
+    pw::spi::Stm32CubeInitiator initiator_;
+    pw::sync::Borrowable<pw::spi::Initiator> borrowable_initiator_;
+    pw::spi::Device device_;
+  };
+
   void InitGPIO();
   void InitSPI();
-  void InitDisplayDriver();
 
   pw::digital_io::Stm32CubeDigitalOut chip_selector_gpio_;
   pw::digital_io::Stm32CubeDigitalOut data_cmd_gpio_;
   pw::spi::Stm32CubeChipSelector spi_chip_selector_;
-  pw::spi::Stm32CubeInitiator spi_initiator_;
   pw::sync::VirtualMutex spi_initiator_mutex_;
-  pw::sync::Borrowable<pw::spi::Initiator> borrowable_spi_initiator_;
-  pw::spi::Device spi_device_;
-  pw::display_driver::DisplayDriverILI9341::Config driver_config_;
+  SpiValues spi_8_bit_;
+  SpiValues spi_16_bit_;
   pw::display_driver::DisplayDriverILI9341 display_driver_;
   uint16_t framebuffer_data_[kNumDisplayPixels];
 };

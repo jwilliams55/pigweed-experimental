@@ -42,6 +42,16 @@ class Display : pw::display::Display {
   }
 
  private:
+  struct SpiValues {
+    SpiValues(pw::spi::Config config,
+              pw::spi::ChipSelector& selector,
+              pw::sync::VirtualMutex& initiator_mutex);
+
+    pw::spi::PicoInitiator initiator_;
+    pw::sync::Borrowable<pw::spi::Initiator> borrowable_initiator_;
+    pw::spi::Device device_;
+  };
+
   constexpr static int kDisplayWidth = 320;
   constexpr static int kDisplayHeight = 240;
   constexpr static int kNumDisplayPixels = kDisplayWidth * kDisplayHeight;
@@ -49,17 +59,14 @@ class Display : pw::display::Display {
   void UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer);
   void InitGPIO();
   void InitSPI();
-  Status InitDisplayDriver();
 
   pw::digital_io::PicoDigitalOut chip_selector_gpio_;
   pw::digital_io::PicoDigitalOut data_cmd_gpio_;
   pw::digital_io::PicoDigitalOut reset_gpio_;
   pw::spi::PicoChipSelector spi_chip_selector_;
-  pw::spi::PicoInitiator spi_initiator_;
   pw::sync::VirtualMutex spi_initiator_mutex_;
-  pw::sync::Borrowable<pw::spi::Initiator> borrowable_spi_initiator_;
-  pw::spi::Device spi_device_;
-  pw::display_driver::DisplayDriverILI9341::Config driver_config_;
+  SpiValues spi_8_bit_;
+  SpiValues spi_16_bit_;
   pw::display_driver::DisplayDriverILI9341 display_driver_;
   uint16_t framebuffer_data_[kNumDisplayPixels];
 };

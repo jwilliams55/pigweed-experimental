@@ -28,27 +28,40 @@ namespace {
 #define LCD_DC_PORT GPIOD
 #define LCD_DC_PIN GPIO_PIN_13
 
-constexpr pw::spi::Config kSpiConfig{
+constexpr pw::spi::Config kSpiConfig8Bit{
     .polarity = pw::spi::ClockPolarity::kActiveHigh,
     .phase = pw::spi::ClockPhase::kFallingEdge,
     .bits_per_word = pw::spi::BitsPerWord(8),
     .bit_order = pw::spi::BitOrder::kMsbFirst,
 };
 
+constexpr pw::spi::Config kSpiConfig16Bit{
+    .polarity = pw::spi::ClockPolarity::kActiveHigh,
+    .phase = pw::spi::ClockPhase::kFallingEdge,
+    .bits_per_word = pw::spi::BitsPerWord(16),
+    .bit_order = pw::spi::BitOrder::kMsbFirst,
+};
+
 }  // namespace
+
+Display::SpiValues::SpiValues(pw::spi::Config config,
+                              pw::spi::ChipSelector& selector,
+                              pw::sync::VirtualMutex& initiator_mutex)
+    : borrowable_initiator_(initiator_, initiator_mutex),
+      device_(borrowable_initiator_, config, selector) {}
 
 Display::Display()
     : chip_selector_gpio_(LCD_CS_PORT, LCD_CS_PIN),
       data_cmd_gpio_(LCD_DC_PORT, LCD_DC_PIN),
       spi_chip_selector_(chip_selector_gpio_),
-      borrowable_spi_initiator_(spi_initiator_, spi_initiator_mutex_),
-      spi_device_(borrowable_spi_initiator_, kSpiConfig, spi_chip_selector_),
-      driver_config_{
+      spi_8_bit_(kSpiConfig8Bit, spi_chip_selector_, spi_initiator_mutex_),
+      spi_16_bit_(kSpiConfig16Bit, spi_chip_selector_, spi_initiator_mutex_),
+      display_driver_({
           .data_cmd_gpio = data_cmd_gpio_,
           .reset_gpio = nullptr,
-          .spi_device = spi_device_,
-      },
-      display_driver_(driver_config_) {}
+          .spi_device_8_bit = spi_8_bit_.device_,
+          .spi_device_16_bit = spi_16_bit_.device_,
+      }) {}
 
 Display::~Display() = default;
 
@@ -83,18 +96,10 @@ void Display::InitSPI() {
   HAL_GPIO_Init(GPIOF, &spi_pin_config);
 }
 
-void Display::InitDisplayDriver() {
-  display_driver_.Init();
-  // From hereafter only display pixel updates are made, so switch to 16-bit
-  // mode which is expected by DisplayDriver::Update();
-  // TODO(b/251033990): Switch to a pw_spi way to change word size.
-  spi_initiator_.SetOverrideBitsPerWord(pw::spi::BitsPerWord(16));
-}
-
 Status Display::Init() {
   InitGPIO();
   InitSPI();
-  InitDisplayDriver();
+  PW_TRY(display_driver_.Init());
   return OkStatus();
 }
 

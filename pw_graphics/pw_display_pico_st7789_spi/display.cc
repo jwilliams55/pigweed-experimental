@@ -21,7 +21,6 @@
 #include "pw_display/display_backend.h"
 
 #define LIB_CMSIS_CORE 0
-#define LIB_PICO_STDIO_USB 0
 #define LIB_PICO_STDIO_SEMIHOSTING 0
 
 #include "hardware/gpio.h"

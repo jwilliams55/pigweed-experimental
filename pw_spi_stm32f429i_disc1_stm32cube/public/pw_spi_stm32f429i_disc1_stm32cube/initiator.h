@@ -24,8 +24,6 @@ class Stm32CubeInitiator : public Initiator {
   Stm32CubeInitiator();
   ~Stm32CubeInitiator();
 
-  void SetOverrideBitsPerWord(BitsPerWord bits_per_word);
-
   // Implements pw::spi::Initiator
   Status Configure(const Config& config) override;
   Status WriteRead(ConstByteSpan write_buffer, ByteSpan read_buffer) override;

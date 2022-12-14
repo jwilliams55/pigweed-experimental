@@ -46,16 +46,14 @@ constexpr int kDisplayNumPixels = kDisplayWidth * kDisplayHeight;
 }  // namespace
 
 DisplayDriverILI9341::DisplayDriverILI9341(const Config& config)
-    : data_cmd_gpio_(config.data_cmd_gpio),
-      reset_gpio_(config.reset_gpio),
-      spi_device_(config.spi_device) {}
+    : config_(config) {}
 
 void DisplayDriverILI9341::SetMode(Mode mode) {
   // Set the D/CX pin to indicate data or command values.
   if (mode == Mode::kData) {
-    data_cmd_gpio_.SetState(State::kActive);
+    config_.data_cmd_gpio.SetState(State::kActive);
   } else {
-    data_cmd_gpio_.SetState(State::kInactive);
+    config_.data_cmd_gpio.SetState(State::kInactive);
   }
 }
 
@@ -78,8 +76,8 @@ Status DisplayDriverILI9341::Init() {
 
   // TODO(cmumford): Figure out why kPerTransaction is flakey for this.
   // Seems to be OK on the Pico's display, but not the STM32F429I-DISC1.
-  auto transaction =
-      spi_device_.StartTransaction(ChipSelectBehavior::kPerWriteRead);
+  auto transaction = config_.spi_device_8_bit.StartTransaction(
+      ChipSelectBehavior::kPerWriteRead);
 
   // ?
   WriteCommand(transaction,
@@ -284,8 +282,8 @@ Status DisplayDriverILI9341::Init() {
 
 Status DisplayDriverILI9341::Update(
     pw::framebuffer::FramebufferRgb565* frame_buffer) {
-  auto transaction =
-      spi_device_.StartTransaction(ChipSelectBehavior::kPerTransaction);
+  auto transaction = config_.spi_device_16_bit.StartTransaction(
+      ChipSelectBehavior::kPerTransaction);
   const uint16_t* fb_data = frame_buffer->GetFramebufferData();
   Status s;
   // TODO(cmumford): Figure out why the STM32F429I cannot send the entire
@@ -315,8 +313,8 @@ Status DisplayDriverILI9341::Update(
 Status DisplayDriverILI9341::UpdatePixelDouble(
     pw::framebuffer::FramebufferRgb565* frame_buffer) {
   uint16_t temp_row[kDisplayWidth];
-  auto transaction =
-      spi_device_.StartTransaction(ChipSelectBehavior::kPerTransaction);
+  auto transaction = config_.spi_device_16_bit.StartTransaction(
+      ChipSelectBehavior::kPerTransaction);
   const color_rgb565_t* const fbdata = frame_buffer->GetFramebufferData();
   for (int y = 0; y < frame_buffer->GetHeight(); y++) {
     // Populate this row with each pixel repeated twice
@@ -338,13 +336,13 @@ Status DisplayDriverILI9341::UpdatePixelDouble(
 }
 
 Status DisplayDriverILI9341::Reset() {
-  if (!reset_gpio_)
+  if (!config_.reset_gpio)
     return Status::Unavailable();
-  auto s = reset_gpio_->SetStateInactive();
+  auto s = config_.reset_gpio->SetStateInactive();
   if (!s.ok())
     return s;
   pw::spin_delay::WaitMillis(100);
-  s = reset_gpio_->SetStateActive();
+  s = config_.reset_gpio->SetStateActive();
   pw::spin_delay::WaitMillis(100);
   return s;
 }
