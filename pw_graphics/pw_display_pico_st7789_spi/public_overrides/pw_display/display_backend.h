@@ -23,24 +23,6 @@
 
 namespace pw::display::backend {
 
-class SPIHelperST7789 : public pw::display_driver::SPIHelper {
- public:
-  SPIHelperST7789(pw::digital_io::DigitalOut& cs_pin);
-
-  Status Init();
-  pw::spi::Device& GetDevice() { return spi_device_; }
-
-  // pw::display_driver::SPIHelper implementation:
-  Status SetDataBits(uint8_t data_bits) override;
-
- private:
-  pw::spi::PicoChipSelector spi_chip_selector_;
-  pw::spi::PicoInitiator spi_initiator_;
-  pw::sync::VirtualMutex spi_initiator_mutex_;
-  pw::sync::Borrowable<pw::spi::Initiator> borrowable_spi_initiator_;
-  pw::spi::Device spi_device_;
-};
-
 class Display : pw::display::Display {
  public:
   Display();
@@ -58,6 +40,16 @@ class Display : pw::display::Display {
   pw::coordinates::Vec3Int GetTouchPoint() override;
 
  private:
+  struct SpiValues {
+    SpiValues(pw::spi::Config config,
+              pw::spi::ChipSelector& selector,
+              pw::sync::VirtualMutex& initiator_mutex);
+
+    pw::spi::PicoInitiator initiator_;
+    pw::sync::Borrowable<pw::spi::Initiator> borrowable_initiator_;
+    pw::spi::Device device_;
+  };
+
   constexpr static int kDisplayWidth = 320;
   constexpr static int kDisplayHeight = 240;
   constexpr static int kNumDisplayPixels = kDisplayWidth * kDisplayHeight;
@@ -67,8 +59,10 @@ class Display : pw::display::Display {
 
   pw::digital_io::PicoDigitalOut chip_selector_gpio_;
   pw::digital_io::PicoDigitalOut data_cmd_gpio_;
-  SPIHelperST7789 spi_helper_;
-  pw::display_driver::DisplayDriverST7789::Config driver_config_;
+  pw::spi::PicoChipSelector spi_chip_selector_;
+  pw::sync::VirtualMutex spi_initiator_mutex_;
+  SpiValues spi_8_bit_;
+  SpiValues spi_16_bit_;
   pw::display_driver::DisplayDriverST7789 display_driver_;
   uint16_t framebuffer_data_[kNumDisplayPixels];
 };

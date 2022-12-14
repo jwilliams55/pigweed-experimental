@@ -74,19 +74,14 @@ constexpr array<byte, 0> kEmptyArray;
 }  // namespace
 
 DisplayDriverST7789::DisplayDriverST7789(const Config& config)
-    : data_cmd_gpio_(config.data_cmd_gpio),
-      reset_gpio_(config.reset_gpio),
-      spi_device_(config.spi_device),
-      spi_helper_(config.spi_helper),
-      screen_width_(config.screen_width),
-      screen_height_(config.screen_height) {}
+    : config_(config) {}
 
 void DisplayDriverST7789::SetMode(Mode mode) {
   // Set the D/CX pin to indicate data or command values.
   if (mode == Mode::kData) {
-    data_cmd_gpio_.SetState(State::kActive);
+    config_.data_cmd_gpio.SetState(State::kActive);
   } else {
-    data_cmd_gpio_.SetState(State::kInactive);
+    config_.data_cmd_gpio.SetState(State::kInactive);
   }
 }
 
@@ -106,10 +101,8 @@ Status DisplayDriverST7789::WriteCommand(Device::Transaction& transaction,
 }
 
 Status DisplayDriverST7789::Init() {
-  auto transaction =
-      spi_device_.StartTransaction(ChipSelectBehavior::kPerWriteRead);
-
-  spi_helper_.SetDataBits(8);
+  auto transaction = config_.spi_device_8_bit.StartTransaction(
+      ChipSelectBehavior::kPerWriteRead);
 
   WriteCommand(transaction, {ST7789_SWRESET, kEmptyArray});  // Software reset
   pw::spin_delay::WaitMillis(150);
@@ -143,7 +136,7 @@ Status DisplayDriverST7789::Init() {
   WriteCommand(transaction, {ST7789_DISPON, kEmptyArray});
 
   // Landscape drawing Column Address Set
-  const uint16_t kMaxColumn = screen_width_ - 1;
+  const uint16_t kMaxColumn = config_.screen_width - 1;
   WriteCommand(transaction,
                {ST7789_CASET,
                 array<byte, 4>{
@@ -154,7 +147,7 @@ Status DisplayDriverST7789::Init() {
                 }});
 
   // Page Address Set
-  const uint16_t kMaxRow = screen_height_ - 1;
+  const uint16_t kMaxRow = config_.screen_height - 1;
   WriteCommand(transaction,
                {ST7789_RASET,
                 array<byte, 4>{
@@ -167,10 +160,10 @@ Status DisplayDriverST7789::Init() {
   uint8_t madctl = 0;
   bool rotate_180 = false;
 
-  if (screen_width_ == 240 && screen_height_ == 240) {
+  if (config_.screen_width == 240 && config_.screen_height == 240) {
     // TODO: Figure out 240x240 square display MADCTL values for rotation.
     madctl = ST7789_MADCTL_HORIZ_ORDER;
-  } else if (screen_width_ == 320 && screen_height_ == 240) {
+  } else if (config_.screen_width == 320 && config_.screen_height == 240) {
     madctl = ST7789_MADCTL_COL_ORDER;
     if (rotate_180)
       madctl = ST7789_MADCTL_ROW_ORDER;
@@ -188,13 +181,15 @@ Status DisplayDriverST7789::Init() {
 Status DisplayDriverST7789::Update(
     pw::framebuffer::FramebufferRgb565* frame_buffer) {
   // Let controller know a write is coming.
-  auto transaction =
-      spi_device_.StartTransaction(ChipSelectBehavior::kPerWriteRead);
-  PW_TRY(spi_helper_.SetDataBits(8));
-  PW_TRY(WriteCommand(transaction, {ST7789_RAMWR, kEmptyArray}));
-  PW_TRY(spi_helper_.SetDataBits(16));
+  {
+    auto transaction = config_.spi_device_8_bit.StartTransaction(
+        ChipSelectBehavior::kPerWriteRead);
+    PW_TRY(WriteCommand(transaction, {ST7789_RAMWR, kEmptyArray}));
+  }
 
   // Write the pixel data.
+  auto transaction = config_.spi_device_16_bit.StartTransaction(
+      ChipSelectBehavior::kPerWriteRead);
   const uint16_t* fb_data = frame_buffer->GetFramebufferData();
   const int num_pixels = frame_buffer->GetWidth() * frame_buffer->GetHeight();
   return transaction.Write(
@@ -202,13 +197,13 @@ Status DisplayDriverST7789::Update(
 }
 
 Status DisplayDriverST7789::Reset() {
-  if (!reset_gpio_)
+  if (!config_.reset_gpio)
     return Status::Unavailable();
-  auto s = reset_gpio_->SetStateInactive();
+  auto s = config_.reset_gpio->SetStateInactive();
   if (!s.ok())
     return s;
   pw::spin_delay::WaitMillis(100);
-  s = reset_gpio_->SetStateActive();
+  s = config_.reset_gpio->SetStateActive();
   pw::spin_delay::WaitMillis(100);
   return s;
 }

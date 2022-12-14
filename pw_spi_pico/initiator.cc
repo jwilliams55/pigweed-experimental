@@ -62,22 +62,7 @@ constexpr spi_cpol_t GetPolarity(ClockPolarity polarity) {
 }  // namespace
 
 PicoInitiator::PicoInitiator(spi_inst_t* spi, uint32_t baud_rate)
-    : spi_(spi),
-      baud_rate_(baud_rate),
-      config_{
-          .polarity = ClockPolarity::kActiveHigh,
-          .phase = ClockPhase::kRisingEdge,
-          .bits_per_word = BitsPerWord(8),
-          .bit_order = BitOrder::kMsbFirst,
-      },
-      desired_bits_per_word_(8) {}
-
-void PicoInitiator::SetOverrideBitsPerWord(BitsPerWord bits_per_word) {
-  // TODO(b/251033990): Remove once changing SPI device config is added.
-  desired_bits_per_word_ = bits_per_word;
-  override_bits_per_word_ = true;
-  config_.bits_per_word = bits_per_word;
-}
+    : spi_(spi), baud_rate_(baud_rate), bits_per_word_(8) {}
 
 Status PicoInitiator::LazyInit() {
   // Already initialized - nothing to do.
@@ -88,16 +73,12 @@ Status PicoInitiator::LazyInit() {
 }
 
 Status PicoInitiator::Configure(const Config& config) {
-  config_ = config;
-  // TODO(b/251033990): Remove once changing SPI device config is added.
-  if (override_bits_per_word_) {
-    config_.bits_per_word = desired_bits_per_word_;
-  }
+  bits_per_word_ = config.bits_per_word;
   spi_set_format(spi_,
-                 config_.bits_per_word(),
-                 GetPolarity(config_.polarity),
-                 GetPhase(config_.phase),
-                 GetBitOrder(config_.bit_order));
+                 config.bits_per_word(),
+                 GetPolarity(config.polarity),
+                 GetPhase(config.phase),
+                 GetBitOrder(config.bit_order));
 
   return OkStatus();
 }
@@ -110,7 +91,7 @@ Status PicoInitiator::WriteRead(ConstByteSpan write_buffer,
     if (!read_buffer.empty()) {
       PW_CRASH("Not implemented");
     } else {
-      if (config_.bits_per_word() == 16) {
+      if (bits_per_word_() == 16) {
         spi_write16_blocking(
             spi_,
             reinterpret_cast<const uint16_t*>(write_buffer.data()),

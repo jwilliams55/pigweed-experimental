@@ -17,7 +17,6 @@
 
 #include "pw_digital_io/digital_io.h"
 #include "pw_display_driver/display_driver.h"
-#include "pw_display_driver/spi_helper.h"
 #include "pw_spi/device.h"
 
 namespace pw::display_driver {
@@ -31,9 +30,12 @@ class DisplayDriverST7789 : public DisplayDriver {
     pw::digital_io::DigitalOut& data_cmd_gpio;
     // GPIO line to reset the display controller.
     pw::digital_io::DigitalOut* reset_gpio;
-    // The SPI device to which the display controller is connected.
-    pw::spi::Device& spi_device;
-    SPIHelper& spi_helper;
+    // The SPI device to which the display controller is connected for 8-bit
+    // data.
+    pw::spi::Device& spi_device_8_bit;
+    // The SPI device to which the display controller is connected for 16-bit
+    // data.
+    pw::spi::Device& spi_device_16_bit;
     int screen_width;
     int screen_height;
   };
@@ -65,12 +67,7 @@ class DisplayDriverST7789 : public DisplayDriver {
   Status WriteCommand(pw::spi::Device::Transaction& transaction,
                       const Command& command);
 
-  pw::digital_io::DigitalOut& data_cmd_gpio_;  // Pin to specify D/CX mode.
-  pw::digital_io::DigitalOut* reset_gpio_;     // Controller reset.
-  pw::spi::Device& spi_device_;  // SPI device connected to controller.
-  SPIHelper& spi_helper_;
-  const int screen_width_;
-  const int screen_height_;
+  Config config_;
 };
 
 }  // namespace pw::display_driver

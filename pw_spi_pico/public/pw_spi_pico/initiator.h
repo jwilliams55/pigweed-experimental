@@ -26,8 +26,6 @@ class PicoInitiator : public Initiator {
  public:
   PicoInitiator(spi_inst_t* spi, uint32_t baud_rate);
 
-  void SetOverrideBitsPerWord(BitsPerWord bits_per_word);
-
   // Implements pw::spi::Initiator:
   Status Configure(const Config& config) override;
   Status WriteRead(ConstByteSpan write_buffer, ByteSpan read_buffer) override;
@@ -37,10 +35,8 @@ class PicoInitiator : public Initiator {
 
   spi_inst_t* spi_;
   uint32_t baud_rate_;
-  Status init_status_;  // The saved LazyInit() status.
-  Config config_;
-  BitsPerWord desired_bits_per_word_;
-  bool override_bits_per_word_ = false;
+  Status init_status_;         // The saved LazyInit() status.
+  BitsPerWord bits_per_word_;  // Last Configure() bits_per_word.
 };
 
 }  // namespace pw::spi

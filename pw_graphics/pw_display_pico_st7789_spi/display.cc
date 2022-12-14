@@ -50,53 +50,43 @@ constexpr int TFT_DC = 16;  // GP10
 
 constexpr uint32_t kBaudRate = 62'500'000;
 
-constexpr pw::spi::Config kSpiConfig{
+constexpr pw::spi::Config kSpiConfig8Bit{
     .polarity = pw::spi::ClockPolarity::kActiveHigh,
     .phase = pw::spi::ClockPhase::kFallingEdge,
     .bits_per_word = pw::spi::BitsPerWord(8),
     .bit_order = pw::spi::BitOrder::kMsbFirst,
 };
 
+constexpr pw::spi::Config kSpiConfig16Bit{
+    .polarity = pw::spi::ClockPolarity::kActiveHigh,
+    .phase = pw::spi::ClockPhase::kFallingEdge,
+    .bits_per_word = pw::spi::BitsPerWord(16),
+    .bit_order = pw::spi::BitOrder::kMsbFirst,
+};
+
 }  // namespace
 
-SPIHelperST7789::SPIHelperST7789(pw::digital_io::DigitalOut& cs_pin)
-    : spi_chip_selector_(cs_pin),
-      spi_initiator_(SPI_PORT, kBaudRate),
-      borrowable_spi_initiator_(spi_initiator_, spi_initiator_mutex_),
-      spi_device_(borrowable_spi_initiator_, kSpiConfig, spi_chip_selector_) {}
-
-Status SPIHelperST7789::SetDataBits(uint8_t data_bits) {
-  PW_ASSERT(data_bits == 8 || data_bits == 16);
-  spi_set_format(SPI_PORT, data_bits, SPI_CPOL_1, SPI_CPHA_1, SPI_MSB_FIRST);
-  spi_initiator_.SetOverrideBitsPerWord(pw::spi::BitsPerWord(data_bits));
-  return OkStatus();
-}
-
-Status SPIHelperST7789::Init() {
-  uint actual_baudrate = spi_init(SPI_PORT, kBaudRate);
-  PW_LOG_DEBUG("Actual Baudrate: %u", actual_baudrate);
-
-  // Not currently used (not yet reading from display).
-  // gpio_set_function(TFT_MISO, GPIO_FUNC_SPI);
-  gpio_set_function(TFT_SCLK, GPIO_FUNC_SPI);
-  gpio_set_function(TFT_MOSI, GPIO_FUNC_SPI);
-
-  return OkStatus();
-}
+Display::SpiValues::SpiValues(pw::spi::Config config,
+                              pw::spi::ChipSelector& selector,
+                              pw::sync::VirtualMutex& initiator_mutex)
+    : initiator_(SPI_PORT, kBaudRate),
+      borrowable_initiator_(initiator_, initiator_mutex),
+      device_(borrowable_initiator_, config, selector) {}
 
 Display::Display()
     : chip_selector_gpio_(TFT_CS),
       data_cmd_gpio_(TFT_DC),
-      spi_helper_(chip_selector_gpio_),
-      driver_config_{
+      spi_chip_selector_(chip_selector_gpio_),
+      spi_8_bit_(kSpiConfig8Bit, spi_chip_selector_, spi_initiator_mutex_),
+      spi_16_bit_(kSpiConfig16Bit, spi_chip_selector_, spi_initiator_mutex_),
+      display_driver_({
           .data_cmd_gpio = data_cmd_gpio_,
           .reset_gpio = nullptr,
-          .spi_device = spi_helper_.GetDevice(),
-          .spi_helper = spi_helper_,
+          .spi_device_8_bit = spi_8_bit_.device_,
+          .spi_device_16_bit = spi_16_bit_.device_,
           .screen_width = kDisplayWidth,
           .screen_height = kDisplayHeight,
-      },
-      display_driver_(driver_config_) {}
+      }) {}
 
 Display::~Display() = default;
 
@@ -106,6 +96,7 @@ Status Display::Init() {
   setup_default_uart();
 
   InitGPIO();
+  InitSPI();
 
   // Init backlight PWM
   pwm_config cfg = pwm_get_default_config();
@@ -115,7 +106,6 @@ Status Display::Init() {
   // Full Brightness
   pwm_set_gpio_level(BACKLIGHT_EN, 65535);
 
-  PW_TRY(spi_helper_.Init());
   PW_TRY(display_driver_.Init());
 
   return OkStatus();
@@ -144,6 +134,16 @@ void Display::InitGPIO() {
 
   chip_selector_gpio_.Enable();
   data_cmd_gpio_.Enable();
+}
+
+void Display::InitSPI() {
+  uint actual_baudrate = spi_init(SPI_PORT, kBaudRate);
+  PW_LOG_DEBUG("Actual Baudrate: %u", actual_baudrate);
+
+  // Not currently used (not yet reading from display).
+  // gpio_set_function(TFT_MISO, GPIO_FUNC_SPI);
+  gpio_set_function(TFT_SCLK, GPIO_FUNC_SPI);
+  gpio_set_function(TFT_MOSI, GPIO_FUNC_SPI);
 }
 
 int Display::GetWidth() const { return kDisplayWidth; }
