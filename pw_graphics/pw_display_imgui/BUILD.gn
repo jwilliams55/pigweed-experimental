@@ -19,12 +19,13 @@ config("public_includes") {
   include_dirs = [ "public" ]
 }
 
-pw_source_set("pw_display") {
+pw_source_set("pw_display_imgui") {
   public_configs = [ ":public_includes" ]
-  public = [ "public/pw_display/display.h" ]
+  public = [ "public/pw_display_imgui/display.h" ]
   public_deps = [
     "$dir_pw_coordinates",
-    "$dir_pw_display_driver:display_driver",
+    "$dir_pw_display",
+    "$dir_pw_display_driver_imgui",
     "$dir_pw_framebuffer",
     "$dir_pw_status",
   ]

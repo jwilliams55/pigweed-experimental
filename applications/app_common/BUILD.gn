@@ -13,20 +13,22 @@
 # the License.
 
 import("//build_overrides/pigweed.gni")
-import("$dir_pw_build/target_types.gni")
+import("$dir_pw_build/facade.gni")
+
+declare_args() {
+  app_common_BACKEND = ""
+}
 
 config("public_includes") {
   include_dirs = [ "public" ]
 }
 
-pw_source_set("pw_display") {
+pw_facade("app_common") {
+  backend = app_common_BACKEND
   public_configs = [ ":public_includes" ]
-  public = [ "public/pw_display/display.h" ]
   public_deps = [
-    "$dir_pw_coordinates",
-    "$dir_pw_display_driver:display_driver",
-    "$dir_pw_framebuffer",
+    "$dir_pw_display",
     "$dir_pw_status",
   ]
-  sources = [ "display.cc" ]
+  public = [ "public/app_common/common.h" ]
 }

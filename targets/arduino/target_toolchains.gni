@@ -33,18 +33,25 @@ target_toolchain_arduino = {
       forward_variables_from(_toolchain_base.defaults, "*")
       forward_variables_from(toolchain_overrides, "*")
 
+      app_common_BACKEND = "//applications/app_common_impl:arduino"
+      pw_lcd_width = "320"
+      pw_lcd_height = "240"
+      pw_lcd_cs_pin_num = "32"
+      pw_lcd_dc_pin_num = "9"
+      pw_lcd_rst_pin_num = "3"
+
+      # pw_spi_arduino currently uses the Arduino SPI API which uses hard
+      # coded (via the board config) SPI pin assignments. These are currently
+      # ignored.
+      pw_spi_miso_pin_num = "-1"  # Pin 12 on Teensy 4.1
+      pw_spi_mosi_pin_num = "-1"  # Pin 11 on Teensy 4.1
+      pw_spi_clock_pin_num = "-1"  # Pin 13 on Teensy 4.1
+
       # Configure backend for pw_board_led
       pw_board_led_BACKEND = "$dir_pw_board_led_arduino"
 
       # Configure backend for pw_spin_delay
       pw_spin_delay_BACKEND = "$dir_pw_spin_delay_arduino"
-
-      # Configure backend for pw_display
-      # pw_display_null does nothing.
-      pw_display_BACKEND = "$dir_pw_display_teensy_ili9341"
-
-      # See //pw_display_teensy_ili9341/README.md for instructions.
-      # pw_display_BACKEND = "$dir_pw_display_teensy_ili9341"
 
       # Configure backend for pw_touchscreen
       pw_touchscreen_BACKEND = "$dir_pw_touchscreen_null"

@@ -23,6 +23,9 @@ import("$dir_pigweed/modules.gni")
 
 # Experimental modules.
 declare_args() {
+  dir_app_common =
+      get_path_info("$dir_pigweed_experimental/applications/app_common",
+                    "abspath")
   dir_pw_board_led =
       get_path_info("$dir_pigweed_experimental/pw_board_led", "abspath")
   dir_pw_board_led_arduino =
@@ -70,28 +73,9 @@ declare_args() {
   dir_pw_display_driver_st7789 =
       get_path_info("$dir_pigweed_experimental/pw_display_driver_st7789",
                     "abspath")
-  dir_pw_display_host_imgui =
-      get_path_info(
-          "$dir_pigweed_experimental/pw_graphics/pw_display_host_imgui",
-          "abspath")
-  dir_pw_display_null =
-      get_path_info("$dir_pigweed_experimental/pw_graphics/pw_display_null",
+  dir_pw_display_imgui =
+      get_path_info("$dir_pigweed_experimental/pw_graphics/pw_display_imgui",
                     "abspath")
-  dir_pw_display_pico_ili9341 =
-      get_path_info(
-          "$dir_pigweed_experimental/pw_graphics/pw_display_pico_ili9341",
-          "abspath")
-  dir_pw_display_pico_st7789_spi =
-      get_path_info(
-          "$dir_pigweed_experimental/pw_graphics/pw_display_pico_st7789_spi",
-          "abspath")
-  dir_pw_display_stm32f429i_disc1_stm32cube_ili9341 = get_path_info(
-          "$dir_pigweed_experimental/pw_graphics/pw_display_stm32f429i_disc1_stm32cube_ili9341",
-          "abspath")
-  dir_pw_display_teensy_ili9341 =
-      get_path_info(
-          "$dir_pigweed_experimental/pw_graphics/pw_display_teensy_ili9341",
-          "abspath")
   dir_pw_draw =
       get_path_info("$dir_pigweed_experimental/pw_graphics/pw_draw", "abspath")
   dir_pw_framebuffer =

@@ -165,3 +165,19 @@ ninja -C out
 Follow the instructions to flash the MIMXRT595-EVK with the SEGGER J-Link
 firmware and using `arm-none-eabi-gdb` at
 https://pigweed.dev/targets/mimxrt595_evk/target_docs.html#running-and-debugging.
+
+#### Teensy 4.1 ####
+
+https://www.pjrc.com/teensy/loader_cli.html
+
+```bash
+brew install teensy_loader_cli
+```
+
+```sh
+OBJCOPY=/Applications/Arduino.app/Contents/Java/hardware/tools/avr/bin/avr-objcopy
+INFILE=out/arduino_debug/obj/applications/terminal_display/bin/terminal_demo.elf
+OUTFILE=foo.hex
+$OBJCOPY -O ihex -R .eeprom -R .fuse -R .lock -R .signature $INFILE $OUTFILE
+teensy_loader_cli --mcu=TEENSY41 -w -v $OUTFILE
+```

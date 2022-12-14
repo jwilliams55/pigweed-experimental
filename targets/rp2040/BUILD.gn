@@ -19,6 +19,7 @@ import("$dir_pw_build/target_types.gni")
 import("$dir_pw_docgen/docs.gni")
 import("$dir_pw_toolchain/arm_gcc/toolchains.gni")
 import("$dir_pw_toolchain/generate_toolchain.gni")
+import("board_configs.gni")
 
 generate_toolchain("rp2040") {
   _excluded_members = [
@@ -31,6 +32,11 @@ generate_toolchain("rp2040") {
   # For now, no Pigweed configurations set up.
   defaults = {
     forward_variables_from(_toolchain_base.defaults, "*")
+
+    # Merge in the app_common_BACKEND and various application settings
+    # which are defined in board_configs.gni.
+    # forward_variables_from(board_config_st7789, "*")
+    forward_variables_from(board_config_ili9341, "*")
 
     pw_build_EXECUTABLE_TARGET_TYPE = "pico_executable"
     pw_build_EXECUTABLE_TARGET_TYPE_FILE =
@@ -58,16 +64,6 @@ generate_toolchain("rp2040") {
 
     # Configure backend for pw_spin_delay
     pw_spin_delay_BACKEND = "$dir_pw_spin_delay_pico"
-
-    # Configure backend for pw_display
-    # pw_display_null does nothing.
-    pw_display_BACKEND = "$dir_pw_display_null"
-
-    # pw_display_pico_ili9341 is for a ILI9341 screen connected over SPI.
-    if (PICO_SRC_DIR != "") {
-      pw_display_BACKEND = "$dir_pw_display_pico_ili9341"
-      # pw_display_BACKEND = "$dir_pw_display_pico_st7789_spi"
-    }
 
     # Configure backend for pw_touchscreen
     pw_touchscreen_BACKEND = "$dir_pw_touchscreen_null"

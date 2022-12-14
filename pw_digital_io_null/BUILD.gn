@@ -13,20 +13,20 @@
 # the License.
 
 import("//build_overrides/pigweed.gni")
+
 import("$dir_pw_build/target_types.gni")
 
 config("public_includes") {
   include_dirs = [ "public" ]
 }
 
-pw_source_set("pw_display") {
+pw_source_set("pw_digital_io_null") {
   public_configs = [ ":public_includes" ]
-  public = [ "public/pw_display/display.h" ]
+  public = [ "public/pw_digital_io_null/digital_io.h" ]
+  deps = [ "$dir_pw_log" ]
   public_deps = [
-    "$dir_pw_coordinates",
-    "$dir_pw_display_driver:display_driver",
-    "$dir_pw_framebuffer",
+    "$dir_pw_digital_io",
     "$dir_pw_status",
   ]
-  sources = [ "display.cc" ]
+  sources = [ "digital_io.cc" ]
 }

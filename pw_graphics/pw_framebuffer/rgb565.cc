@@ -33,6 +33,23 @@ FramebufferRgb565::FramebufferRgb565(color_rgb565_t* data,
       height_(height),
       row_bytes_(row_bytes) {}
 
+FramebufferRgb565::FramebufferRgb565(FramebufferRgb565&& other)
+    : pixel_data_(other.pixel_data_),
+      width_(other.width_),
+      height_(other.height_),
+      row_bytes_(other.row_bytes_) {
+  other.pixel_data_ = nullptr;
+}
+
+FramebufferRgb565& FramebufferRgb565::operator=(FramebufferRgb565&& rhs) {
+  pixel_data_ = rhs.pixel_data_;
+  width_ = rhs.width_;
+  height_ = rhs.height_;
+  row_bytes_ = rhs.row_bytes_;
+  rhs.pixel_data_ = nullptr;
+  return *this;
+}
+
 void FramebufferRgb565::SetFramebufferData(color_rgb565_t* data,
                                            int width,
                                            int height,

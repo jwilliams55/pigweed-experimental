@@ -34,10 +34,10 @@ class FramebufferRgb565 {
                     int row_bytes);
 
   FramebufferRgb565(const FramebufferRgb565&) = delete;
-  FramebufferRgb565(FramebufferRgb565&& other) = delete;
+  FramebufferRgb565(FramebufferRgb565&& other);
 
   FramebufferRgb565& operator=(const FramebufferRgb565&) = delete;
-  FramebufferRgb565& operator=(FramebufferRgb565&&) = delete;
+  FramebufferRgb565& operator=(FramebufferRgb565&&);
 
   // Has the framebuffer been properly initialized?
   bool IsValid() const { return pixel_data_ != nullptr; };

@@ -1,0 +1,43 @@
+# Copyright 2022 The Pigweed Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
+# These values are merged into the rp2040 toolchain and are used to set the
+# app_common backend and various application settings. More information on
+# common values can be found in //applications/app_common_impl/BUILD.gn.
+
+board_config_ili9341 = {
+  app_common_BACKEND = "//applications/app_common_impl:pico_ili9341"
+  pw_lcd_width = "320"
+  pw_lcd_height = "240"
+  pw_lcd_backlight = "-1"
+  pw_lcd_cs_pin_num = "9"
+  pw_lcd_dc_pin_num = "10"
+  pw_lcd_rst_pin_num = "11"
+  pw_spi_miso_pin_num = "-1"
+  pw_spi_mosi_pin_num = "19"
+  pw_spi_clock_pin_num = "18"
+}
+
+board_config_st7789 = {
+  app_common_BACKEND = "//applications/app_common_impl:pico_st7789"
+  pw_lcd_width = "320"
+  pw_lcd_height = "240"
+  pw_lcd_backlight = "-1"
+  pw_lcd_cs_pin_num = "17"
+  pw_lcd_dc_pin_num = "16"
+  pw_lcd_rst_pin_num = "-1"
+  pw_spi_miso_pin_num = "-1"
+  pw_spi_mosi_pin_num = "19"
+  pw_spi_clock_pin_num = "18"
+}

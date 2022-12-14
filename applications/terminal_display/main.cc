@@ -20,13 +20,14 @@
 #define PW_LOG_LEVEL PW_LOG_LEVEL_DEBUG
 
 #include "ansi.h"
+#include "app_common/common.h"
+#include "pw_assert/check.h"
 #include "pw_board_led/led.h"
 #include "pw_color/color.h"
 #include "pw_color/colors_endesga32.h"
 #include "pw_color/colors_pico8.h"
 #include "pw_coordinates/vec2.h"
 #include "pw_coordinates/vec_int.h"
-#include "pw_display/display_backend.h"
 #include "pw_draw/draw.h"
 #include "pw_draw/font_set.h"
 #include "pw_draw/pigweed_farm.h"
@@ -42,7 +43,7 @@ using pw::color::color_rgb565_t;
 using pw::color::colors_pico8_rgb565;
 using pw::coordinates::Size;
 using pw::coordinates::Vector2;
-using pw::display::backend::Display;
+using pw::display::Display;
 using pw::draw::FontSet;
 using pw::framebuffer::FramebufferRgb565;
 
@@ -388,21 +389,19 @@ int main() {
   uint32_t frames = 0;
   int frames_per_second = 0;
 
-  pw::board_led::Init();
+  pw::log_basic::SetOutput(LogCallback);
 
-  Display display;
+  pw::board_led::Init();
+  PW_CHECK_OK(Common::Init());
+
+  Display& display = Common::GetDisplay();
   FramebufferRgb565 frame_buffer;
-  display.InitFramebuffer(&frame_buffer).IgnoreError();
+  PW_CHECK_OK(display.InitFramebuffer(&frame_buffer));
 
   pw::draw::Fill(&frame_buffer, kBlack);
 
-  PW_LOG_INFO("pw::display::Init()");
-  display.Init();
-
   PW_LOG_INFO("pw::touchscreen::Init()");
   pw::touchscreen::Init();
-
-  pw::log_basic::SetOutput(LogCallback);
 
   pw::coordinates::Vec3Int last_frame_touch_state(0, 0, 0);
 

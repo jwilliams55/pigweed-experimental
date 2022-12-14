@@ -38,8 +38,8 @@ target_toolchain_mimxrt595_evk = {
       forward_variables_from(_toolchain_base.defaults, "*", _excluded_defaults)
       forward_variables_from(toolchain_overrides, "*")
 
+      app_common_BACKEND = "//applications/app_common_impl:mimxrt595"
       pw_board_led_BACKEND = "$dir_pw_board_led_mimxrt595_evk"
-      pw_display_BACKEND = "$dir_pw_display_null"
       pw_spin_delay_BACKEND = "$dir_pw_spin_delay_mcuxpresso"
       pw_touchscreen_BACKEND = "$dir_pw_touchscreen_null"
     }

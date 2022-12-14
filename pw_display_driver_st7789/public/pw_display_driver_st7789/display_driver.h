@@ -36,8 +36,8 @@ class DisplayDriverST7789 : public DisplayDriver {
     // The SPI device to which the display controller is connected for 16-bit
     // data.
     pw::spi::Device& spi_device_16_bit;
-    int screen_width;
-    int screen_height;
+    int screen_width = 320;
+    int screen_height = 240;
   };
 
   DisplayDriverST7789(const Config& config);

@@ -14,38 +14,51 @@
 #pragma once
 
 #include "pw_coordinates/vec_int.h"
+#include "pw_display_driver/display_driver.h"
 #include "pw_framebuffer/rgb565.h"
 #include "pw_status/status.h"
 
 namespace pw::display {
 
-// Defines an interface that all display backends must implement.
+// The display is an object that represents a single display (or screen)
+// attached to the host. There is a 1:1 correspondence with the screen
+// that it manages. It has one or more framebuffers which its clients may
+// use for rendering.
 class Display {
  public:
-  virtual ~Display() = default;
+  Display(pw::framebuffer::FramebufferRgb565 framebuffer,
+          pw::display_driver::DisplayDriver& display_driver);
+  virtual ~Display();
 
-  // Initialize the display.
-  virtual Status Init() = 0;
+  // Initialize the display instance.
+  Status Init() { return OkStatus(); }
 
-  // Initialize the supplied |framebuffer| to the appropriate size for the
-  // display.
-  virtual Status InitFramebuffer(
-      pw::framebuffer::FramebufferRgb565* framebuffer) = 0;
+  // Initialize the |framebuffer| for the caller to draw in.
+  Status InitFramebuffer(pw::framebuffer::FramebufferRgb565* framebuffer);
 
-  // TODO(tonymd): Add a DPI or physical size value.
-  virtual int GetWidth() const = 0;
-  virtual int GetHeight() const = 0;
+  // Return the width (in pixels) of the associated display.
+  int GetWidth() const { return framebuffer_.GetWidth(); }
 
-  // TODO(tonymd): Add update functions for new framebuffer types or make this a
-  // templated class.
-  virtual void Update(pw::framebuffer::FramebufferRgb565& framebuffer) = 0;
+  // Return the height (in pixels) of the associated display.
+  int GetHeight() const { return framebuffer_.GetHeight(); }
 
-  virtual bool TouchscreenAvailable() const = 0;
-  virtual bool NewTouchEvent() = 0;
-  virtual pw::coordinates::Vec3Int GetTouchPoint() = 0;
+  // Transport the pixels in the |framebuffer| to the associated screen.
+  void Update(pw::framebuffer::FramebufferRgb565& framebuffer);
 
- protected:
-  Display() = default;
+  // Does the associated screen have a touch screen?
+  virtual bool TouchscreenAvailable() const { return false; }
+
+  // Is there a new touch event available?
+  virtual bool NewTouchEvent() { return false; }
+
+  // Return the new touch point.
+  virtual pw::coordinates::Vec3Int GetTouchPoint() {
+    return pw::coordinates::Vec3Int{0, 0, 0};
+  }
+
+ private:
+  pw::framebuffer::FramebufferRgb565 framebuffer_;
+  pw::display_driver::DisplayDriver& display_driver_;
 };
 
 }  // namespace pw::display
