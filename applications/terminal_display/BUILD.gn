@@ -68,6 +68,17 @@ pw_executable("terminal_demo") {
     "//third_party/pigweed/pw_toolchain/host_clang:linux_sysroot",
   ]
 
+  # Hack for targets with no pre-init target implementation.
+  defines = []
+  if (pw_build_EXECUTABLE_TARGET_TYPE != "executable" &&
+      pw_build_EXECUTABLE_TARGET_TYPE != "arduino_executable") {
+    defines += [ "USE_FREERTOS" ]
+    deps += [ "$dir_pw_third_party/freertos" ]
+  }
+  if (pw_build_EXECUTABLE_TARGET_TYPE == "pico_executable") {
+    defines += [ "DEFINE_FREERTOS_MEMORY_FUNCTIONS=1" ]
+  }
+
   if (pw_build_EXECUTABLE_TARGET_TYPE == "arduino_executable" ||
       pw_build_EXECUTABLE_TARGET_TYPE == "pico_executable" ||
       pw_build_EXECUTABLE_TARGET_TYPE == "mimxrt595_executable") {

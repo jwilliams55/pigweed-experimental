@@ -1,4 +1,4 @@
-// Copyright 2022 The Pigweed Authors
+// Copyright 2021 The Pigweed Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not
 // use this file except in compliance with the License. You may obtain a copy of
@@ -17,24 +17,19 @@
 #include <array>
 
 #include "FreeRTOS.h"
-#include "board.h"
-#include "clock_config.h"
-#include "fsl_clock.h"
-#include "pin_mux.h"
-#include "pw_assert/check.h"
-#include "pw_boot_cortex_m/boot.h"
+#include "pw_malloc/malloc.h"
 #include "pw_preprocessor/compiler.h"
 #include "pw_string/util.h"
-#include "pw_sys_io_mcuxpresso/init.h"
+#include "pw_sys_io_stm32cube/init.h"
 #include "task.h"
 
-#if PW_MALLOC_ACTIVE
-#include "pw_malloc/malloc.h"
-#endif  // PW_MALLOC_ACTIVE
-
+#error
 namespace {
 
-std::array<StackType_t, configMINIMAL_STACK_SIZE> freertos_idle_stack;
+// TODO(cmumford): Remove hard-coded hack. At present this cache is here, which
+// is used for vApplicationGetIdleTaskMemory, and the application has its own
+// stack. Determine if both are needed.
+std::array<StackType_t, 100 /*configMINIMAL_STACK_SIZE*/> freertos_idle_stack;
 StaticTask_t freertos_idle_tcb;
 
 std::array<StackType_t, configTIMER_TASK_STACK_DEPTH> freertos_timer_stack;
@@ -45,6 +40,10 @@ std::array<char, configMAX_TASK_NAME_LEN> temp_thread_name_buffer;
 }  // namespace
 
 extern "C" {
+
+// Functions needed when configGENERATE_RUN_TIME_STATS is on.
+void configureTimerForRunTimeStats(void) {}
+unsigned long getRunTimeCounterValue(void) { return uwTick; }
 
 // Required for configCHECK_FOR_STACK_OVERFLOW.
 void vApplicationStackOverflowHook(TaskHandle_t, char* pcTaskName) {
@@ -69,10 +68,7 @@ void vApplicationGetIdleTaskMemory(StaticTask_t** ppxIdleTaskTCBBuffer,
   *pulIdleTaskStackSize = freertos_idle_stack.size();
 }
 
-void pw_boot_PreStaticMemoryInit() {
-  // Call CMSIS SystemInit code.
-  SystemInit();
-}
+void pw_boot_PreStaticMemoryInit() {}
 
 void pw_boot_PreStaticConstructorInit() {
 #if PW_MALLOC_ACTIVE
@@ -80,15 +76,7 @@ void pw_boot_PreStaticConstructorInit() {
 #endif  // PW_MALLOC_ACTIVE
 }
 
-void pw_boot_PreMainInit() {
-  CLOCK_AttachClk(kLPOSC_to_UTICK_CLK);
-
-  BOARD_InitBootPins();
-
-  BOARD_InitBootClocks();
-
-  pw_sys_io_mcuxpresso_Init();
-}
+void pw_boot_PreMainInit() { pw_sys_io_Init(); }
 
 PW_NO_RETURN void pw_boot_PostMain() {
   // In case main() returns, just sit here until the device is reset.

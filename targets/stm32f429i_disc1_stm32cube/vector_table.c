@@ -44,6 +44,11 @@ typedef void (*InterruptHandler)(void);
 // template.
 void TIM6_DAC_IRQHandler(void);
 
+// Interrupt handlers critical for OS operation.
+void SVC_Handler(void);
+void PendSV_Handler(void);
+void SysTick_Handler(void);
+
 PW_KEEP_IN_SECTION(".vector_table")
 const InterruptHandler vector_table[] = {
     // The starting location of the stack pointer.
@@ -60,7 +65,17 @@ const InterruptHandler vector_table[] = {
     [2] = DefaultFaultHandler,
     // HardFault handler.
     [3] = DefaultFaultHandler,
-
+    // 4-6: Specialized fault handlers.
+    // 7-10: Reserved.
+    // SVCall handler.
+    [11] = SVC_Handler,
+    // DebugMon handler.
+    [12] = DefaultFaultHandler,
+    // 13: Reserved.
+    // PendSV handler.
+    [14] = PendSV_Handler,
+    // SysTick handler.
+    [15] = SysTick_Handler,
     // stm32f4xx_hal sys-tick handler.
     [TIM6_DAC_IRQn + 16] = TIM6_DAC_IRQHandler,
 };

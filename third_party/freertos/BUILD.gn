@@ -17,21 +17,79 @@ import("//build_overrides/pigweed.gni")
 import("$dir_pw_build/target_types.gni")
 import("$dir_pw_third_party/freertos/freertos.gni")
 
-config("public_includes") {
+dir_freertos = get_path_info("//third_party/freertos/Source", "abspath")
+
+config("cm0_public_config") {
   include_dirs = [
-    "Source/include",
-    "Source/portable/GCC/ARM_CM4F",
+    "$dir_freertos/include",
+    "$dir_freertos/portable/GCC/ARM_CM0",
   ]
   cflags = [ "-Wno-cast-qual" ]
   visibility = [ ":*" ]
 }
 
+config("cm4f_public_config") {
+  include_dirs = [
+    "$dir_freertos/include",
+    "$dir_freertos/portable/GCC/ARM_CM4F",
+  ]
+  cflags = [ "-Wno-cast-qual" ]
+  visibility = [ ":*" ]
+}
+
+config("cm33_public_config") {
+  include_dirs = [
+    "$dir_freertos/include",
+    "$dir_freertos/portable/GCC/ARM_CM33_NTZ",
+    "$dir_freertos/portable/GCC/ARM_CM33_NTZ/non_secure",
+  ]
+  cflags = [ "-Wno-cast-qual" ]
+  visibility = [ ":*" ]
+}
+
+config("disable_warnings") {
+  cflags = [
+    "-Wno-error=unknown-pragmas",
+    "-Wno-cast-qual",
+    "-Wno-redundant-decls",
+    "-Wno-undef",
+    "-Wno-unused-parameter",
+    "-Wno-unused-variable",
+  ]
+  visibility = [ ":*" ]
+}
+
+pw_source_set("arm_cm0_freertos_port") {
+  public_configs = [ ":cm0_public_config" ]
+  deps = [ "$pw_third_party_freertos_CONFIG" ]
+  public = [ "$dir_freertos/portable/GCC/ARM_CM0/portmacro.h" ]
+  sources = [
+    "$dir_freertos/portable/GCC/ARM_CM0/port.c",
+    "$dir_freertos/portable/MemMang/heap_4.c",
+  ]
+}
+
 pw_source_set("arm_cm4f_freertos_port") {
-  public_configs = [ ":public_includes" ]
+  public_configs = [ ":cm4f_public_config" ]
   deps = [ "$pw_third_party_freertos_CONFIG" ]
   public = []
   sources = [
-    "Source/portable/GCC/ARM_CM4F/port.c",
-    "Source/portable/MemMang/heap_4.c",
+    "$dir_freertos/portable/GCC/ARM_CM4F/port.c",
+    "$dir_freertos/portable/MemMang/heap_4.c",
+  ]
+}
+
+pw_source_set("arm_cm33_ntz_freertos_port") {
+  public_configs = [
+    ":cm33_public_config",
+    ":disable_warnings",
+  ]
+  deps = [ "$pw_third_party_freertos_CONFIG" ]
+  public = []
+  sources = [
+    "$dir_freertos/portable/GCC/ARM_CM23_NTZ/non_secure/portmacro.h",
+    "$dir_freertos/portable/GCC/ARM_CM33_NTZ/non_secure/port.c",
+    "$dir_freertos/portable/GCC/ARM_CM33_NTZ/non_secure/portasm.c",
+    "$dir_freertos/portable/MemMang/heap_4.c",
   ]
 }

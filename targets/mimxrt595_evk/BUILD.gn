@@ -102,7 +102,9 @@ if (pw_third_party_mcuxpresso_SDK != "") {
       "$dir_pw_boot",
       "$dir_pw_boot_cortex_m",
       "$dir_pw_preprocessor",
+      "$dir_pw_string",
       "$dir_pw_sys_io_mcuxpresso",
+      "$dir_pw_third_party/freertos",
       pw_third_party_mcuxpresso_SDK,
     ]
     if (pw_malloc_BACKEND != "") {
@@ -180,6 +182,16 @@ pw_source_set("mimxrt595_config") {
     "$dir_board_files/clock_config.c",
     "$dir_board_files/pin_mux.c",
   ]
+}
+
+config("freertos_config_includes") {
+  include_dirs = [ "config" ]
+  visibility = [ ":*" ]
+}
+
+pw_source_set("freertos_config") {
+  public_configs = [ ":freertos_config_includes" ]
+  public = [ "config/FreeRTOSConfig.h" ]
 }
 
 pw_doc_group("target_docs") {

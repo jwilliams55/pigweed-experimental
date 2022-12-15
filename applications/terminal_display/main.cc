@@ -39,6 +39,11 @@
 #include "pw_touchscreen/touchscreen.h"
 #include "text_buffer.h"
 
+#if defined(USE_FREERTOS)
+#include "FreeRTOS.h"
+#include "task.h"
+#endif  // if defined(USE_FREERTOS)
+
 using pw::color::color_rgb565_t;
 using pw::color::colors_pico8_rgb565;
 using pw::coordinates::Size;
@@ -46,6 +51,35 @@ using pw::coordinates::Vector2;
 using pw::display::Display;
 using pw::draw::FontSet;
 using pw::framebuffer::FramebufferRgb565;
+
+// TODO(cmumford): move this code into a pre_init section (i.e. boot.cc) which
+//                 is part of the target. Not all targets currently have this.
+#if defined(DEFINE_FREERTOS_MEMORY_FUNCTIONS)
+std::array<StackType_t, 100 /*configMINIMAL_STACK_SIZE*/> freertos_idle_stack;
+StaticTask_t freertos_idle_tcb;
+
+std::array<StackType_t, configTIMER_TASK_STACK_DEPTH> freertos_timer_stack;
+StaticTask_t freertos_timer_tcb;
+
+extern "C" {
+// Required for configUSE_TIMERS.
+void vApplicationGetTimerTaskMemory(StaticTask_t** ppxTimerTaskTCBBuffer,
+                                    StackType_t** ppxTimerTaskStackBuffer,
+                                    uint32_t* pulTimerTaskStackSize) {
+  *ppxTimerTaskTCBBuffer = &freertos_timer_tcb;
+  *ppxTimerTaskStackBuffer = freertos_timer_stack.data();
+  *pulTimerTaskStackSize = freertos_timer_stack.size();
+}
+
+void vApplicationGetIdleTaskMemory(StaticTask_t** ppxIdleTaskTCBBuffer,
+                                   StackType_t** ppxIdleTaskStackBuffer,
+                                   uint32_t* pulIdleTaskStackSize) {
+  *ppxIdleTaskTCBBuffer = &freertos_idle_tcb;
+  *ppxIdleTaskStackBuffer = freertos_idle_stack.data();
+  *pulIdleTaskStackSize = freertos_idle_stack.size();
+}
+}  // extern "C"
+#endif  // defined(DEFINE_FREERTOS_MEMORY_FUNCTIONS)
 
 namespace {
 
@@ -98,6 +132,10 @@ constexpr Size<int> kButtonSize = {kButtonWidth, 12};
 TextBuffer s_log_text_buffer;
 DemoDecoder s_demo_decoder(s_log_text_buffer);
 Button g_button(kButtonLabel, kButtonTL, kButtonSize);
+#if defined(USE_FREERTOS)
+std::array<StackType_t, configMINIMAL_STACK_SIZE> s_freertos_stack;
+StaticTask_t s_freertos_tcb;
+#endif  // defined(USE_FREERTOS)
 
 void DrawButton(const Button& button,
                 color_rgb565_t bg_color,
@@ -383,7 +421,7 @@ void CreateDemoLogMessages() {
 
 }  // namespace
 
-int main() {
+void MainTask(void* pvParameters) {
   // Timing variables
   uint32_t frame_start_millis = pw::spin_delay::Millis();
   uint32_t frames = 0;
@@ -451,4 +489,21 @@ int main() {
       frame_start_millis = pw::spin_delay::Millis();
     }
   }
+}
+
+int main(void) {
+#if defined(USE_FREERTOS)
+  TaskHandle_t task_handle = xTaskCreateStatic(MainTask,
+                                               "main",
+                                               s_freertos_stack.size(),
+                                               /*pvParameters=*/nullptr,
+                                               tskIDLE_PRIORITY,
+                                               s_freertos_stack.data(),
+                                               &s_freertos_tcb);
+  PW_CHECK_NOTNULL(task_handle);  // Ensure it succeeded.
+  vTaskStartScheduler();
+#else
+  MainTask(/*pvParameters=*/nullptr);
+#endif
+  return 0;
 }

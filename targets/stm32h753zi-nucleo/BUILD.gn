@@ -43,3 +43,13 @@ if (current_toolchain != default_toolchain) {
     sources = [ "init.c" ]
   }
 }
+
+config("freertos_config_includes") {
+  include_dirs = [ "config" ]
+  visibility = [ ":*" ]
+}
+
+pw_source_set("freertos_config") {
+  public_configs = [ ":freertos_config_includes" ]
+  public = [ "config/FreeRTOSConfig.h" ]
+}

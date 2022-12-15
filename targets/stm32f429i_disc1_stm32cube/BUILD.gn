@@ -53,6 +53,8 @@ if (current_toolchain != default_toolchain) {
     deps = [
       "$dir_pw_malloc",
       "$dir_pw_preprocessor",
+      "$dir_pw_string",
+      "$dir_pw_third_party/freertos",
       "$dir_pw_third_party/stm32cube",
     ]
     sources = [
@@ -68,6 +70,12 @@ if (current_toolchain != default_toolchain) {
   pw_source_set("stm32f4xx_hal_config") {
     public_configs = [ ":config_includes" ]
     public = [ "config/stm32f4xx_hal_conf.h" ]
+  }
+
+  pw_source_set("stm32f4xx_freertos_config") {
+    public_configs = [ ":config_includes" ]
+    public_deps = [ "$dir_pw_third_party/freertos:config_assert" ]
+    public = [ "config/FreeRTOSConfig.h" ]
   }
 }
 
