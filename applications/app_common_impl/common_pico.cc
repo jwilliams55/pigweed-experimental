@@ -19,6 +19,7 @@
 #define LIB_PICO_STDIO_SEMIHOSTING 0
 
 #include "hardware/gpio.h"
+#include "hardware/pwm.h"
 #include "pico/stdlib.h"
 #include "pw_digital_io_pico/digital_io.h"
 #include "pw_log/log.h"

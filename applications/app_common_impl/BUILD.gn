@@ -132,22 +132,25 @@ pw_source_set("mimxrt595") {
   sources = [ "common_mimxrt595.cc" ]
 }
 
+_pico_common_deps = [
+  "$PICO_ROOT/src/common/pico_base",
+  "$PICO_ROOT/src/common/pico_stdlib",
+  "$PICO_ROOT/src/rp2_common/hardware_pwm",
+  "$PICO_ROOT/src/rp2_common/hardware_spi",
+  "$dir_pw_digital_io_pico",
+  "$dir_pw_display",
+  "$dir_pw_log",
+  "$dir_pw_spi_pico",
+  "$dir_pw_sync:borrow",
+  "$dir_pw_sync:mutex",
+  "//applications/app_common:app_common.facade",
+]
+
 pw_source_set("pico_ili9341") {
   public_configs = [ ":common_standard_flags" ]
   cflags = [ "-DDISPLAY_TYPE_ILI9341" ]
-  deps = [
-    "$PICO_ROOT/src/common/pico_base",
-    "$PICO_ROOT/src/common/pico_stdlib",
-    "$PICO_ROOT/src/rp2_common/hardware_spi",
-    "$dir_pw_digital_io_pico",
-    "$dir_pw_display",
-    "$dir_pw_display_driver_ili9341",
-    "$dir_pw_log",
-    "$dir_pw_spi_pico",
-    "$dir_pw_sync:borrow",
-    "$dir_pw_sync:mutex",
-    "//applications/app_common:app_common.facade",
-  ]
+  deps = _pico_common_deps
+  deps += [ "$dir_pw_display_driver_ili9341" ]
   sources = [ "common_pico.cc" ]
   remove_configs = [ "$dir_pw_build:strict_warnings" ]
 }
@@ -155,19 +158,8 @@ pw_source_set("pico_ili9341") {
 pw_source_set("pico_st7789") {
   public_configs = [ ":common_standard_flags" ]
   cflags = [ "-DDISPLAY_TYPE_ST7789" ]
-  deps = [
-    "$PICO_ROOT/src/common/pico_base",
-    "$PICO_ROOT/src/common/pico_stdlib",
-    "$PICO_ROOT/src/rp2_common/hardware_spi",
-    "$dir_pw_digital_io_pico",
-    "$dir_pw_display",
-    "$dir_pw_display_driver_st7789",
-    "$dir_pw_log",
-    "$dir_pw_spi_pico",
-    "$dir_pw_sync:borrow",
-    "$dir_pw_sync:mutex",
-    "//applications/app_common:app_common.facade",
-  ]
+  deps = _pico_common_deps
+  deps += [ "$dir_pw_display_driver_st7789" ]
   sources = [ "common_pico.cc" ]
   remove_configs = [ "$dir_pw_build:strict_warnings" ]
 }
