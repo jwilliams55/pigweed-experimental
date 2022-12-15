@@ -13,6 +13,8 @@
 // the License.
 #include "pw_display/display.h"
 
+using pw::framebuffer::FramebufferRgb565;
+
 namespace pw::display {
 
 Display::Display(pw::framebuffer::FramebufferRgb565 framebuffer,
@@ -21,17 +23,17 @@ Display::Display(pw::framebuffer::FramebufferRgb565 framebuffer,
 
 Display::~Display() = default;
 
-Status Display::InitFramebuffer(
-    pw::framebuffer::FramebufferRgb565* framebuffer) {
-  framebuffer->SetFramebufferData(framebuffer_.GetFramebufferData(),
-                                  framebuffer_.GetWidth(),
-                                  framebuffer_.GetHeight(),
-                                  framebuffer_.GetRowBytes());
-  return OkStatus();
+FramebufferRgb565 Display::GetFramebuffer() {
+  return FramebufferRgb565(framebuffer_.GetFramebufferData(),
+                           framebuffer_.GetWidth(),
+                           framebuffer_.GetHeight(),
+                           framebuffer_.GetRowBytes());
 }
 
-void Display::Update(pw::framebuffer::FramebufferRgb565& framebuffer) {
-  display_driver_.Update(&framebuffer).IgnoreError();
+Status Display::ReleaseFramebuffer(FramebufferRgb565 framebuffer) {
+  if (!framebuffer.IsValid())
+    return Status::InvalidArgument();
+  return display_driver_.Update(&framebuffer);
 }
 
 }  // namespace pw::display

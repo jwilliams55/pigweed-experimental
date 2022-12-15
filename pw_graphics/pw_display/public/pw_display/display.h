@@ -33,17 +33,23 @@ class Display {
   // Initialize the display instance.
   Status Init() { return OkStatus(); }
 
-  // Initialize the |framebuffer| for the caller to draw in.
-  Status InitFramebuffer(pw::framebuffer::FramebufferRgb565* framebuffer);
+  // Return a framebuffer to which the caller may draw. When drawing is complete
+  // the framebuffer must be returned using ReleaseFramebuffer().
+  pw::framebuffer::FramebufferRgb565 GetFramebuffer();
+
+  // Release the framebuffer back to the display. The display will
+  // send the framebuffer data to the screen. This function will block until
+  // the transfer has completed.
+  //
+  // This function should only be passed a valid framebuffer returned by
+  // a paired call to GetFramebuffer.
+  Status ReleaseFramebuffer(pw::framebuffer::FramebufferRgb565 framebuffer);
 
   // Return the width (in pixels) of the associated display.
   int GetWidth() const { return framebuffer_.GetWidth(); }
 
   // Return the height (in pixels) of the associated display.
   int GetHeight() const { return framebuffer_.GetHeight(); }
-
-  // Transport the pixels in the |framebuffer| to the associated screen.
-  void Update(pw::framebuffer::FramebufferRgb565& framebuffer);
 
   // Does the associated screen have a touch screen?
   virtual bool TouchscreenAvailable() const { return false; }

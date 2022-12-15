@@ -16,6 +16,7 @@
 #include <forward_list>
 #include <memory>
 #include <string_view>
+#include <utility>
 
 #define PW_LOG_LEVEL PW_LOG_LEVEL_DEBUG
 
@@ -433,19 +434,19 @@ void MainTask(void* pvParameters) {
   PW_CHECK_OK(Common::Init());
 
   Display& display = Common::GetDisplay();
-  FramebufferRgb565 frame_buffer;
-  PW_CHECK_OK(display.InitFramebuffer(&frame_buffer));
+  FramebufferRgb565 framebuffer = display.GetFramebuffer();
+  PW_ASSERT(framebuffer.IsValid());
 
-  pw::draw::Fill(&frame_buffer, kBlack);
+  pw::draw::Fill(&framebuffer, kBlack);
 
   PW_LOG_INFO("pw::touchscreen::Init()");
   pw::touchscreen::Init();
 
   pw::coordinates::Vec3Int last_frame_touch_state(0, 0, 0);
 
-  DrawFrame(frame_buffer);
+  DrawFrame(framebuffer);
   // Push the frame buffer to the screen.
-  display.Update(frame_buffer);
+  display.ReleaseFramebuffer(std::move(framebuffer));
 
   // The display loop.
   while (1) {
@@ -471,10 +472,11 @@ void MainTask(void* pvParameters) {
     last_frame_touch_state.y = point.y;
     last_frame_touch_state.z = point.z;
 
-    pw::draw::Fill(&frame_buffer, kBlack);
-    DrawFrame(frame_buffer);
+    framebuffer = display.GetFramebuffer();
+    pw::draw::Fill(&framebuffer, kBlack);
+    DrawFrame(framebuffer);
 
-    display.Update(frame_buffer);
+    display.ReleaseFramebuffer(std::move(framebuffer));
 
     // Every second make a log message.
     frames++;
