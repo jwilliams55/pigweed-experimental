@@ -19,8 +19,6 @@
 #include "pw_log/log.h"
 #include "pw_status/try.h"
 #include "stm32cube/stm32cube.h"
-#include "stm32f4xx_hal.h"
-#include "stm32f4xx_hal_spi.h"
 
 namespace pw::spi {
 
@@ -48,7 +46,7 @@ uint32_t GetDataSize(BitsPerWord bits_per_word) {
   } else if (bits_per_word() == 16) {
     return SPI_DATASIZE_16BIT;
   }
-  PW_ASSERT(false);
+  PW_UNREACHABLE;
   return SPI_DATASIZE_8BIT;
 }
 
@@ -59,7 +57,7 @@ constexpr uint32_t GetBitOrder(BitOrder bit_order) {
     case BitOrder::kMsbFirst:
       return SPI_FIRSTBIT_MSB;
   }
-  PW_ASSERT(false);
+  PW_UNREACHABLE;
   return SPI_FIRSTBIT_MSB;
 }
 
@@ -70,7 +68,7 @@ constexpr uint32_t GetPhase(ClockPhase phase) {
     case ClockPhase::kRisingEdge:
       return SPI_PHASE_2EDGE;
   }
-  PW_ASSERT(false);
+  PW_UNREACHABLE;
   return SPI_PHASE_1EDGE;
 }
 
@@ -81,64 +79,49 @@ constexpr uint32_t GetPolarity(ClockPolarity polarity) {
     case ClockPolarity::kActiveLow:
       return SPI_POLARITY_LOW;
   }
-  PW_ASSERT(false);
+  PW_UNREACHABLE;
   return SPI_POLARITY_HIGH;
 }
 
 }  // namespace
 
-// A collection of instance variables isolated into a separate structure
-// so that clients of Stm32CubeInitiator aren't forced to have a compile-time
-// dependency on the STM32 header files.
-struct Stm32CubeInitiator::PrivateInstanceData {
-  bool initialized = false;
-  Status init_status;  // The saved LazyInit() status.
-  BitsPerWord desired_bits_per_word_;
-  SPI_HandleTypeDef spi_handle;
-
-  PrivateInstanceData()
-      : desired_bits_per_word_(8),
-        spi_handle{.Instance = SPI5,
-                   .Init{.Mode = SPI_MODE_MASTER,
-                         .Direction = SPI_DIRECTION_2LINES,
-                         .DataSize = SPI_DATASIZE_8BIT,
-                         .CLKPolarity = SPI_POLARITY_LOW,
-                         .CLKPhase = SPI_PHASE_1EDGE,
-                         .NSS = SPI_NSS_SOFT,
-                         .BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2,
-                         .FirstBit = SPI_FIRSTBIT_MSB,
-                         .TIMode = SPI_TIMODE_DISABLE,
-                         .CRCCalculation = SPI_CRCCALCULATION_DISABLE,
-                         .CRCPolynomial = 7}} {}
-
-  Status InitSpi() {
-    auto s = HAL_SPI_Init(&spi_handle);
-    auto status = ConvertStatus(s);
-    PW_LOG_INFO("HAL_SPI_Init =>: %s", status.str());
-    return status;
-  }
-};
-
 Stm32CubeInitiator::Stm32CubeInitiator()
-    : instance_data_(new PrivateInstanceData) {}
+    : spi_handle{.Instance = SPI5,
+                 .Init{.Mode = SPI_MODE_MASTER,
+                       .Direction = SPI_DIRECTION_2LINES,
+                       .DataSize = SPI_DATASIZE_8BIT,
+                       .CLKPolarity = SPI_POLARITY_LOW,
+                       .CLKPhase = SPI_PHASE_1EDGE,
+                       .NSS = SPI_NSS_SOFT,
+                       .BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2,
+                       .FirstBit = SPI_FIRSTBIT_MSB,
+                       .TIMode = SPI_TIMODE_DISABLE,
+                       .CRCCalculation = SPI_CRCCALCULATION_DISABLE,
+                       .CRCPolynomial = 7}} {}
 
-Stm32CubeInitiator::~Stm32CubeInitiator() { delete instance_data_; }
+Stm32CubeInitiator::~Stm32CubeInitiator() = default;
 
 Status Stm32CubeInitiator::LazyInit() {
-  if (instance_data_->initialized)
-    return instance_data_->init_status;
-  instance_data_->init_status = instance_data_->InitSpi();
-  instance_data_->initialized = true;
-  PW_LOG_INFO("Stm32CubeInitiator::LazyInit: %s",
-              instance_data_->init_status.str());
-  return instance_data_->init_status;
+  if (initialized)
+    return init_status;
+  init_status = InitSPI();
+  initialized = true;
+  PW_LOG_INFO("Stm32CubeInitiator::LazyInit: %s", init_status.str());
+  return init_status;
+}
+
+Status Stm32CubeInitiator::InitSPI() {
+  auto s = HAL_SPI_Init(&spi_handle);
+  auto status = ConvertStatus(s);
+  PW_LOG_INFO("HAL_SPI_Init =>: %s", status.str());
+  return status;
 }
 
 Status Stm32CubeInitiator::Configure(const Config& config) {
-  instance_data_->spi_handle.Init.DataSize = GetDataSize(config.bits_per_word);
-  instance_data_->spi_handle.Init.FirstBit = GetBitOrder(config.bit_order);
-  instance_data_->spi_handle.Init.CLKPhase = GetPhase(config.phase);
-  instance_data_->spi_handle.Init.CLKPolarity = GetPolarity(config.polarity);
+  spi_handle.Init.DataSize = GetDataSize(config.bits_per_word);
+  spi_handle.Init.FirstBit = GetBitOrder(config.bit_order);
+  spi_handle.Init.CLKPhase = GetPhase(config.phase);
+  spi_handle.Init.CLKPolarity = GetPolarity(config.polarity);
   PW_TRY(LazyInit());
 
   return OkStatus();
@@ -155,7 +138,7 @@ Status Stm32CubeInitiator::WriteRead(ConstByteSpan write_buffer,
       // TODO(cmumford): Not yet conforming to the WriteRead contract.
       uint16_t size = std::min(write_buffer.size(), read_buffer.size());
       status = HAL_SPI_TransmitReceive(
-          &instance_data_->spi_handle,
+          &spi_handle,
           reinterpret_cast<uint8_t*>(
               const_cast<std::byte*>(write_buffer.data())),
           reinterpret_cast<uint8_t*>(read_buffer.data()),
@@ -163,7 +146,7 @@ Status Stm32CubeInitiator::WriteRead(ConstByteSpan write_buffer,
           kTimeout);
     } else {
       status =
-          HAL_SPI_Transmit(&instance_data_->spi_handle,
+          HAL_SPI_Transmit(&spi_handle,
                            reinterpret_cast<uint8_t*>(
                                const_cast<std::byte*>(write_buffer.data())),
                            write_buffer.size(),
@@ -175,7 +158,7 @@ Status Stm32CubeInitiator::WriteRead(ConstByteSpan write_buffer,
       }
     }
   } else {
-    status = HAL_SPI_Receive(&instance_data_->spi_handle,
+    status = HAL_SPI_Receive(&spi_handle,
                              reinterpret_cast<uint8_t*>(read_buffer.data()),
                              read_buffer.size(),
                              kTimeout);

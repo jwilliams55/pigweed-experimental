@@ -15,6 +15,9 @@
 #pragma once
 
 #include "pw_spi/initiator.h"
+#include "pw_status/status.h"
+#include "stm32f4xx_hal.h"
+#include "stm32f4xx_hal_spi.h"
 
 namespace pw::spi {
 
@@ -29,10 +32,12 @@ class Stm32CubeInitiator : public Initiator {
   Status WriteRead(ConstByteSpan write_buffer, ByteSpan read_buffer) override;
 
  private:
-  struct PrivateInstanceData;
   Status LazyInit();
+  Status InitSPI();
 
-  PrivateInstanceData* instance_data_;
+  bool initialized = false;
+  pw::Status init_status;  // The saved LazyInit() status.
+  SPI_HandleTypeDef spi_handle;
 };
 
 }  // namespace pw::spi
