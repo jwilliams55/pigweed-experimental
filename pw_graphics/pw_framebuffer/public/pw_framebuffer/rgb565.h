@@ -20,8 +20,7 @@ namespace pw::framebuffer {
 
 class FramebufferRgb565 {
  public:
-  // Construct a default framebuffer. The framebuffer will be invalid (i.e.
-  // IsValid() returns false) until SetFramebufferData() is called. Using an
+  // Construct a default invalid framebuffer. Using an
   // invalid framebuffer will result in a failed PW_CHECK.
   FramebufferRgb565();
 
@@ -43,11 +42,6 @@ class FramebufferRgb565 {
   bool IsValid() const { return pixel_data_ != nullptr; };
 
   pw::color::color_rgb565_t* GetFramebufferData() const { return pixel_data_; }
-
-  void SetFramebufferData(pw::color::color_rgb565_t* data,
-                          int width,
-                          int height,
-                          int row_bytes);
 
   // Return the RGB565 color at position x, y. Bounds are checked.
   Result<pw::color::color_rgb565_t> GetPixel(int x, int y) const;

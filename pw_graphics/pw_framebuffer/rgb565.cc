@@ -50,16 +50,6 @@ FramebufferRgb565& FramebufferRgb565::operator=(FramebufferRgb565&& rhs) {
   return *this;
 }
 
-void FramebufferRgb565::SetFramebufferData(color_rgb565_t* data,
-                                           int width,
-                                           int height,
-                                           int row_bytes) {
-  width_ = width;
-  height_ = height;
-  row_bytes_ = row_bytes;
-  pixel_data_ = data;
-}
-
 // Return the RGB565 color at position x, y. Bounds are checked.
 Result<color_rgb565_t> FramebufferRgb565::GetPixel(int x, int y) const {
   PW_ASSERT(IsValid());
