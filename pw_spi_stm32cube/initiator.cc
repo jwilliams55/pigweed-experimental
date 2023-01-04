@@ -12,7 +12,7 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-#include "pw_spi_stm32f429i_disc1_stm32cube/initiator.h"
+#include "pw_spi_stm32cube/initiator.h"
 
 #include <algorithm>
 

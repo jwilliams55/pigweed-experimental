@@ -12,32 +12,17 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-#pragma once
+#include "pw_spi_stm32cube/chip_selector.h"
 
-#include "pw_spi/initiator.h"
-#include "pw_status/status.h"
-#include "stm32f4xx_hal.h"
-#include "stm32f4xx_hal_spi.h"
+using pw::digital_io::State;
 
 namespace pw::spi {
 
-// STM32 userspace implementation of the SPI Initiator
-class Stm32CubeInitiator : public Initiator {
- public:
-  Stm32CubeInitiator();
-  ~Stm32CubeInitiator();
+Stm32CubeChipSelector::Stm32CubeChipSelector(pw::digital_io::DigitalOut& cs_pin)
+    : cs_pin_(cs_pin) {}
 
-  // Implements pw::spi::Initiator
-  Status Configure(const Config& config) override;
-  Status WriteRead(ConstByteSpan write_buffer, ByteSpan read_buffer) override;
-
- private:
-  Status LazyInit();
-  Status InitSPI();
-
-  bool initialized = false;
-  pw::Status init_status;  // The saved LazyInit() status.
-  SPI_HandleTypeDef spi_handle;
-};
+Status Stm32CubeChipSelector::SetActive(bool active) {
+  return cs_pin_.SetState(active ? State::kInactive : State::kActive);
+}
 
 }  // namespace pw::spi

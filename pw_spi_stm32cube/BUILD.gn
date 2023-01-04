@@ -21,11 +21,11 @@ config("default_config") {
   include_dirs = [ "public" ]
 }
 
-pw_source_set("pw_spi_stm32f429i_disc1_stm32cube") {
+pw_source_set("pw_spi_stm32cube") {
   public_configs = [ ":default_config" ]
   public = [
-    "public/pw_spi_stm32f429i_disc1_stm32cube/chip_selector.h",
-    "public/pw_spi_stm32f429i_disc1_stm32cube/initiator.h",
+    "public/pw_spi_stm32cube/chip_selector.h",
+    "public/pw_spi_stm32cube/initiator.h",
   ]
   public_deps = [ "$dir_pw_status" ]
   deps = [

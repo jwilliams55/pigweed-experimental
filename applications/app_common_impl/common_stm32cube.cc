@@ -16,8 +16,8 @@
 #include "app_common/common.h"
 #include "pw_digital_io_stm32cube/digital_io.h"
 #include "pw_display_driver_ili9341/display_driver.h"
-#include "pw_spi_stm32f429i_disc1_stm32cube/chip_selector.h"
-#include "pw_spi_stm32f429i_disc1_stm32cube/initiator.h"
+#include "pw_spi_stm32cube/chip_selector.h"
+#include "pw_spi_stm32cube/initiator.h"
 #include "pw_sync/borrow.h"
 #include "pw_sync/mutex.h"
 

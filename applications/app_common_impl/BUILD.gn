@@ -92,7 +92,7 @@ pw_source_set("stm32cube") {
     "$dir_pw_digital_io_stm32cube",
     "$dir_pw_display",
     "$dir_pw_display_driver_ili9341",
-    "$dir_pw_spi_stm32f429i_disc1_stm32cube",
+    "$dir_pw_spi_stm32cube",
     "$dir_pw_sync:borrow",
     "$dir_pw_sync:mutex",
     "//applications/app_common:app_common.facade",
