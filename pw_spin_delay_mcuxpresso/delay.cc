@@ -29,11 +29,7 @@ constexpr uint32_t kTickMicros = 1000;  // Every 1 ms.
 bool s_initialized = false;
 volatile uint32_t s_msec_count = 0;
 
-void UTickCallback(void) {
-  // clang-format off
-  s_msec_count++;
-  // clang-format on
-}
+void UTickCallback(void) { s_msec_count++; }
 
 void InitTickTimer() {
   s_initialized = true;
@@ -54,11 +50,11 @@ uint32_t Millis() {
   return s_msec_count;
 }
 
-uint32_t Micros() {
+uint64_t Micros() {
   if (!s_initialized) {
     InitTickTimer();
   }
-  return s_msec_count * 1000;
+  return static_cast<uint64_t>(s_msec_count) * 1000;
 }
 
 }  // namespace pw::spin_delay

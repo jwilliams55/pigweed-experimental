@@ -48,14 +48,11 @@ uint32_t Millis() {
   return difference;
 }
 
-uint32_t Micros() {
-  std::chrono::system_clock::time_point now;
-  uint32_t difference;
-  now = std::chrono::system_clock::now();
-  difference =
-      std::chrono::duration_cast<std::chrono::microseconds>(now - kProgramStart)
-          .count();
-  return difference;
+uint64_t Micros() {
+  std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+  return std::chrono::duration_cast<std::chrono::microseconds>(now -
+                                                               kProgramStart)
+      .count();
 }
 
 }  // namespace pw::spin_delay

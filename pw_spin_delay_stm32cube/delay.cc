@@ -21,6 +21,6 @@ namespace pw::spin_delay {
 void WaitMillis(size_t delay_ms) { HAL_Delay(delay_ms); }
 
 uint32_t Millis() { return HAL_GetTick(); }
-uint32_t Micros() { return HAL_GetTick() * 1000; }
+uint64_t Micros() { return static_cast<uint64_t>(HAL_GetTick()) * 1000; }
 
 }  // namespace pw::spin_delay

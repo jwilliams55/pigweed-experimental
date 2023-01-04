@@ -22,6 +22,6 @@ namespace pw::spin_delay {
 
 void WaitMillis(size_t delay_ms) { delay(delay_ms); }
 uint32_t Millis() { return millis(); }
-uint32_t Micros() { return micros(); }
+uint64_t Micros() { return micros(); }
 
 }  // namespace pw::spin_delay
