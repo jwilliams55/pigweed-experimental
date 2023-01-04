@@ -72,6 +72,6 @@ constexpr color_rgba8888_t colors_pico8_rgba8888[] = {
 #define COLOR_BLUE 12
 #define COLOR_INDIGO 13
 #define COLOR_PINK 14
-#define COLOR_PEACH 16
+#define COLOR_PEACH 15
 
 }  // namespace pw::color
