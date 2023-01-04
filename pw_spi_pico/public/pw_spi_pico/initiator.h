@@ -24,7 +24,7 @@ namespace pw::spi {
 // Pico SDK userspace implementation of the SPI Initiator
 class PicoInitiator : public Initiator {
  public:
-  PicoInitiator(spi_inst_t* spi, uint32_t baud_rate);
+  PicoInitiator(spi_inst_t* spi);
 
   // Implements pw::spi::Initiator:
   Status Configure(const Config& config) override;
@@ -34,7 +34,6 @@ class PicoInitiator : public Initiator {
   Status LazyInit();
 
   spi_inst_t* spi_;
-  uint32_t baud_rate_;
   Status init_status_;         // The saved LazyInit() status.
   BitsPerWord bits_per_word_;  // Last Configure() bits_per_word.
 };

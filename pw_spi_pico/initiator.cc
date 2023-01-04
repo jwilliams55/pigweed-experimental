@@ -61,8 +61,7 @@ constexpr spi_cpol_t GetPolarity(ClockPolarity polarity) {
 
 }  // namespace
 
-PicoInitiator::PicoInitiator(spi_inst_t* spi, uint32_t baud_rate)
-    : spi_(spi), baud_rate_(baud_rate), bits_per_word_(8) {}
+PicoInitiator::PicoInitiator(spi_inst_t* spi) : spi_(spi), bits_per_word_(8) {}
 
 Status PicoInitiator::LazyInit() {
   // Already initialized - nothing to do.

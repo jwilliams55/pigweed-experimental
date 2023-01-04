@@ -87,7 +87,7 @@ PicoDigitalOut s_display_reset_pin(TFT_RST);
 #endif
 PicoDigitalOut s_display_cs_pin(TFT_CS);
 PicoChipSelector s_spi_chip_selector(s_display_cs_pin);
-PicoInitiator s_spi_initiator(SPI_PORT, kBaudRate);
+PicoInitiator s_spi_initiator(SPI_PORT);
 VirtualMutex s_spi_initiator_mutex;
 Borrowable<Initiator> s_borrowable_spi_initiator(s_spi_initiator,
                                                  s_spi_initiator_mutex);
@@ -126,7 +126,7 @@ void SetBacklight(uint16_t brightness) {
 SpiValues::SpiValues(pw::spi::Config config,
                      pw::spi::ChipSelector& selector,
                      pw::sync::VirtualMutex& initiator_mutex)
-    : initiator(SPI_PORT, kBaudRate),
+    : initiator(SPI_PORT),
       borrowable_initiator(initiator, initiator_mutex),
       device(borrowable_initiator, config, selector) {}
 
