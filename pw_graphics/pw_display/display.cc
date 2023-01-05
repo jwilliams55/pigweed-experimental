@@ -17,7 +17,7 @@ using pw::framebuffer::FramebufferRgb565;
 
 namespace pw::display {
 
-Display::Display(pw::framebuffer::FramebufferRgb565 framebuffer,
+Display::Display(FramebufferRgb565 framebuffer,
                  pw::display_driver::DisplayDriver& display_driver)
     : framebuffer_(std::move(framebuffer)), display_driver_(display_driver) {}
 
@@ -33,7 +33,7 @@ FramebufferRgb565 Display::GetFramebuffer() {
 Status Display::ReleaseFramebuffer(FramebufferRgb565 framebuffer) {
   if (!framebuffer.IsValid())
     return Status::InvalidArgument();
-  return display_driver_.Update(&framebuffer);
+  return display_driver_.Update(framebuffer);
 }
 
 }  // namespace pw::display

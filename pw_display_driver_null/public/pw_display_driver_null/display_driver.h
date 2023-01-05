@@ -25,7 +25,7 @@ class DisplayDriverNULL : public DisplayDriver {
 
   // pw::display_driver::DisplayDriver implementation:
   pw::Status Init() override { return pw::OkStatus(); }
-  pw::Status Update(pw::framebuffer::FramebufferRgb565*) override {
+  pw::Status Update(const pw::framebuffer::FramebufferRgb565&) override {
     return pw::OkStatus();
   }
 };

@@ -20,6 +20,7 @@
 
 using pw::color::color_rgb565_t;
 using pw::digital_io::State;
+using pw::framebuffer::FramebufferRgb565;
 using pw::spi::ChipSelectBehavior;
 using pw::spi::Device;
 
@@ -280,11 +281,10 @@ Status DisplayDriverILI9341::Init() {
   return OkStatus();
 }
 
-Status DisplayDriverILI9341::Update(
-    pw::framebuffer::FramebufferRgb565* frame_buffer) {
+Status DisplayDriverILI9341::Update(const FramebufferRgb565& frame_buffer) {
   auto transaction = config_.spi_device_16_bit.StartTransaction(
       ChipSelectBehavior::kPerTransaction);
-  const uint16_t* fb_data = frame_buffer->GetFramebufferData();
+  const uint16_t* fb_data = frame_buffer.GetFramebufferData();
   Status s;
   // TODO(cmumford): Figure out why the STM32F429I cannot send the entire
   // framebuffer in a single write, but another display can.
@@ -311,16 +311,16 @@ Status DisplayDriverILI9341::Update(
 }
 
 Status DisplayDriverILI9341::UpdatePixelDouble(
-    pw::framebuffer::FramebufferRgb565* frame_buffer) {
+    const FramebufferRgb565& frame_buffer) {
   uint16_t temp_row[kDisplayWidth];
   auto transaction = config_.spi_device_16_bit.StartTransaction(
       ChipSelectBehavior::kPerTransaction);
-  const color_rgb565_t* const fbdata = frame_buffer->GetFramebufferData();
-  for (int y = 0; y < frame_buffer->GetHeight(); y++) {
+  const color_rgb565_t* const fbdata = frame_buffer.GetFramebufferData();
+  for (int y = 0; y < frame_buffer.GetHeight(); y++) {
     // Populate this row with each pixel repeated twice
-    for (int x = 0; x < frame_buffer->GetWidth(); x++) {
-      temp_row[x * 2] = fbdata[y * frame_buffer->GetWidth() + x];
-      temp_row[(x * 2) + 1] = fbdata[y * frame_buffer->GetWidth() + x];
+    for (int x = 0; x < frame_buffer.GetWidth(); x++) {
+      temp_row[x * 2] = fbdata[y * frame_buffer.GetWidth() + x];
+      temp_row[(x * 2) + 1] = fbdata[y * frame_buffer.GetWidth() + x];
     }
     // Send this row to the display twice.
     auto s = transaction.Write(ConstByteSpan(

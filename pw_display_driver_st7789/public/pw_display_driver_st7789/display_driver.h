@@ -44,7 +44,7 @@ class DisplayDriverST7789 : public DisplayDriver {
 
   // DisplayDriver implementation:
   Status Init() override;
-  Status Update(pw::framebuffer::FramebufferRgb565* framebuffer);
+  Status Update(const pw::framebuffer::FramebufferRgb565& framebuffer) override;
 
  private:
   enum class Mode {

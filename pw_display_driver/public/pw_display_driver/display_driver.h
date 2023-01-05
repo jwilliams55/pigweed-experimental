@@ -18,8 +18,7 @@
 #include "pw_framebuffer/rgb565.h"
 #include "pw_status/status.h"
 
-namespace pw {
-namespace display_driver {
+namespace pw::display_driver {
 
 // This interface defines a software display driver. This is the software
 // component responsible for *all* communications with a display controller.
@@ -34,8 +33,8 @@ class DisplayDriver {
 
   // Send all pixels in the supplied |framebuffer| to the display controller
   // for display.
-  virtual Status Update(pw::framebuffer::FramebufferRgb565* framebuffer) = 0;
+  virtual Status Update(
+      const pw::framebuffer::FramebufferRgb565& framebuffer) = 0;
 };
 
-}  // namespace display_driver
-}  // namespace pw
+}  // namespace pw::display_driver

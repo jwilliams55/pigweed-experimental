@@ -23,6 +23,7 @@
 
 using pw::color::color_rgb565_t;
 using pw::digital_io::State;
+using pw::framebuffer::FramebufferRgb565;
 using pw::spi::ChipSelectBehavior;
 using pw::spi::Device;
 using std::array;
@@ -178,8 +179,7 @@ Status DisplayDriverST7789::Init() {
   return OkStatus();
 }
 
-Status DisplayDriverST7789::Update(
-    pw::framebuffer::FramebufferRgb565* frame_buffer) {
+Status DisplayDriverST7789::Update(const FramebufferRgb565& frame_buffer) {
   // Let controller know a write is coming.
   {
     auto transaction = config_.spi_device_8_bit.StartTransaction(
@@ -190,8 +190,8 @@ Status DisplayDriverST7789::Update(
   // Write the pixel data.
   auto transaction = config_.spi_device_16_bit.StartTransaction(
       ChipSelectBehavior::kPerWriteRead);
-  const uint16_t* fb_data = frame_buffer->GetFramebufferData();
-  const int num_pixels = frame_buffer->GetWidth() * frame_buffer->GetHeight();
+  const uint16_t* fb_data = frame_buffer.GetFramebufferData();
+  const int num_pixels = frame_buffer.GetWidth() * frame_buffer.GetHeight();
   return transaction.Write(
       ConstByteSpan(reinterpret_cast<const byte*>(fb_data), num_pixels));
 }

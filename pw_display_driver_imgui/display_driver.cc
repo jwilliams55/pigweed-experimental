@@ -34,6 +34,7 @@
 
 using pw::color::color_rgb565_t;
 using pw::coordinates::Vec3Int;
+using pw::framebuffer::FramebufferRgb565;
 
 namespace pw::display_driver {
 
@@ -389,14 +390,13 @@ void DisplayDriverImgUI::Render() {
   }
 }
 
-Status DisplayDriverImgUI::Update(
-    pw::framebuffer::FramebufferRgb565* framebuffer) {
+Status DisplayDriverImgUI::Update(const FramebufferRgb565& framebuffer) {
   RecreateLcdTexture();
 
   // Copy frame_buffer into lcd_pixel_data
   for (GLuint x = 0; x < kDisplayWidth; x++) {
     for (GLuint y = 0; y < kDisplayHeight; y++) {
-      if (auto c = framebuffer->GetPixel(x, y); c.ok()) {
+      if (auto c = framebuffer.GetPixel(x, y); c.ok()) {
         _SetTexturePixel(x, y, c.value());
       }
     }

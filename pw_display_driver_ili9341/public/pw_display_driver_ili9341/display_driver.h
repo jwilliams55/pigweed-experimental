@@ -42,8 +42,9 @@ class DisplayDriverILI9341 : public DisplayDriver {
 
   // DisplayDriver implementation:
   Status Init() override;
-  Status Update(pw::framebuffer::FramebufferRgb565* framebuffer);
-  Status UpdatePixelDouble(pw::framebuffer::FramebufferRgb565* frame_buffer);
+  Status Update(const pw::framebuffer::FramebufferRgb565& framebuffer);
+  Status UpdatePixelDouble(
+      const pw::framebuffer::FramebufferRgb565& framebuffer);
 
  private:
   enum class Mode {
