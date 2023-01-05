@@ -78,7 +78,7 @@ class PicoTool(pw_package.package_manager.Package):
             bin_path = bootstrap_env_path / 'cipd/packages/pigweed/bin'
             destination_path = bin_path / picotool_bin.name
             _LOG.info('Copy %s -> %s', picotool_bin, destination_path)
-            shutil.copyfile(picotool_bin, destination_path)
+            shutil.copy(picotool_bin, destination_path)
 
     def info(self, path: pathlib.Path) -> Sequence[str]:
         return (
