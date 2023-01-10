@@ -67,8 +67,11 @@ struct SpiValues {
   pw::spi::Device device;
 };
 
-constexpr int kNumPixels = LCD_WIDTH * LCD_HEIGHT;
-constexpr int kDisplayRowBytes = sizeof(uint16_t) * LCD_WIDTH;
+constexpr int kDisplayScaleFactor = 1;
+constexpr int kFramebufferWidth = LCD_WIDTH / kDisplayScaleFactor;
+constexpr int kFramebufferHeight = LCD_HEIGHT / kDisplayScaleFactor;
+constexpr int kNumPixels = kFramebufferWidth * kFramebufferHeight;
+constexpr int FramebufferRowBytes = sizeof(uint16_t) * kFramebufferWidth;
 
 constexpr uint32_t kBaudRate = 31'250'000;
 constexpr pw::spi::Config kSpiConfig8Bit{
@@ -111,9 +114,11 @@ DisplayDriver s_display_driver({
   .spi_device_16_bit = s_spi_16_bit.device,
 });
 uint16_t pixel_data[kNumPixels];
-Display s_display(
-    FramebufferRgb565(pixel_data, LCD_WIDTH, LCD_HEIGHT, kDisplayRowBytes),
-    s_display_driver);
+Display s_display(FramebufferRgb565(pixel_data,
+                                    kFramebufferWidth,
+                                    kFramebufferHeight,
+                                    FramebufferRowBytes),
+                  s_display_driver);
 
 #if TFT_BL != -1
 void SetBacklight(uint16_t brightness) {

@@ -43,6 +43,7 @@ group("host") {
   deps = [
     ":host_tests(//targets/host:host_debug_tests)",
     "$dir_pw_color:tests.run(//targets/host:host_debug_tests)",
+    "$dir_pw_display:tests.run(//targets/host:host_debug_tests)",
     "$dir_pw_draw:tests.run(//targets/host:host_debug_tests)",
     "$dir_pw_framebuffer:tests.run(//targets/host:host_debug_tests)",
 

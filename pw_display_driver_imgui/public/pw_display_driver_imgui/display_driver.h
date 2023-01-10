@@ -28,6 +28,9 @@ class DisplayDriverImgUI : public DisplayDriver {
   // pw::display_driver::DisplayDriver implementation:
   Status Init() override;
   Status Update(const pw::framebuffer::FramebufferRgb565& framebuffer) override;
+  Status WriteRow(span<uint16_t> row_pixels, int row_idx, int col_idx) override;
+  int GetWidth() const override;
+  int GetHeight() const override;
 
  private:
   void RecreateLcdTexture();

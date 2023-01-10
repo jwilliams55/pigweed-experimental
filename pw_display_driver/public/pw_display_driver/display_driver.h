@@ -16,6 +16,7 @@
 #include <cstddef>
 
 #include "pw_framebuffer/rgb565.h"
+#include "pw_span/span.h"
 #include "pw_status/status.h"
 
 namespace pw::display_driver {
@@ -32,9 +33,19 @@ class DisplayDriver {
   virtual Status Init() = 0;
 
   // Send all pixels in the supplied |framebuffer| to the display controller
-  // for display.
+  // for the display.
   virtual Status Update(
       const pw::framebuffer::FramebufferRgb565& framebuffer) = 0;
+
+  // Send a row of pixels to the display. The number of pixels must be <=
+  // display width.
+  virtual Status WriteRow(span<uint16_t> row_pixels,
+                          int row_idx,
+                          int col_idx) = 0;
+
+  virtual int GetWidth() const = 0;
+
+  virtual int GetHeight() const = 0;
 };
 
 }  // namespace pw::display_driver

@@ -72,6 +72,10 @@ constexpr array<byte, 0> kEmptyArray;
 #define ST7789_MADCTL_HORIZ_ORDER 0b00000100
 // clang-format on
 
+constexpr uint8_t HighByte(uint16_t val) { return val >> 8; }
+
+constexpr uint8_t LowByte(uint16_t val) { return val & 0xff; }
+
 }  // namespace
 
 DisplayDriverST7789::DisplayDriverST7789(const Config& config)
@@ -194,6 +198,46 @@ Status DisplayDriverST7789::Update(const FramebufferRgb565& frame_buffer) {
   const int num_pixels = frame_buffer.GetWidth() * frame_buffer.GetHeight();
   return transaction.Write(
       ConstByteSpan(reinterpret_cast<const byte*>(fb_data), num_pixels));
+}
+
+Status DisplayDriverST7789::WriteRow(span<uint16_t> row_pixels,
+                                     int row_idx,
+                                     int col_idx) {
+  {
+    // Let controller know a write is coming.
+    auto transaction = config_.spi_device_8_bit.StartTransaction(
+        ChipSelectBehavior::kPerWriteRead);
+    // Landscape drawing Column Address Set
+    const uint16_t max_col_idx =
+        std::max(config_.screen_width - 1,
+                 col_idx + static_cast<int>(row_pixels.size()));
+    WriteCommand(transaction,
+                 {ST7789_CASET,
+                  std::array<std::byte, 4>{
+                      std::byte{HighByte(col_idx)},
+                      std::byte{LowByte(col_idx)},
+                      std::byte{HighByte(max_col_idx)},
+                      std::byte{LowByte(max_col_idx)},
+                  }});
+
+    // Page Address Set
+    uint16_t max_row_idx = row_idx;
+    WriteCommand(transaction,
+                 {ST7789_RASET,
+                  std::array<std::byte, 4>{
+                      std::byte{HighByte(row_idx)},
+                      std::byte{LowByte(row_idx)},
+                      std::byte{HighByte(max_row_idx)},
+                      std::byte{LowByte(max_row_idx)},
+                  }});
+    PW_TRY(WriteCommand(transaction, {ST7789_RAMWR, kEmptyArray}));
+  }
+
+  auto transaction = config_.spi_device_16_bit.StartTransaction(
+      ChipSelectBehavior::kPerTransaction);
+  return transaction.Write(
+      ConstByteSpan(reinterpret_cast<const std::byte*>(row_pixels.data()),
+                    row_pixels.size()));
 }
 
 Status DisplayDriverST7789::Reset() {

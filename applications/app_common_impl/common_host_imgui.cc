@@ -21,14 +21,19 @@ using pw::framebuffer::FramebufferRgb565;
 
 namespace {
 
-constexpr int kNumPixels = LCD_WIDTH * LCD_HEIGHT;
-constexpr int kDisplayRowBytes = sizeof(uint16_t) * LCD_WIDTH;
+constexpr int kDisplayScaleFactor = 1;
+constexpr int kFramebufferWidth = LCD_WIDTH / kDisplayScaleFactor;
+constexpr int kFramebufferHeight = LCD_HEIGHT / kDisplayScaleFactor;
+constexpr int kNumPixels = kFramebufferWidth * kFramebufferHeight;
+constexpr int FramebufferRowBytes = sizeof(uint16_t) * kFramebufferWidth;
 
 uint16_t s_pixel_data[kNumPixels];
 pw::display_driver::DisplayDriverImgUI s_display_driver;
-pw::display::DisplayImgUI s_display(
-    FramebufferRgb565(s_pixel_data, LCD_WIDTH, LCD_HEIGHT, kDisplayRowBytes),
-    s_display_driver);
+pw::display::DisplayImgUI s_display(FramebufferRgb565(s_pixel_data,
+                                                      kFramebufferWidth,
+                                                      kFramebufferHeight,
+                                                      FramebufferRowBytes),
+                                    s_display_driver);
 
 }  // namespace
 

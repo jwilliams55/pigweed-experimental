@@ -63,6 +63,11 @@ class Display {
   }
 
  private:
+  // Update screen while scaling the framebuffer using nearest
+  // neighbor algorithm.
+  Status UpdateNearestNeighbor(
+      const pw::framebuffer::FramebufferRgb565& framebuffer);
+
   pw::framebuffer::FramebufferRgb565 framebuffer_;
   pw::display_driver::DisplayDriver& display_driver_;
 };

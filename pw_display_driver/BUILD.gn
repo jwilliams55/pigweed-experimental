@@ -32,6 +32,7 @@ pw_source_set("display_driver") {
   public = [ "public/pw_display_driver/display_driver.h" ]
   public_deps = [
     "$dir_pw_framebuffer",
+    "$dir_pw_span",
     "$dir_pw_status",
   ]
 }

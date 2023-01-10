@@ -44,7 +44,10 @@ class DisplayDriverST7789 : public DisplayDriver {
 
   // DisplayDriver implementation:
   Status Init() override;
-  Status Update(const pw::framebuffer::FramebufferRgb565& framebuffer) override;
+  Status Update(const pw::framebuffer::FramebufferRgb565& framebuffer);
+  Status WriteRow(span<uint16_t> row_pixels, int row_idx, int col_idx) override;
+  int GetWidth() const override { return config_.screen_width; }
+  int GetHeight() const override { return config_.screen_height; }
 
  private:
   enum class Mode {

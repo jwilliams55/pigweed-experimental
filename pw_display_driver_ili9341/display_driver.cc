@@ -14,6 +14,8 @@
 
 #include "pw_display_driver_ili9341/display_driver.h"
 
+#include <algorithm>
+
 #include "pw_digital_io/digital_io.h"
 #include "pw_framebuffer/rgb565.h"
 #include "pw_spin_delay/delay.h"
@@ -28,6 +30,7 @@ namespace pw::display_driver {
 
 namespace {
 
+constexpr std::array<std::byte, 0> kEmptyByteArray = {};
 constexpr uint16_t ILI9341_MADCTL = 0x36;
 constexpr std::byte MADCTL_MY = std::byte{0x80};
 constexpr std::byte MADCTL_MX = std::byte{0x40};
@@ -37,12 +40,19 @@ constexpr std::byte MADCTL_RGB = std::byte{0x00};
 constexpr std::byte MADCTL_BGR = std::byte{0x08};
 constexpr std::byte MADCTL_MH = std::byte{0x04};
 
+constexpr uint8_t ILI9341_CASET = 0x2a;  // Column address set.
+constexpr uint8_t ILI9341_PASET = 0x2b;  // Page address set.
+constexpr uint8_t ILI9341_RAMWR = 0x2c;  // Memory write.
 constexpr uint16_t ILI9341_PIXEL_FORMAT_SET = 0x3A;
 
 // The ILI9341 is hard-coded at 320x240;
 constexpr int kDisplayWidth = 320;
 constexpr int kDisplayHeight = 240;
 constexpr int kDisplayNumPixels = kDisplayWidth * kDisplayHeight;
+
+constexpr uint8_t HighByte(uint16_t val) { return val >> 8; }
+
+constexpr uint8_t LowByte(uint16_t val) { return val & 0xff; }
 
 }  // namespace
 
@@ -66,9 +76,9 @@ Status DisplayDriverILI9341::WriteCommand(Device::Transaction& transaction,
   if (!s.ok())
     return s;
 
+  SetMode(Mode::kData);
   if (command.command_data.empty())
     return OkStatus();
-  SetMode(Mode::kData);
   return transaction.Write(command.command_data);
 }
 
@@ -310,30 +320,48 @@ Status DisplayDriverILI9341::Update(const FramebufferRgb565& frame_buffer) {
   return s;
 }
 
-Status DisplayDriverILI9341::UpdatePixelDouble(
-    const FramebufferRgb565& frame_buffer) {
-  uint16_t temp_row[kDisplayWidth];
+Status DisplayDriverILI9341::WriteRow(span<uint16_t> row_pixels,
+                                      int row_idx,
+                                      int col_idx) {
+  {
+    // Let controller know a write is coming.
+    auto transaction = config_.spi_device_8_bit.StartTransaction(
+        ChipSelectBehavior::kPerWriteRead);
+    // Landscape drawing Column Address Set
+    const uint16_t max_col_idx = std::max(
+        kDisplayWidth - 1, col_idx + static_cast<int>(row_pixels.size()));
+    WriteCommand(transaction,
+                 {ILI9341_CASET,
+                  std::array<std::byte, 4>{
+                      std::byte{HighByte(col_idx)},
+                      std::byte{LowByte(col_idx)},
+                      std::byte{HighByte(max_col_idx)},
+                      std::byte{LowByte(max_col_idx)},
+                  }});
+
+    // Page Address Set
+    uint16_t max_row_idx = row_idx;
+    WriteCommand(transaction,
+                 {ILI9341_PASET,
+                  std::array<std::byte, 4>{
+                      std::byte{HighByte(row_idx)},
+                      std::byte{LowByte(row_idx)},
+                      std::byte{HighByte(max_row_idx)},
+                      std::byte{LowByte(max_row_idx)},
+                  }});
+    PW_TRY(WriteCommand(transaction, {ILI9341_RAMWR, kEmptyByteArray}));
+  }
+
   auto transaction = config_.spi_device_16_bit.StartTransaction(
       ChipSelectBehavior::kPerTransaction);
-  const color_rgb565_t* const fbdata = frame_buffer.GetFramebufferData();
-  for (int y = 0; y < frame_buffer.GetHeight(); y++) {
-    // Populate this row with each pixel repeated twice
-    for (int x = 0; x < frame_buffer.GetWidth(); x++) {
-      temp_row[x * 2] = fbdata[y * frame_buffer.GetWidth() + x];
-      temp_row[(x * 2) + 1] = fbdata[y * frame_buffer.GetWidth() + x];
-    }
-    // Send this row to the display twice.
-    auto s = transaction.Write(ConstByteSpan(
-        reinterpret_cast<const std::byte*>(temp_row), kDisplayWidth));
-    if (!s.ok())
-      return s;
-    s = transaction.Write(ConstByteSpan(
-        reinterpret_cast<const std::byte*>(temp_row), kDisplayWidth));
-    if (!s.ok())
-      return s;
-  }
-  return OkStatus();
+  return transaction.Write(
+      ConstByteSpan(reinterpret_cast<const std::byte*>(row_pixels.data()),
+                    row_pixels.size()));
 }
+
+int DisplayDriverILI9341::GetWidth() const { return kDisplayWidth; }
+
+int DisplayDriverILI9341::GetHeight() const { return kDisplayHeight; }
 
 Status DisplayDriverILI9341::Reset() {
   if (!config_.reset_gpio)

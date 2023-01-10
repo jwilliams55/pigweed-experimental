@@ -406,6 +406,24 @@ Status DisplayDriverImgUI::Update(const FramebufferRgb565& framebuffer) {
   return OkStatus();
 }
 
+Status DisplayDriverImgUI::WriteRow(span<uint16_t> row_pixels,
+                                    int row_idx,
+                                    int col_idx) {
+  RecreateLcdTexture();
+
+  for (auto c : row_pixels) {
+    _SetTexturePixel(col_idx++, row_idx, c);
+  }
+
+  // Rendering here is horribly slow - come up with better solution.
+  Render();
+  return OkStatus();
+}
+
+int DisplayDriverImgUI::GetWidth() const { return kDisplayWidth; }
+
+int DisplayDriverImgUI::GetHeight() const { return kDisplayHeight; }
+
 bool DisplayDriverImgUI::NewTouchEvent() { return left_mouse_pressed; }
 
 Vec3Int DisplayDriverImgUI::GetTouchPoint() {
