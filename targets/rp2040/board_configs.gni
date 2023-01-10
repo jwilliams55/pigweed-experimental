@@ -29,6 +29,19 @@ board_config_ili9341 = {
   pw_spi_clock_pin_num = "18"
 }
 
+board_config_st7735 = {
+  app_common_BACKEND = "//applications/app_common_impl:pico_st7735"
+  pw_lcd_width = "160"
+  pw_lcd_height = "128"
+  pw_lcd_backlight = "7"
+  pw_lcd_cs_pin_num = "26"
+  pw_lcd_dc_pin_num = "20"
+  pw_lcd_rst_pin_num = "21"
+  pw_spi_miso_pin_num = "-1"
+  pw_spi_mosi_pin_num = "19"
+  pw_spi_clock_pin_num = "18"
+}
+
 board_config_st7789 = {
   app_common_BACKEND = "//applications/app_common_impl:pico_st7789"
   pw_lcd_width = "320"

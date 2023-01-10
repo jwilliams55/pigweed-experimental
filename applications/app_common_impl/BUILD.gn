@@ -164,6 +164,15 @@ pw_source_set("pico_st7789") {
   remove_configs = [ "$dir_pw_build:strict_warnings" ]
 }
 
+pw_source_set("pico_st7735") {
+  public_configs = [ ":common_standard_flags" ]
+  cflags = [ "-DDISPLAY_TYPE_ST7735" ]
+  deps = _pico_common_deps
+  deps += [ "$dir_pw_display_driver_st7735" ]
+  sources = [ "common_pico.cc" ]
+  remove_configs = [ "$dir_pw_build:strict_warnings" ]
+}
+
 pw_source_set("host_imgui") {
   public_configs = [ ":common_host_flags" ]
   deps = [

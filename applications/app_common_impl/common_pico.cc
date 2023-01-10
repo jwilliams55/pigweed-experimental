@@ -31,6 +31,9 @@
 #if defined(DISPLAY_TYPE_ILI9341)
 #include "pw_display_driver_ili9341/display_driver.h"
 using DisplayDriver = pw::display_driver::DisplayDriverILI9341;
+#elif defined(DISPLAY_TYPE_ST7735)
+#include "pw_display_driver_st7735/display_driver.h"
+using DisplayDriver = pw::display_driver::DisplayDriverST7735;
 #elif defined(DISPLAY_TYPE_ST7789)
 #include "pw_display_driver_st7789/display_driver.h"
 using DisplayDriver = pw::display_driver::DisplayDriverST7789;

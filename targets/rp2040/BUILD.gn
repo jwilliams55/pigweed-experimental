@@ -59,6 +59,7 @@ generate_toolchain("rp2040") {
 
     # Merge in the app_common_BACKEND and various application settings
     # which are defined in board_configs.gni.
+    # forward_variables_from(board_config_st7735, "*")
     # forward_variables_from(board_config_st7789, "*")
     forward_variables_from(board_config_ili9341, "*")
 
