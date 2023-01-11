@@ -13,6 +13,10 @@
 // the License.
 #include "pw_display/display.h"
 
+#include <utility>
+
+#include "pw_framebuffer/rgb565.h"
+#include "pw_framebuffer_pool/framebuffer_pool.h"
 #include "pw_status/try.h"
 
 using pw::color::color_rgb565_t;
@@ -20,9 +24,9 @@ using pw::framebuffer::FramebufferRgb565;
 
 namespace pw::display {
 
-Display::Display(FramebufferRgb565 framebuffer,
-                 pw::display_driver::DisplayDriver& display_driver)
-    : framebuffer_(std::move(framebuffer)), display_driver_(display_driver) {}
+Display::Display(pw::display_driver::DisplayDriver& display_driver,
+                 pw::coordinates::Size<int> size)
+    : display_driver_(display_driver), size_(size) {}
 
 Display::~Display() = default;
 
@@ -41,8 +45,8 @@ Status Display::UpdateNearestNeighbor(const FramebufferRgb565& framebuffer) {
   constexpr int kBytesPerPixel = sizeof(color_rgb565_t);
   const int num_src_row_pixels = framebuffer.GetRowBytes() / kBytesPerPixel;
 
-  const int num_dst_rows = display_driver_.GetHeight();
-  const int num_dst_cols = display_driver_.GetWidth();
+  const int num_dst_rows = size_.height;
+  const int num_dst_cols = size_.width;
   for (int dst_row_idx = 0; dst_row_idx < num_dst_rows; dst_row_idx++) {
     int src_row_idx = dst_row_idx * fb_last_row_idx / (num_dst_rows - 1);
     PW_ASSERT(src_row_idx >= 0);
@@ -76,20 +80,17 @@ Status Display::UpdateNearestNeighbor(const FramebufferRgb565& framebuffer) {
 }
 
 FramebufferRgb565 Display::GetFramebuffer() {
-  return FramebufferRgb565(framebuffer_.GetFramebufferData(),
-                           framebuffer_.GetWidth(),
-                           framebuffer_.GetHeight(),
-                           framebuffer_.GetRowBytes());
+  return display_driver_.GetFramebuffer();
 }
 
 Status Display::ReleaseFramebuffer(FramebufferRgb565 framebuffer) {
   if (!framebuffer.IsValid())
     return Status::InvalidArgument();
-  if (framebuffer.GetWidth() != display_driver_.GetWidth() ||
-      framebuffer.GetHeight() != display_driver_.GetHeight()) {
+  if (framebuffer.GetWidth() != size_.width ||
+      framebuffer.GetHeight() != size_.height) {
     return UpdateNearestNeighbor(framebuffer);
   }
-  return display_driver_.Update(framebuffer);
+  return display_driver_.ReleaseFramebuffer(std::move(framebuffer));
 }
 
 }  // namespace pw::display

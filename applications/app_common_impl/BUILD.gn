@@ -16,6 +16,7 @@ import("//build_overrides/pi_pico.gni")
 import("//build_overrides/pigweed.gni")
 import("$dir_pigweed_experimental/third_party/imgui/imgui.gni")
 import("$dir_pw_build/target_types.gni")
+import("$dir_pw_third_party/mcuxpresso/mcuxpresso.gni")
 
 declare_args() {
   # LCD width in pixels (ex. "320")
@@ -50,6 +51,15 @@ declare_args() {
 
   # SPI bus clock pin (ex. "14")
   pw_spi_clock_pin_num = ""
+
+  # framebuffer width in pixels (ex. "320")
+  pw_nxp_buffer_width = ""
+
+  # framebuffer start pixel X coord (ex. "4")
+  pw_nxp_buffer_start_x = "0"
+
+  # framebuffer start pixel Y coord (ex. "4")
+  pw_nxp_buffer_start_y = "0"
 }
 
 config("common_standard_flags") {
@@ -76,6 +86,16 @@ config("common_stm32_flags") {
     "-DLCD_DC_PORT_CHAR=" + pw_lcd_dc_port_char,
     "-DLCD_DC_PIN_NUM=" + pw_lcd_dc_pin_num,
     "-DLCD_RST_PIN_NUM=" + pw_lcd_rst_pin_num,
+  ]
+}
+
+config("common_mimxrt595_flags") {
+  cflags = [
+    "-DLCD_WIDTH=" + pw_lcd_width,
+    "-DLCD_HEIGHT=" + pw_lcd_height,
+    "-DFRAMEBUFFER_WIDTH=" + pw_nxp_buffer_width,
+    "-DFRAMEBUFFER_START_X=" + pw_nxp_buffer_start_x,
+    "-DFRAMEBUFFER_START_Y=" + pw_nxp_buffer_start_y,
   ]
 }
 
@@ -124,12 +144,19 @@ pw_source_set("arduino") {
   remove_configs = [ "$dir_pw_build:strict_warnings" ]
 }
 
-pw_source_set("mimxrt595") {
-  deps = [
-    "$dir_pw_display_driver_null",
-    "//applications/app_common:app_common.facade",
-  ]
-  sources = [ "common_mimxrt595.cc" ]
+if (pw_third_party_mcuxpresso_SDK != "") {
+  pw_source_set("mimxrt595") {
+    public_configs = [ ":common_mimxrt595_flags" ]
+    deps = [
+      "$dir_pw_display",
+      "$dir_pw_display_driver_mipi_dsi",
+      "$dir_pw_framebuffer_pool",
+      "$dir_pw_mipi_dsi_mcuxpresso",
+      "$pw_third_party_mcuxpresso_SDK",
+      "//applications/app_common:app_common.facade",
+    ]
+    sources = [ "common_mimxrt595.cc" ]
+  }
 }
 
 _pico_common_deps = [

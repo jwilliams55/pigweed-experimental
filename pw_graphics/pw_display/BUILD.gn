@@ -27,6 +27,7 @@ pw_source_set("pw_display") {
     "$dir_pw_coordinates",
     "$dir_pw_display_driver:display_driver",
     "$dir_pw_framebuffer",
+    "$dir_pw_framebuffer_pool",
     "$dir_pw_status",
   ]
   sources = [ "display.cc" ]

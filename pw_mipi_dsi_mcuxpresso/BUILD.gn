@@ -1,0 +1,60 @@
+# Copyright 2023 The Pigweed Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
+import("//build_overrides/pigweed.gni")
+
+import("$dir_pw_build/target_types.gni")
+import("$dir_pw_docgen/docs.gni")
+import("$dir_pw_third_party/mcuxpresso/mcuxpresso.gni")
+
+declare_args() {
+  # Use Smart DMA for MIPI DSI transfers (0: disabled, 1: enabled).
+  pw_mipi_dsi_use_smart_dma = "1"
+}
+
+config("default_config") {
+  include_dirs = [ "public" ]
+  visibility = [ ":*" ]
+
+  cflags = [ "-DUSE_DSI_SMARTDMA=" + pw_mipi_dsi_use_smart_dma ]
+}
+
+pw_source_set("pw_mipi_dsi_mcuxpresso") {
+  public_configs = [ ":default_config" ]
+  public = [
+    "public/pw_mipi_dsi_mcuxpresso/device.h",
+    "public/pw_mipi_dsi_mcuxpresso/framebuffer_device.h",
+  ]
+  public_deps = [
+    "$dir_pw_framebuffer",
+    "$dir_pw_framebuffer_pool",
+    "$dir_pw_mipi_dsi",
+    "$dir_pw_status",
+  ]
+  deps = [
+    "$dir_pw_assert",
+    "$dir_pw_log",
+    "$pw_third_party_mcuxpresso_SDK",
+  ]
+  sources = [
+    "common.cc",
+    "common.h",
+    "device.cc",
+    "framebuffer_device.cc",
+  ]
+}
+
+pw_doc_group("docs") {
+  sources = [ "docs.rst" ]
+}

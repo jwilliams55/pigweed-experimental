@@ -56,6 +56,7 @@ struct SpiValues {
 
 constexpr int kNumPixels = LCD_WIDTH * LCD_HEIGHT;
 constexpr int kDisplayRowBytes = sizeof(uint16_t) * LCD_WIDTH;
+constexpr pw::coordinates::Size<int> kDisplaySize = {LCD_WIDTH, LCD_HEIGHT};
 constexpr pw::spi::Config kSpiConfig8Bit{
     .polarity = pw::spi::ClockPolarity::kActiveHigh,
     .phase = pw::spi::ClockPhase::kFallingEdge,
@@ -82,16 +83,27 @@ SpiValues s_spi_8_bit(kSpiConfig8Bit,
 SpiValues s_spi_16_bit(kSpiConfig16Bit,
                        s_spi_chip_selector,
                        s_spi_initiator_mutex);
+uint16_t s_pixel_data[kNumPixels];
+constexpr pw::framebuffer::pool::PoolData s_fb_pool_data = {
+    .fb_addr =
+        {
+            s_pixel_data,
+            nullptr,
+            nullptr,
+        },
+    .num_fb = 1,
+    .size = {LCD_WIDTH, LCD_HEIGHT},
+    .row_bytes = kDisplayRowBytes,
+    .start = {0, 0},
+};
 DisplayDriverILI9341 s_display_driver({
     .data_cmd_gpio = s_display_dc_pin,
     .reset_gpio = nullptr,
     .spi_device_8_bit = s_spi_8_bit.device,
     .spi_device_16_bit = s_spi_16_bit.device,
+    .pool_data = s_fb_pool_data,
 });
-uint16_t pixel_data[kNumPixels];
-Display s_display(
-    FramebufferRgb565(pixel_data, LCD_WIDTH, LCD_HEIGHT, kDisplayRowBytes),
-    s_display_driver);
+Display s_display(s_display_driver, kDisplaySize);
 
 SpiValues::SpiValues(pw::spi::Config config,
                      pw::spi::ChipSelector& selector,
@@ -130,9 +142,7 @@ Status Common::Init() {
   };
   HAL_GPIO_Init(GPIOF, &spi_pin_config);
 
-  PW_TRY(s_display_driver.Init());
-
-  return s_display.Init();
+  return s_display_driver.Init();
 }
 
 // static

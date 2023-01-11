@@ -1,4 +1,4 @@
-// Copyright 2022 The Pigweed Authors
+// Copyright 2023 The Pigweed Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not
 // use this file except in compliance with the License. You may obtain a copy of
@@ -15,20 +15,21 @@
 
 #include "pw_coordinates/vec_int.h"
 #include "pw_display_driver/display_driver.h"
-#include "pw_framebuffer_pool/framebuffer_pool.h"
+#include "pw_mipi_dsi/device.h"
 
 namespace pw::display_driver {
 
-class DisplayDriverImgUI : public DisplayDriver {
+// A display driver that communicates with a display controller over the
+// MIPI Display Serial Interface (MIPI DSI).
+class DisplayDriverMipiDsi : public DisplayDriver {
  public:
-  DisplayDriverImgUI(const pw::framebuffer::pool::PoolData& pool_data);
-
-  bool NewTouchEvent();
-  pw::coordinates::Vec3Int GetTouchPoint();
+  DisplayDriverMipiDsi(pw::mipi::dsi::Device& device,
+                       pw::coordinates::Size<int> display_size);
+  ~DisplayDriverMipiDsi() override;
 
   // pw::display_driver::DisplayDriver implementation:
   Status Init() override;
-  pw::framebuffer::FramebufferRgb565 GetFramebuffer() override;
+  pw::framebuffer::FramebufferRgb565 GetFramebuffer(void) override;
   Status ReleaseFramebuffer(
       pw::framebuffer::FramebufferRgb565 framebuffer) override;
   Status WriteRow(span<uint16_t> row_pixels, int row_idx, int col_idx) override;
@@ -36,10 +37,8 @@ class DisplayDriverImgUI : public DisplayDriver {
   int GetHeight() const override;
 
  private:
-  void RecreateLcdTexture();
-  void Render();
-
-  const pw::framebuffer::pool::PoolData& pool_data_;
+  pw::mipi::dsi::Device& device_;
+  const pw::coordinates::Size<int> display_size_;
 };
 
 }  // namespace pw::display_driver

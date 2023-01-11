@@ -183,7 +183,15 @@ Status DisplayDriverST7789::Init() {
   return OkStatus();
 }
 
-Status DisplayDriverST7789::Update(const FramebufferRgb565& frame_buffer) {
+FramebufferRgb565 DisplayDriverST7789::GetFramebuffer() {
+  return FramebufferRgb565(config_.pool_data.fb_addr[0],
+                           config_.pool_data.size.width,
+                           config_.pool_data.size.height,
+                           config_.pool_data.row_bytes);
+}
+
+Status DisplayDriverST7789::ReleaseFramebuffer(
+    pw::framebuffer::FramebufferRgb565 frame_buffer) {
   // Let controller know a write is coming.
   {
     auto transaction = config_.spi_device_8_bit.StartTransaction(

@@ -1,4 +1,4 @@
-// Copyright 2022 The Pigweed Authors
+// Copyright 2023 The Pigweed Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not
 // use this file except in compliance with the License. You may obtain a copy of
@@ -11,21 +11,14 @@
 // WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 // License for the specific language governing permissions and limitations under
 // the License.
-#include "pw_display_imgui/display.h"
 
-namespace pw::display {
+#pragma once
 
-DisplayImgUI::DisplayImgUI(
-    pw::display_driver::DisplayDriverImgUI& display_driver,
-    pw::coordinates::Size<int> size)
-    : Display(display_driver, size), display_driver_(display_driver) {}
+#include "fsl_common.h"
+#include "pw_status/status.h"
 
-DisplayImgUI::~DisplayImgUI() = default;
+namespace pw::mipi::dsi {
 
-bool DisplayImgUI::NewTouchEvent() { return display_driver_.NewTouchEvent(); }
+Status MCUXpressoToPigweedStatus(status_t mcux_status);
 
-pw::coordinates::Vec3Int DisplayImgUI::GetTouchPoint() {
-  return display_driver_.GetTouchPoint();
-}
-
-}  // namespace pw::display
+}  // namespace pw::mipi::dsi

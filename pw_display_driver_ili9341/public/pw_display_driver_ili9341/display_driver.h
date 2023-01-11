@@ -17,6 +17,7 @@
 
 #include "pw_digital_io/digital_io.h"
 #include "pw_display_driver/display_driver.h"
+#include "pw_framebuffer_pool/framebuffer_pool.h"
 #include "pw_spi/device.h"
 
 namespace pw::display_driver {
@@ -36,13 +37,16 @@ class DisplayDriverILI9341 : public DisplayDriver {
     // The SPI device to which the display controller is connected for 16-bit
     // data.
     pw::spi::Device& spi_device_16_bit;
+    const pw::framebuffer::pool::PoolData& pool_data;
   };
 
   DisplayDriverILI9341(const Config& config);
 
   // DisplayDriver implementation:
   Status Init() override;
-  Status Update(const pw::framebuffer::FramebufferRgb565& framebuffer);
+  pw::framebuffer::FramebufferRgb565 GetFramebuffer(void) override;
+  Status ReleaseFramebuffer(
+      pw::framebuffer::FramebufferRgb565 framebuffer) override;
   Status WriteRow(span<uint16_t> row_pixels, int row_idx, int col_idx) override;
   int GetWidth() const override;
   int GetHeight() const override;

@@ -16,6 +16,7 @@
 #include "pw_coordinates/vec_int.h"
 #include "pw_display_driver/display_driver.h"
 #include "pw_framebuffer/rgb565.h"
+#include "pw_framebuffer_pool/framebuffer_pool.h"
 #include "pw_status/status.h"
 
 namespace pw::display {
@@ -26,15 +27,14 @@ namespace pw::display {
 // use for rendering.
 class Display {
  public:
-  Display(pw::framebuffer::FramebufferRgb565 framebuffer,
-          pw::display_driver::DisplayDriver& display_driver);
+  Display(pw::display_driver::DisplayDriver& display_driver,
+          pw::coordinates::Size<int> size);
   virtual ~Display();
 
-  // Initialize the display instance.
-  Status Init() { return OkStatus(); }
-
   // Return a framebuffer to which the caller may draw. When drawing is complete
-  // the framebuffer must be returned using ReleaseFramebuffer().
+  // the framebuffer must be returned using ReleaseFramebuffer(). An invalid
+  // framebuffer may be returned, so the caller should verify it is valid
+  // before use.
   pw::framebuffer::FramebufferRgb565 GetFramebuffer();
 
   // Release the framebuffer back to the display. The display will
@@ -46,10 +46,10 @@ class Display {
   Status ReleaseFramebuffer(pw::framebuffer::FramebufferRgb565 framebuffer);
 
   // Return the width (in pixels) of the associated display.
-  int GetWidth() const { return framebuffer_.GetWidth(); }
+  int GetWidth() const { return size_.width; }
 
   // Return the height (in pixels) of the associated display.
-  int GetHeight() const { return framebuffer_.GetHeight(); }
+  int GetHeight() const { return size_.height; }
 
   // Does the associated screen have a touch screen?
   virtual bool TouchscreenAvailable() const { return false; }
@@ -68,8 +68,8 @@ class Display {
   Status UpdateNearestNeighbor(
       const pw::framebuffer::FramebufferRgb565& framebuffer);
 
-  pw::framebuffer::FramebufferRgb565 framebuffer_;
   pw::display_driver::DisplayDriver& display_driver_;
+  const pw::coordinates::Size<int> size_;
 };
 
 }  // namespace pw::display

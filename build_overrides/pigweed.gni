@@ -67,6 +67,9 @@ declare_args() {
   dir_pw_display_driver_imgui =
       get_path_info("$dir_pigweed_experimental/pw_display_driver_imgui",
                     "abspath")
+  dir_pw_display_driver_mipi_dsi =
+      get_path_info("$dir_pigweed_experimental/pw_display_driver_mipi",
+                    "abspath")
   dir_pw_display_driver_null =
       get_path_info("$dir_pigweed_experimental/pw_display_driver_null",
                     "abspath")
@@ -83,6 +86,14 @@ declare_args() {
       get_path_info("$dir_pigweed_experimental/pw_graphics/pw_draw", "abspath")
   dir_pw_framebuffer =
       get_path_info("$dir_pigweed_experimental/pw_graphics/pw_framebuffer",
+                    "abspath")
+  dir_pw_framebuffer_pool =
+      get_path_info("$dir_pigweed_experimental/pw_graphics/pw_framebuffer_pool",
+                    "abspath")
+  dir_pw_mipi_dsi =
+      get_path_info("$dir_pigweed_experimental/pw_mipi_dsi", "abspath")
+  dir_pw_mipi_dsi_mcuxpresso =
+      get_path_info("$dir_pigweed_experimental/pw_mipi_dsi_mcuxpresso",
                     "abspath")
   dir_pw_spi_arduino =
       get_path_info("$dir_pigweed_experimental/pw_spi_arduino", "abspath")

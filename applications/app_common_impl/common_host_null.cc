@@ -21,22 +21,15 @@ using pw::framebuffer::FramebufferRgb565;
 
 namespace {
 
-constexpr int kNumPixels = LCD_WIDTH * LCD_HEIGHT;
-constexpr int kDisplayRowBytes = sizeof(uint16_t) * LCD_WIDTH;
+constexpr pw::coordinates::Size<int> kDisplaySize = {LCD_WIDTH, LCD_HEIGHT};
 
-uint16_t s_pixel_data[kNumPixels];
 pw::display_driver::DisplayDriverNULL s_display_driver;
-pw::display::Display s_display(
-    FramebufferRgb565(s_pixel_data, LCD_WIDTH, LCD_HEIGHT, kDisplayRowBytes),
-    s_display_driver);
+pw::display::Display s_display(s_display_driver, kDisplaySize);
 
 }  // namespace
 
 // static
-Status Common::Init() {
-  PW_TRY(s_display_driver.Init());
-  return s_display.Init();
-}
+Status Common::Init() { return s_display_driver.Init(); }
 
 // static
 pw::display::Display& Common::GetDisplay() { return s_display; }

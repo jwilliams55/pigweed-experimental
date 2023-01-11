@@ -68,10 +68,11 @@ struct SpiValues {
 };
 
 constexpr int kDisplayScaleFactor = 1;
+constexpr pw::coordinates::Size<int> kDisplaySize{LCD_WIDTH, LCD_HEIGHT};
 constexpr int kFramebufferWidth = LCD_WIDTH / kDisplayScaleFactor;
 constexpr int kFramebufferHeight = LCD_HEIGHT / kDisplayScaleFactor;
 constexpr int kNumPixels = kFramebufferWidth * kFramebufferHeight;
-constexpr int FramebufferRowBytes = sizeof(uint16_t) * kFramebufferWidth;
+constexpr int kFramebufferRowBytes = sizeof(uint16_t) * kFramebufferWidth;
 
 constexpr uint32_t kBaudRate = 31'250'000;
 constexpr pw::spi::Config kSpiConfig8Bit{
@@ -103,6 +104,19 @@ SpiValues s_spi_8_bit(kSpiConfig8Bit,
 SpiValues s_spi_16_bit(kSpiConfig16Bit,
                        s_spi_chip_selector,
                        s_spi_initiator_mutex);
+uint16_t s_pixel_data[kNumPixels];
+constexpr pw::framebuffer::pool::PoolData s_fb_pool_data = {
+    .fb_addr =
+        {
+            s_pixel_data,
+            nullptr,
+            nullptr,
+        },
+    .num_fb = 1,
+    .size = {kFramebufferWidth, kFramebufferHeight},
+    .row_bytes = kFramebufferRowBytes,
+    .start = {0, 0},
+};
 DisplayDriver s_display_driver({
   .data_cmd_gpio = s_display_dc_pin,
 #if TFT_RST != -1
@@ -111,14 +125,9 @@ DisplayDriver s_display_driver({
   .reset_gpio = nullptr,
 #endif
   .spi_device_8_bit = s_spi_8_bit.device,
-  .spi_device_16_bit = s_spi_16_bit.device,
+  .spi_device_16_bit = s_spi_16_bit.device, .pool_data = s_fb_pool_data,
 });
-uint16_t pixel_data[kNumPixels];
-Display s_display(FramebufferRgb565(pixel_data,
-                                    kFramebufferWidth,
-                                    kFramebufferHeight,
-                                    FramebufferRowBytes),
-                  s_display_driver);
+Display s_display(s_display_driver, kDisplaySize);
 
 #if TFT_BL != -1
 void SetBacklight(uint16_t brightness) {
@@ -168,9 +177,7 @@ Status Common::Init() {
   gpio_set_function(TFT_SCLK, GPIO_FUNC_SPI);
   gpio_set_function(TFT_MOSI, GPIO_FUNC_SPI);
 
-  PW_TRY(s_display_driver.Init());
-
-  return s_display.Init();
+  return s_display_driver.Init();
 }
 
 // static

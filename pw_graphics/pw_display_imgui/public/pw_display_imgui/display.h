@@ -16,7 +16,6 @@
 #include "pw_coordinates/vec_int.h"
 #include "pw_display/display.h"
 #include "pw_display_driver_imgui/display_driver.h"
-#include "pw_framebuffer/rgb565.h"
 #include "pw_status/status.h"
 
 namespace pw::display {
@@ -24,8 +23,8 @@ namespace pw::display {
 // A display that uses ImgUI and supports touch input.
 class DisplayImgUI : public Display {
  public:
-  DisplayImgUI(pw::framebuffer::FramebufferRgb565 framebuffer,
-               pw::display_driver::DisplayDriverImgUI& display_driver);
+  DisplayImgUI(pw::display_driver::DisplayDriverImgUI& display_driver,
+               pw::coordinates::Size<int> size);
   ~DisplayImgUI();
 
   bool TouchscreenAvailable() const override { return true; }

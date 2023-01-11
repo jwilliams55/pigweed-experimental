@@ -39,6 +39,13 @@ target_toolchain_mimxrt595_evk = {
       forward_variables_from(toolchain_overrides, "*")
 
       app_common_BACKEND = "//applications/app_common_impl:mimxrt595"
+      pw_mipi_dsi_use_smart_dma = 1
+      pw_lcd_width = 400
+      pw_lcd_height = 392
+      pw_nxp_buffer_width = 392
+      pw_nxp_buffer_start_x = 4
+      pw_nxp_buffer_start_y = 0
+
       pw_board_led_BACKEND = "$dir_pw_board_led_mimxrt595_evk"
       pw_spin_delay_BACKEND = "$dir_pw_spin_delay_mcuxpresso"
       pw_touchscreen_BACKEND = "$dir_pw_touchscreen_null"

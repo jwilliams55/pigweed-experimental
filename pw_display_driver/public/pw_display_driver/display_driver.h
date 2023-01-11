@@ -22,7 +22,7 @@
 namespace pw::display_driver {
 
 // This interface defines a software display driver. This is the software
-// component responsible for *all* communications with a display controller.
+// component responsible for all communications with a display controller.
 // The display controller is the hardware component of a display that
 // controls pixel values and other physical display properties.
 class DisplayDriver {
@@ -32,10 +32,14 @@ class DisplayDriver {
   // Initialize the display controller.
   virtual Status Init() = 0;
 
+  // Return a framebuffer to which the caller may draw. When drawing is complete
+  // the framebuffer must be returned using ReleaseFramebuffer().
+  virtual pw::framebuffer::FramebufferRgb565 GetFramebuffer() = 0;
+
   // Send all pixels in the supplied |framebuffer| to the display controller
-  // for the display.
-  virtual Status Update(
-      const pw::framebuffer::FramebufferRgb565& framebuffer) = 0;
+  // for display.
+  virtual Status ReleaseFramebuffer(
+      pw::framebuffer::FramebufferRgb565 framebuffer) = 0;
 
   // Send a row of pixels to the display. The number of pixels must be <=
   // display width.

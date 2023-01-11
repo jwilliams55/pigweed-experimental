@@ -291,7 +291,15 @@ Status DisplayDriverILI9341::Init() {
   return OkStatus();
 }
 
-Status DisplayDriverILI9341::Update(const FramebufferRgb565& frame_buffer) {
+FramebufferRgb565 DisplayDriverILI9341::GetFramebuffer() {
+  return FramebufferRgb565(config_.pool_data.fb_addr[0],
+                           config_.pool_data.size.width,
+                           config_.pool_data.size.height,
+                           config_.pool_data.row_bytes);
+}
+
+Status DisplayDriverILI9341::ReleaseFramebuffer(
+    FramebufferRgb565 frame_buffer) {
   auto transaction = config_.spi_device_16_bit.StartTransaction(
       ChipSelectBehavior::kPerTransaction);
   const uint16_t* fb_data = frame_buffer.GetFramebufferData();

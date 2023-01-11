@@ -199,6 +199,7 @@ group("applications") {
       "//applications/blinky:blinky(//targets/mimxrt595_evk:mimxrt595_evk_debug)",
       "//applications/rpc:all(//targets/mimxrt595_evk:mimxrt595_evk_debug)",
       "//applications/strings:all(//targets/mimxrt595_evk:mimxrt595_evk_debug)",
+      "//applications/terminal_display:all(//targets/mimxrt595_evk:mimxrt595_evk_debug)",
     ]
   }
 
