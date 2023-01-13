@@ -23,10 +23,7 @@ int main() {
   while (true) {
     PW_LOG_INFO("Blink %d", i++);
 
-    pw::board_led::TurnOn();
-    pw::spin_delay::WaitMillis(1000);
-
-    pw::board_led::TurnOff();
+    pw::board_led::Toggle();
     pw::spin_delay::WaitMillis(1000);
   }
 

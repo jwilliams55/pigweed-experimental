@@ -21,23 +21,22 @@
 namespace pw::board_led {
 namespace {
 
-constexpr int kLedPin = 13;
 bool led_on = false;
 
 }  // namespace
 
 void Init() {
-  pinMode(kLedPin, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
   TurnOff();
 }
 
 void TurnOff() {
-  digitalWrite(kLedPin, LOW);
+  digitalWrite(LED_BUILTIN, LOW);
   led_on = false;
 }
 
 void TurnOn() {
-  digitalWrite(kLedPin, HIGH);
+  digitalWrite(LED_BUILTIN, HIGH);
   led_on = true;
 }
 
