@@ -28,9 +28,9 @@ class TextArea {
   const FontSet* current_font;
   pw::color::color_rgb565_t foreground_color;
   pw::color::color_rgb565_t background_color;
-  pw::framebuffer::FramebufferRgb565* framebuffer;
+  pw::framebuffer::FramebufferRgb565& framebuffer;
 
-  TextArea(pw::framebuffer::FramebufferRgb565* fb, const FontSet* font);
+  TextArea(pw::framebuffer::FramebufferRgb565& fb, const FontSet* font);
 
   // Change the current font.
   void SetFont(const FontSet* new_font);

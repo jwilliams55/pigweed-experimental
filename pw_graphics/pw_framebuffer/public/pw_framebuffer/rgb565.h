@@ -50,7 +50,7 @@ class FramebufferRgb565 {
   void SetPixel(int x, int y, pw::color::color_rgb565_t rgb565_color);
 
   // Copy the colors from another framebuffer into this one at position x, y.
-  void Blit(FramebufferRgb565* fb, int x, int y);
+  void Blit(const FramebufferRgb565& fb, int x, int y);
 
   // Fill the entire buffer with a color.
   void Fill(pw::color::color_rgb565_t color);

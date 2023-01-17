@@ -145,7 +145,7 @@ StaticTask_t s_freertos_tcb;
 void DrawButton(const Button& button,
                 color_rgb565_t bg_color,
                 FramebufferRgb565& framebuffer) {
-  pw::draw::DrawRectWH(&framebuffer,
+  pw::draw::DrawRectWH(framebuffer,
                        button.tl_.x,
                        button.tl_.y,
                        button.size_.width,
@@ -233,7 +233,7 @@ int DrawPigweedSprite(FramebufferRgb565& framebuffer) {
 
   // Draw the dark blue border
   pw::draw::DrawRectWH(
-      &framebuffer,
+      framebuffer,
       sprite_pos_x - border_size,
       sprite_pos_y - border_size,
       pigweed_farm_sprite_sheet.width * sprite_scale + (border_size * 2),
@@ -246,7 +246,7 @@ int DrawPigweedSprite(FramebufferRgb565& framebuffer) {
 
   // Draw the light blue background
   pw::draw::DrawRectWH(
-      &framebuffer,
+      framebuffer,
       sprite_pos_x - border_size,
       sprite_pos_y - border_size,
       pigweed_farm_sprite_sheet.width * sprite_scale + (border_size * 2),
@@ -268,7 +268,7 @@ int DrawPigweedSprite(FramebufferRgb565& framebuffer) {
     motion_dir = -1;
 
   // Draw the Sun
-  pw::draw::DrawCircle(&framebuffer,
+  pw::draw::DrawCircle(framebuffer,
                        sun_offset.x + sprite_pos_x +
                            (pigweed_farm_sprite_sheet.width * sprite_scale) -
                            32,
@@ -276,7 +276,7 @@ int DrawPigweedSprite(FramebufferRgb565& framebuffer) {
                        20,
                        colors_pico8_rgb565[COLOR_ORANGE],
                        true);
-  pw::draw::DrawCircle(&framebuffer,
+  pw::draw::DrawCircle(framebuffer,
                        sun_offset.x + sprite_pos_x +
                            (pigweed_farm_sprite_sheet.width * sprite_scale) -
                            32,
@@ -287,7 +287,7 @@ int DrawPigweedSprite(FramebufferRgb565& framebuffer) {
 
   // Draw the farm sprite's shadow
   pigweed_farm_sprite_sheet.current_index = 1;
-  pw::draw::DrawSprite(&framebuffer,
+  pw::draw::DrawSprite(framebuffer,
                        sprite_pos_x + 2,
                        sprite_pos_y + 2,
                        &pigweed_farm_sprite_sheet,
@@ -296,7 +296,7 @@ int DrawPigweedSprite(FramebufferRgb565& framebuffer) {
   // Draw the farm sprite
   pigweed_farm_sprite_sheet.current_index = 0;
   pw::draw::DrawSprite(
-      &framebuffer, sprite_pos_x, sprite_pos_y, &pigweed_farm_sprite_sheet, 4);
+      framebuffer, sprite_pos_x, sprite_pos_y, &pigweed_farm_sprite_sheet, 4);
 
   return 76;
 }
@@ -485,7 +485,7 @@ void MainTask(void* pvParameters) {
   FramebufferRgb565 framebuffer = display.GetFramebuffer();
   PW_ASSERT(framebuffer.IsValid());
 
-  pw::draw::Fill(&framebuffer, kBlack);
+  pw::draw::Fill(framebuffer, kBlack);
 
   PW_LOG_INFO("pw::touchscreen::Init()");
   pw::touchscreen::Init();
@@ -524,7 +524,7 @@ void MainTask(void* pvParameters) {
     framebuffer = display.GetFramebuffer();
     if (!framebuffer.IsValid())
       continue;
-    pw::draw::Fill(&framebuffer, kBlack);
+    pw::draw::Fill(framebuffer, kBlack);
     DrawFrame(framebuffer, fps_view);
     uint32_t end = pw::spin_delay::Millis();
     uint32_t time = end - start;

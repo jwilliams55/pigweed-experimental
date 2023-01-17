@@ -24,9 +24,8 @@ using pw::coordinates::Vector2;
 
 namespace pw::draw {
 
-TextArea::TextArea(pw::framebuffer::FramebufferRgb565* fb,
-                   const FontSet* font) {
-  framebuffer = fb;
+TextArea::TextArea(pw::framebuffer::FramebufferRgb565& fb, const FontSet* font)
+    : framebuffer(fb) {
   SetFont(font);
   // Default colors: White on Black
   character_wrap_enabled = true;
@@ -66,7 +65,7 @@ void TextArea::InsertLineBreak() {
   cursor_x = cursor_x - (column_count * current_font->width);
   column_count = 0;
 
-  if (cursor_y >= framebuffer->GetHeight()) {
+  if (cursor_y >= framebuffer.GetHeight()) {
     ScrollUp(1);
     cursor_y = cursor_y - current_font->height;
   }
@@ -86,7 +85,7 @@ void TextArea::DrawCharacter(int character) {
   }
 
   if (character_wrap_enabled &&
-      (current_font->width + cursor_x) > framebuffer->GetWidth()) {
+      (current_font->width + cursor_x) > framebuffer.GetWidth()) {
     InsertLineBreak();
   }
 
@@ -95,7 +94,7 @@ void TextArea::DrawCharacter(int character) {
                           foreground_color,
                           background_color,
                           *current_font,
-                          *framebuffer);
+                          framebuffer);
 
   // Move cursor to the right by 1 glyph.
   MoveCursorRightOnce();
@@ -148,12 +147,12 @@ void TextArea::ScrollUp(int lines) {
   int start_x = 0;
   int start_y = pixel_height;
 
-  for (int current_x = 0; current_x < framebuffer->GetWidth(); current_x++) {
-    for (int current_y = start_y; current_y < framebuffer->GetHeight();
+  for (int current_x = 0; current_x < framebuffer.GetWidth(); current_x++) {
+    for (int current_y = start_y; current_y < framebuffer.GetHeight();
          current_y++) {
-      if (auto pixel_color = framebuffer->GetPixel(current_x, current_y);
+      if (auto pixel_color = framebuffer.GetPixel(current_x, current_y);
           pixel_color.ok()) {
-        framebuffer->SetPixel(
+        framebuffer.SetPixel(
             start_x + current_x, current_y - start_y, *pixel_color);
       }
     }
@@ -161,11 +160,11 @@ void TextArea::ScrollUp(int lines) {
 
   // Draw a filled background_color rectangle at the bottom to erase the old
   // text.
-  for (int x = 0; x < framebuffer->GetWidth(); x++) {
-    for (int y = framebuffer->GetHeight() - pixel_height;
-         y < framebuffer->GetHeight();
+  for (int x = 0; x < framebuffer.GetWidth(); x++) {
+    for (int y = framebuffer.GetHeight() - pixel_height;
+         y < framebuffer.GetHeight();
          y++) {
-      framebuffer->SetPixel(x, y, background_color);
+      framebuffer.SetPixel(x, y, background_color);
     }
   }
 }

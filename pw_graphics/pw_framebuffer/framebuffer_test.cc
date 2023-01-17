@@ -91,9 +91,9 @@ TEST(FramebufferRgb565, Blit) {
   fb2.Fill(orange);
 
   // Do the blits
-  fb.Blit(&fb2, -3, -3);
+  fb.Blit(fb2, -3, -3);
 
-  fb.Blit(&fb2, 2, 2);
+  fb.Blit(fb2, 2, 2);
 
   // TODO(tonymd): Include PrintFramebufferAsANSI from draw_test.cc
   // PrintFramebufferAsANSI(&fb);

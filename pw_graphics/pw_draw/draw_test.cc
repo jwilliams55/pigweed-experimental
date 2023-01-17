@@ -32,18 +32,18 @@ namespace {
 
 constexpr color_rgb565_t kBlack = 0x0;
 
-void PrintFramebufferAsANSI(FramebufferRgb565* fb) {
+void PrintFramebufferAsANSI(const FramebufferRgb565& fb) {
   pw::StringBuffer<4096> line;
   pw::StringBuffer<128> color_string;
 
-  for (int y = 0; y < fb->GetHeight(); y += 2) {
+  for (int y = 0; y < fb.GetHeight(); y += 2) {
     line.clear();
 
-    for (int x = 0; x < fb->GetWidth(); x++) {
+    for (int x = 0; x < fb.GetWidth(); x++) {
       color_string.clear();
-      auto row1_color = fb->GetPixel(x, y);
+      auto row1_color = fb.GetPixel(x, y);
       pw::color::ColorRGBA row1(row1_color.ok() ? row1_color.value() : kBlack);
-      auto row2_color = fb->GetPixel(x, y + 1);
+      auto row2_color = fb.GetPixel(x, y + 1);
       if (!row2_color.ok()) {
         color_string.Format("[m[38;2;%d;%d;%dm▀", row1.r, row1.g, row1.b);
       } else {
@@ -72,8 +72,8 @@ TEST(DrawLine, Diagonal) {
 
   fb.Fill(0);
 
-  DrawLine(&fb, 0, 0, fb.GetWidth(), fb.GetHeight(), indigo);
-  PrintFramebufferAsANSI(&fb);
+  DrawLine(fb, 0, 0, fb.GetWidth(), fb.GetHeight(), indigo);
+  PrintFramebufferAsANSI(fb);
 
   // Check the diagonal is set to indigo, everything else should be 0.
   Result<color_rgb565_t> c;
@@ -97,8 +97,8 @@ TEST(DrawHLine, Top) {
   fb.Fill(0);
 
   // Horizonal line at y = 0
-  DrawHLine(&fb, 0, fb.GetWidth(), 0, indigo);
-  PrintFramebufferAsANSI(&fb);
+  DrawHLine(fb, 0, fb.GetWidth(), 0, indigo);
+  PrintFramebufferAsANSI(fb);
 
   // Check color at y = 0 is indigo, y = 1 should be 0.
   Result<color_rgb565_t> c;
@@ -119,8 +119,8 @@ TEST(DrawRect, Empty) {
   fb.Fill(0);
 
   // 4x4 rectangle, not filled
-  DrawRect(&fb, 0, 0, 3, 3, indigo, false);
-  PrintFramebufferAsANSI(&fb);
+  DrawRect(fb, 0, 0, 3, 3, indigo, false);
+  PrintFramebufferAsANSI(fb);
 
   Result<color_rgb565_t> c;
   c = fb.GetPixel(0, 0);
@@ -211,8 +211,8 @@ TEST(DrawRect, Filled) {
   fb.Fill(0);
 
   // 4x4 rectangle, filled
-  DrawRect(&fb, 0, 0, 3, 3, indigo, true);
-  PrintFramebufferAsANSI(&fb);
+  DrawRect(fb, 0, 0, 3, 3, indigo, true);
+  PrintFramebufferAsANSI(fb);
 
   Result<color_rgb565_t> c;
   c = fb.GetPixel(0, 0);
@@ -298,8 +298,8 @@ TEST(DrawRectWH, WidthHeightCorrect) {
   fb.Fill(0);
 
   // 4x4 rectangle, not filled
-  DrawRectWH(&fb, 0, 0, 4, 4, indigo, false);
-  PrintFramebufferAsANSI(&fb);
+  DrawRectWH(fb, 0, 0, 4, 4, indigo, false);
+  PrintFramebufferAsANSI(fb);
 
   Result<color_rgb565_t> c;
   c = fb.GetPixel(0, 0);
@@ -389,9 +389,9 @@ TEST(DrawCircle, Empty) {
   color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   fb.Fill(0);
 
-  DrawCircle(&fb, 3, 3, 3, indigo, false);
+  DrawCircle(fb, 3, 3, 3, indigo, false);
 
-  PrintFramebufferAsANSI(&fb);
+  PrintFramebufferAsANSI(fb);
 
   // ..xxx..
   // .x...x.
@@ -562,12 +562,12 @@ TEST(DrawText, WithFgBg) {
   FramebufferRgb565 fb(data, 5 * 6, 3 * 8, (5 * 6) * sizeof(data[0]));
   fb.Fill(0);
 
-  pw::draw::TextArea text_area(&fb, &font6x8);
+  pw::draw::TextArea text_area(fb, &font6x8);
   text_area.SetForegroundColor(color::colors_pico8_rgb565[COLOR_PINK]);
   text_area.SetBackgroundColor(0);
   text_area.DrawText("Hell\noT\nhere.\nWorld");
 
-  PrintFramebufferAsANSI(&fb);
+  PrintFramebufferAsANSI(fb);
 }
 
 }  // namespace

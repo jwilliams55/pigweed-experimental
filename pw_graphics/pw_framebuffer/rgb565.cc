@@ -68,11 +68,11 @@ void FramebufferRgb565::SetPixel(int x, int y, color_rgb565_t rgb565_color) {
 }
 
 // Copy the colors from another framebuffer into this one at position x, y.
-void FramebufferRgb565::Blit(FramebufferRgb565* fb, int x, int y) {
-  PW_ASSERT(fb->IsValid());
-  for (int current_x = 0; current_x < fb->width_; current_x++) {
-    for (int current_y = 0; current_y < fb->height_; current_y++) {
-      if (auto pixel_color = fb->GetPixel(current_x, current_y);
+void FramebufferRgb565::Blit(const FramebufferRgb565& fb, int x, int y) {
+  PW_ASSERT(fb.IsValid());
+  for (int current_x = 0; current_x < fb.width_; current_x++) {
+    for (int current_y = 0; current_y < fb.height_; current_y++) {
+      if (auto pixel_color = fb.GetPixel(current_x, current_y);
           pixel_color.ok()) {
         SetPixel(x + current_x, y + current_y, pixel_color.value());
       }

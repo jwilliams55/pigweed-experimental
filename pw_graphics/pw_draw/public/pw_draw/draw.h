@@ -23,7 +23,7 @@
 
 namespace pw::draw {
 
-void DrawLine(pw::framebuffer::FramebufferRgb565* fb,
+void DrawLine(pw::framebuffer::FramebufferRgb565& fb,
               int x1,
               int y1,
               int x2,
@@ -32,20 +32,20 @@ void DrawLine(pw::framebuffer::FramebufferRgb565* fb,
 
 // Draw a circle at center_x, center_y with given radius and color. Only a
 // one-pixel outline is drawn if filled is false.
-void DrawCircle(pw::framebuffer::FramebufferRgb565* fb,
+void DrawCircle(pw::framebuffer::FramebufferRgb565& fb,
                 int center_x,
                 int center_y,
                 int radius,
                 pw::color::color_rgb565_t pen_color,
                 bool filled);
 
-void DrawHLine(pw::framebuffer::FramebufferRgb565* fb,
+void DrawHLine(pw::framebuffer::FramebufferRgb565& fb,
                int x1,
                int x2,
                int y,
                pw::color::color_rgb565_t pen_color);
 
-void DrawRect(pw::framebuffer::FramebufferRgb565* fb,
+void DrawRect(pw::framebuffer::FramebufferRgb565& fb,
               int x1,
               int y1,
               int x2,
@@ -53,7 +53,7 @@ void DrawRect(pw::framebuffer::FramebufferRgb565* fb,
               pw::color::color_rgb565_t pen_color,
               bool filled);
 
-void DrawRectWH(pw::framebuffer::FramebufferRgb565* fb,
+void DrawRectWH(pw::framebuffer::FramebufferRgb565& fb,
                 int x,
                 int y,
                 int w,
@@ -61,10 +61,10 @@ void DrawRectWH(pw::framebuffer::FramebufferRgb565* fb,
                 pw::color::color_rgb565_t pen_color,
                 bool filled);
 
-void Fill(pw::framebuffer::FramebufferRgb565* fb,
+void Fill(pw::framebuffer::FramebufferRgb565& fb,
           pw::color::color_rgb565_t pen_color);
 
-void DrawSprite(pw::framebuffer::FramebufferRgb565* fb,
+void DrawSprite(pw::framebuffer::FramebufferRgb565& fb,
                 int x,
                 int y,
                 pw::draw::SpriteSheet* sprite_sheet,

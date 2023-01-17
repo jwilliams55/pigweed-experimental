@@ -44,7 +44,7 @@ Size<int> DrawSpace(Vector2<int> pos,
 
 }  // namespace
 
-void DrawLine(FramebufferRgb565* fb,
+void DrawLine(FramebufferRgb565& fb,
               int x1,
               int y1,
               int x2,
@@ -78,9 +78,9 @@ void DrawLine(FramebufferRgb565* fb,
 
   for (; x1 <= x2; x1++) {
     if (steep_gradient) {
-      fb->SetPixel(y1, x1, pen_color);
+      fb.SetPixel(y1, x1, pen_color);
     } else {
-      fb->SetPixel(x1, y1, pen_color);
+      fb.SetPixel(x1, y1, pen_color);
     }
     error_value -= dy;
     if (error_value < 0) {
@@ -92,7 +92,7 @@ void DrawLine(FramebufferRgb565* fb,
 
 // Draw a circle at center_x, center_y with given radius and color. Only a
 // one-pixel outline is drawn if filled is false.
-void DrawCircle(FramebufferRgb565* fb,
+void DrawCircle(FramebufferRgb565& fb,
                 int center_x,
                 int center_y,
                 int radius,
@@ -109,15 +109,15 @@ void DrawCircle(FramebufferRgb565* fb,
     // Draw each quarter circle
     for (int i = x; i <= fx; i++) {
       // Lower right
-      fb->SetPixel(center_x - i, center_y + y, pen_color);
+      fb.SetPixel(center_x - i, center_y + y, pen_color);
       // Upper left
-      fb->SetPixel(center_x + i, center_y - y, pen_color);
+      fb.SetPixel(center_x + i, center_y - y, pen_color);
     }
     for (int i = fy; i <= y; i++) {
       // Lower left
-      fb->SetPixel(center_x - i, center_y - x, pen_color);
+      fb.SetPixel(center_x - i, center_y - x, pen_color);
       // Upper right
-      fb->SetPixel(center_x + i, center_y + x, pen_color);
+      fb.SetPixel(center_x + i, center_y + x, pen_color);
     }
     radius = error_value;
     if (radius <= y) {
@@ -132,13 +132,13 @@ void DrawCircle(FramebufferRgb565* fb,
 }
 
 void DrawHLine(
-    FramebufferRgb565* fb, int x1, int x2, int y, color_rgb565_t pen_color) {
+    FramebufferRgb565& fb, int x1, int x2, int y, color_rgb565_t pen_color) {
   for (int i = x1; i <= x2; i++) {
-    fb->SetPixel(i, y, pen_color);
+    fb.SetPixel(i, y, pen_color);
   }
 }
 
-void DrawRect(FramebufferRgb565* fb,
+void DrawRect(FramebufferRgb565& fb,
               int x1,
               int y1,
               int x2,
@@ -154,13 +154,13 @@ void DrawRect(FramebufferRgb565* fb,
     }
   } else {
     for (int y = y1 + 1; y < y2; y++) {
-      fb->SetPixel(x1, y, pen_color);
-      fb->SetPixel(x2, y, pen_color);
+      fb.SetPixel(x1, y, pen_color);
+      fb.SetPixel(x2, y, pen_color);
     }
   }
 }
 
-void DrawRectWH(FramebufferRgb565* fb,
+void DrawRectWH(FramebufferRgb565& fb,
                 int x,
                 int y,
                 int w,
@@ -170,11 +170,11 @@ void DrawRectWH(FramebufferRgb565* fb,
   DrawRect(fb, x, y, x - 1 + w, y - 1 + h, pen_color, filled);
 }
 
-void Fill(FramebufferRgb565* fb, color_rgb565_t pen_color) {
-  fb->Fill(pen_color);
+void Fill(FramebufferRgb565& fb, color_rgb565_t pen_color) {
+  fb.Fill(pen_color);
 }
 
-void DrawSprite(FramebufferRgb565* fb,
+void DrawSprite(FramebufferRgb565& fb,
                 int x,
                 int y,
                 pw::draw::SpriteSheet* sprite_sheet,
@@ -187,7 +187,7 @@ void DrawSprite(FramebufferRgb565* fb,
           current_x, current_y, sprite_sheet->current_index);
       if (color != sprite_sheet->transparent_color) {
         if (integer_scale == 1) {
-          fb->SetPixel(x + current_x, y + current_y, color);
+          fb.SetPixel(x + current_x, y + current_y, color);
         }
         // If integer_scale > 1: draw a rectangle
         else if (integer_scale > 1) {
@@ -201,13 +201,13 @@ void DrawSprite(FramebufferRgb565* fb,
   }
 }
 
-void DrawTestPattern(FramebufferRgb565* fb) {
+void DrawTestPattern(FramebufferRgb565& fb) {
   color_rgb565_t color = pw::color::ColorRGBA(0x00, 0xFF, 0xFF).ToRgb565();
   // Create a Test Pattern
-  for (int x = 0; x < fb->GetWidth(); x++) {
-    for (int y = 0; y < fb->GetHeight(); y++) {
+  for (int x = 0; x < fb.GetWidth(); x++) {
+    for (int y = 0; y < fb.GetHeight(); y++) {
       if (y % 10 != x % 10) {
-        fb->SetPixel(x, y, color);
+        fb.SetPixel(x, y, color);
       }
     }
   }
