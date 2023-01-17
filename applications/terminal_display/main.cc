@@ -441,22 +441,18 @@ void CreateDemoLogMessages() {
 }
 
 // Given a ring buffer full of uint32_t values, return the average value
-// or zero if empty.
+// or zero if empty (or iteration error).
 uint32_t CalcAverageUint32Value(PrefixedEntryRingBuffer& ring_buffer) {
-  if (!ring_buffer.EntryCount())
-    return 0;
   uint64_t sum = 0;
   uint32_t count = 0;
-  pw::ring_buffer::PrefixedEntryRingBufferMulti::iterator it =
-      ring_buffer.begin();
-  for (; it != ring_buffer.end(); ++it) {
-    PW_ASSERT(it->buffer.size() == sizeof(uint32_t));
+  for (const auto& entry_info : ring_buffer) {
+    PW_ASSERT(entry_info.buffer.size() == sizeof(uint32_t));
     uint32_t val;
-    std::memcpy(&val, it->buffer.data(), sizeof(val));
+    std::memcpy(&val, entry_info.buffer.data(), sizeof(val));
     sum += val;
     count++;
   }
-  return sum / count;
+  return count == 0 ? 0 : sum / count;
 }
 
 }  // namespace
