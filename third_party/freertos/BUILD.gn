@@ -37,6 +37,15 @@ config("cm4f_public_config") {
   visibility = [ ":*" ]
 }
 
+config("cm7_public_config") {
+  include_dirs = [
+    "$dir_freertos/include",
+    "$dir_freertos/portable/GCC/ARM_CM7/r0p1",
+  ]
+  cflags = [ "-Wno-cast-qual" ]
+  visibility = [ ":*" ]
+}
+
 config("cm33_public_config") {
   include_dirs = [
     "$dir_freertos/include",
@@ -75,6 +84,16 @@ pw_source_set("arm_cm4f_freertos_port") {
   public = []
   sources = [
     "$dir_freertos/portable/GCC/ARM_CM4F/port.c",
+    "$dir_freertos/portable/MemMang/heap_4.c",
+  ]
+}
+
+pw_source_set("arm_cm7_freertos_port") {
+  public_configs = [ ":cm7_public_config" ]
+  deps = [ "$pw_third_party_freertos_CONFIG" ]
+  public = []
+  sources = [
+    "$dir_freertos/portable/GCC/ARM_CM7/r0p1/port.c",
     "$dir_freertos/portable/MemMang/heap_4.c",
   ]
 }

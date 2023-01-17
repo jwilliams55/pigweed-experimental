@@ -40,6 +40,9 @@ declare_args() {
   dir_pw_board_led_stm32f429i_disc1 =
       get_path_info("$dir_pigweed_experimental/pw_board_led_stm32f429i_disc1",
                     "abspath")
+  dir_pw_board_led_stm32f769i_disc0 =
+      get_path_info("$dir_pigweed_experimental/pw_board_led_stm32f769i_disc0",
+                    "abspath")
   dir_pw_board_led_stm32cube =
       get_path_info("$dir_pigweed_experimental/pw_board_led_stm32cube",
                     "abspath")
@@ -118,6 +121,12 @@ declare_args() {
                     "abspath")
   dir_pw_spin_delay_stm32cube =
       get_path_info("$dir_pigweed_experimental/pw_spin_delay_stm32cube",
+                    "abspath")
+  dir_pw_spin_delay_stm32f769i_disc0 =
+      get_path_info("$dir_pigweed_experimental/pw_spin_delay_stm32f769i_disc0",
+                    "abspath")
+  dir_pw_sys_io_baremetal_stm32f769 =
+      get_path_info("$dir_pigweed_experimental/pw_sys_io_baremetal_stm32f769",
                     "abspath")
   dir_pw_touchscreen =
       get_path_info("$dir_pigweed_experimental/pw_graphics/pw_touchscreen",

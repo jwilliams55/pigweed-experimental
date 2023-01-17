@@ -57,6 +57,29 @@ ninja -C out
 openocd -f third_party/pigweed/targets/stm32f429i_disc1/py/stm32f429i_disc1_utils/openocd_stm32f4xx.cfg -c "program out/stm32f429i_disc1_stm32cube_debug/obj/applications/terminal_display/bin/terminal_demo.elf verify reset exit"
 ```
 
+#### **[STM32F769-DISC0](https://www.st.com/en/evaluation-tools/32f769idiscovery.html)**
+
+**First time setup:**
+```
+pw package install stm32cube_f7
+```
+
+**Compile:**
+
+```sh
+gn gen out --export-compile-commands --args="
+  dir_pw_third_party_stm32cube_f7=\"//environment/packages/stm32cube_f7\"
+"
+ninja -C out
+```
+
+**Flash:**
+
+```
+openocd -f targets/stm32f769i_disc0/py/stm32f769i_disc0_utils/openocd_stm32f7xx.cfg \
+  -c "program out/stm32f769i_disc0_debug/obj/applications/blinky/bin/blinky.elf verify reset exit"
+```
+
 #### **Linux, Windows or Mac**
 
 **Compile:**

@@ -93,6 +93,16 @@ group("stm32f429i_disc1") {
   ]
 }
 
+# stm32f769i_disc0 specific targets.
+group("stm32f769i_disc0") {
+  _default_toolchain = "//targets/stm32f769i_disc0:stm32f769i_disc0_debug"
+  _testing_toolchain = "${_default_toolchain}_tests"
+  deps = [
+    # ":app(${_default_toolchain})",
+    ":tests(${_testing_toolchain})",
+  ]
+}
+
 # This group is built during bootstrap to setup the interactive Python
 # environment.
 pw_python_group("python") {
@@ -114,6 +124,7 @@ _pigweed_python_packages = [
   "$dir_pw_env_setup:core_pigweed_python_packages",
   "$dir_pigweed/targets/lm3s6965evb_qemu/py",
   "$dir_pigweed/targets/stm32f429i_disc1/py",
+  "//targets/stm32f769i_disc0/py",
 ]
 
 _all_python_packages =
@@ -211,6 +222,14 @@ group("applications") {
     "//applications/strings:all(//targets/stm32f429i_disc1:stm32f429i_disc1_debug)",
   ]
 
+  # STMicroelectronics STM32F769I-DISC0 applications steps.
+  deps += [
+    ":applications_tests(//targets/stm32f769i_disc0:stm32f769i_disc0_debug_tests)",
+    "//applications/blinky:blinky(//targets/stm32f769i_disc0:stm32f769i_disc0_debug)",
+    "//applications/rpc:all(//targets/stm32f769i_disc0:stm32f769i_disc0_debug)",
+    "//applications/strings:all(//targets/stm32f769i_disc0:stm32f769i_disc0_debug)",
+  ]
+
   if (dir_pw_third_party_stm32cube_f4 != "") {
     # STMicroelectronics STM32F429I-DISC1 STM32Cube applications steps.
     deps += [
@@ -228,6 +247,14 @@ group("applications") {
 
   if (dir_pw_third_party_stm32cube_f2 != "") {
     deps += [ "//applications/blinky:blinky(//targets/stm32f207zg-nucleo:stm32f207zg_nucleo_debug)" ]
+  }
+
+  if (dir_pw_third_party_stm32cube_f4 != "") {
+    # STMicroelectronics STM32F769I-DISC0 STM32Cube applications steps.
+    deps += [
+      ":applications_tests(//targets/stm32f769i_disc0_stm32cube:stm32f769i_disc0_stm32cube_debug)",
+      "//applications/blinky:blinky(//targets/stm32f769i_disc0_stm32cube:stm32f769i_disc0_stm32cube_debug)",
+    ]
   }
 
   if (dir_pw_third_party_stm32cube_l5 != "") {
