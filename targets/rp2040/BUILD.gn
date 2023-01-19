@@ -75,6 +75,7 @@ generate_toolchain("rp2040") {
     pw_sync_INTERRUPT_SPIN_LOCK_BACKEND =
         "$dir_pw_sync_baremetal:interrupt_spin_lock"
     pw_sync_MUTEX_BACKEND = "$dir_pw_sync_baremetal:mutex"
+    pw_rpc_CONFIG = "$dir_pw_rpc:disable_global_mutex"
 
     pw_third_party_freertos_CONFIG = "//targets/rp2040:freertos_config"
     pw_third_party_freertos_PORT =
