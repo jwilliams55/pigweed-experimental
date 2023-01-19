@@ -50,6 +50,20 @@ constexpr int kDisplayWidth = 320;
 constexpr int kDisplayHeight = 240;
 constexpr int kDisplayNumPixels = kDisplayWidth * kDisplayHeight;
 
+constexpr std::byte kMode0 = MADCTL_MX | MADCTL_BGR;
+constexpr std::byte kMode1 = MADCTL_MV | MADCTL_BGR;
+constexpr std::byte kMode2 = MADCTL_MY | MADCTL_BGR;
+constexpr std::byte kMode3 = MADCTL_MX | MADCTL_MY | MADCTL_MV | MADCTL_BGR;
+
+// Frame Control (Normal Mode)
+constexpr std::byte kFrameRate61 = std::byte{0x1F};
+constexpr std::byte kFrameRate70 = std::byte{0x1B};
+constexpr std::byte kFrameRate79 = std::byte{0x18};
+constexpr std::byte kFrameRate119 = std::byte{0x10};
+
+constexpr std::byte kPixelFormat16bits = std::byte(0x55);
+constexpr std::byte kPixelFormat18bits = std::byte(0x36);
+
 constexpr uint8_t HighByte(uint16_t val) { return val >> 8; }
 
 constexpr uint8_t LowByte(uint16_t val) { return val & 0xff; }
@@ -166,23 +180,12 @@ Status DisplayDriverILI9341::Init() {
   // VCM control
   WriteCommand(transaction, {0xC7, std::array<std::byte, 1>{std::byte{0x86}}});
 
-  constexpr std::byte kMode0 = MADCTL_MX | MADCTL_BGR;
-  constexpr std::byte kMode1 = MADCTL_MV | MADCTL_BGR;
-  constexpr std::byte kMode2 = MADCTL_MY | MADCTL_BGR;
-  constexpr std::byte kMode3 = MADCTL_MX | MADCTL_MY | MADCTL_MV | MADCTL_BGR;
   WriteCommand(transaction, {ILI9341_MADCTL, std::array<std::byte, 1>{kMode3}});
 
-  constexpr std::byte kPixelFormat16bits = std::byte(0x55);
-  constexpr std::byte kPixelFormat18bits = std::byte(0x36);
   WriteCommand(
       transaction,
       {ILI9341_PIXEL_FORMAT_SET, std::array<std::byte, 1>{kPixelFormat16bits}});
 
-  // Frame Control (Normal Mode)
-  constexpr std::byte kFrameRate61 = std::byte{0x1F};
-  constexpr std::byte kFrameRate70 = std::byte{0x1B};
-  constexpr std::byte kFrameRate79 = std::byte{0x18};
-  constexpr std::byte kFrameRate119 = std::byte{0x10};
   WriteCommand(transaction,
                {0xB1,
                 std::array<std::byte, 2>{
