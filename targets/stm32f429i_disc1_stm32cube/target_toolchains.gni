@@ -93,7 +93,8 @@ _target_config = {
   pw_board_led_BACKEND = dir_pw_board_led_stm32cube
   pw_board_led_stm32cube_gpio_port = "G"
   pw_board_led_stm32cube_gpio_pin = "13"
-  app_common_BACKEND = "//applications/app_common_impl:stm32cube"
+  app_common_BACKEND =
+      "$dir_pigweed_experimental/applications/app_common_impl:stm32cube"
   pw_lcd_width = "320"
   pw_lcd_height = "240"
   pw_lcd_cs_port_char = "C"

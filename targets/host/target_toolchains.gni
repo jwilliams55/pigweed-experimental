@@ -50,14 +50,16 @@ target_toolchain_host = {
       # Configure backend for pw_sys_io facade.
       pw_sys_io_BACKEND = dir_pw_sys_io_stdio
 
-      app_common_BACKEND = "//applications/app_common_impl:host_null"
+      app_common_BACKEND =
+          "$dir_pigweed_experimental/applications/app_common_impl:host_null"
       pw_lcd_width = "320"
       pw_lcd_height = "240"
 
       # pw_display_host_imgui uses imgui and opengl3
       # See //pw_display_host_imgui/README.md for instructions.
       if (dir_pw_third_party_imgui != "") {
-        app_common_BACKEND = "//applications/app_common_impl:host_imgui"
+        app_common_BACKEND =
+            "$dir_pigweed_experimental/applications/app_common_impl:host_imgui"
       }
 
       pw_touchscreen_BACKEND = "$dir_pw_touchscreen_null"

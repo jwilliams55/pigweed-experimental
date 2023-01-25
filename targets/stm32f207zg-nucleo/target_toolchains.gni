@@ -70,7 +70,8 @@ _target_config = {
   current_cpu = "arm"
   current_os = ""
 
-  app_common_BACKEND = "//applications/app_common_impl:stm32cube"
+  app_common_BACKEND =
+      "$dir_pigweed_experimental/applications/app_common_impl:stm32cube"
 
   pw_board_led_BACKEND = dir_pw_board_led_stm32cube
   pw_board_led_stm32cube_gpio_port = "B"

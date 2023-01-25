@@ -109,21 +109,21 @@ config("common_host_flags") {
 pw_source_set("stm32cube") {
   public_configs = [ ":common_stm32_flags" ]
   deps = [
+    "$dir_pigweed_experimental/applications/app_common:app_common.facade",
     "$dir_pw_digital_io_stm32cube",
     "$dir_pw_display",
     "$dir_pw_display_driver_ili9341",
     "$dir_pw_spi_stm32cube",
     "$dir_pw_sync:borrow",
     "$dir_pw_sync:mutex",
-    "//applications/app_common:app_common.facade",
   ]
   sources = [ "common_stm32cube.cc" ]
 }
 
 pw_source_set("stm32") {
   deps = [
+    "$dir_pigweed_experimental/applications/app_common:app_common.facade",
     "$dir_pw_display_driver_null",
-    "//applications/app_common:app_common.facade",
   ]
   sources = [ "common_stm32.cc" ]
 }
@@ -131,6 +131,7 @@ pw_source_set("stm32") {
 pw_source_set("arduino") {
   public_configs = [ ":common_standard_flags" ]
   deps = [
+    "$dir_pigweed_experimental/applications/app_common:app_common.facade",
     "$dir_pw_digital_io_arduino",
     "$dir_pw_display",
     "$dir_pw_display_driver_ili9341",
@@ -138,7 +139,6 @@ pw_source_set("arduino") {
     "$dir_pw_sync:borrow",
     "$dir_pw_sync:mutex",
     "$dir_pw_third_party/arduino:arduino_core_sources",
-    "//applications/app_common:app_common.facade",
   ]
   sources = [ "common_arduino.cc" ]
   remove_configs = [ "$dir_pw_build:strict_warnings" ]
@@ -148,12 +148,12 @@ if (pw_third_party_mcuxpresso_SDK != "") {
   pw_source_set("mimxrt595") {
     public_configs = [ ":common_mimxrt595_flags" ]
     deps = [
+      "$dir_pigweed_experimental/applications/app_common:app_common.facade",
       "$dir_pw_display",
       "$dir_pw_display_driver_mipi_dsi",
       "$dir_pw_framebuffer_pool",
       "$dir_pw_mipi_dsi_mcuxpresso",
       "$pw_third_party_mcuxpresso_SDK",
-      "//applications/app_common:app_common.facade",
     ]
     sources = [ "common_mimxrt595.cc" ]
   }
@@ -164,13 +164,13 @@ _pico_common_deps = [
   "$PICO_ROOT/src/common/pico_stdlib",
   "$PICO_ROOT/src/rp2_common/hardware_pwm",
   "$PICO_ROOT/src/rp2_common/hardware_spi",
+  "$dir_pigweed_experimental/applications/app_common:app_common.facade",
   "$dir_pw_digital_io_pico",
   "$dir_pw_display",
   "$dir_pw_log",
   "$dir_pw_spi_pico",
   "$dir_pw_sync:borrow",
   "$dir_pw_sync:mutex",
-  "//applications/app_common:app_common.facade",
 ]
 
 pw_source_set("pico_ili9341") {
@@ -203,9 +203,9 @@ pw_source_set("pico_st7735") {
 pw_source_set("host_imgui") {
   public_configs = [ ":common_host_flags" ]
   deps = [
+    "$dir_pigweed_experimental/applications/app_common:app_common.facade",
     "$dir_pw_display_driver_imgui",
     "$dir_pw_display_imgui",
-    "//applications/app_common:app_common.facade",
   ]
   sources = [ "common_host_imgui.cc" ]
 }
@@ -213,9 +213,9 @@ pw_source_set("host_imgui") {
 pw_source_set("host_null") {
   public_configs = [ ":common_host_flags" ]
   deps = [
+    "$dir_pigweed_experimental/applications/app_common:app_common.facade",
     "$dir_pw_display",
     "$dir_pw_display_driver_null",
-    "//applications/app_common:app_common.facade",
   ]
   sources = [ "common_host_null.cc" ]
 }

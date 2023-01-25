@@ -33,7 +33,8 @@ target_toolchain_arduino = {
       forward_variables_from(_toolchain_base.defaults, "*")
       forward_variables_from(toolchain_overrides, "*")
 
-      app_common_BACKEND = "//applications/app_common_impl:arduino"
+      app_common_BACKEND =
+          "$dir_pigweed_experimental/applications/app_common_impl:arduino"
       pw_lcd_width = "320"
       pw_lcd_height = "240"
       pw_lcd_cs_pin_num = "32"

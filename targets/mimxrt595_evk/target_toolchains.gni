@@ -38,7 +38,8 @@ target_toolchain_mimxrt595_evk = {
       forward_variables_from(_toolchain_base.defaults, "*", _excluded_defaults)
       forward_variables_from(toolchain_overrides, "*")
 
-      app_common_BACKEND = "//applications/app_common_impl:mimxrt595"
+      app_common_BACKEND =
+          "$dir_pigweed_experimental/applications/app_common_impl:mimxrt595"
       pw_mipi_dsi_use_smart_dma = 1
       pw_lcd_width = 400
       pw_lcd_height = 392

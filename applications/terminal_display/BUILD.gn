@@ -49,6 +49,7 @@ pw_executable("terminal_demo") {
   deps = [
     ":text_buffer",
     "$dir_app_common",
+    "$dir_pw_board_led",
     "$dir_pw_color",
     "$dir_pw_containers:vector",
     "$dir_pw_coordinates",
@@ -58,11 +59,10 @@ pw_executable("terminal_demo") {
     "$dir_pw_log",
     "$dir_pw_random",
     "$dir_pw_ring_buffer",
+    "$dir_pw_spin_delay",
     "$dir_pw_string",
     "$dir_pw_sys_io",
     "$dir_pw_touchscreen",
-    "//pw_board_led",
-    "//pw_spin_delay",
   ]
   remove_configs = [
     "$dir_pw_build:strict_warnings",

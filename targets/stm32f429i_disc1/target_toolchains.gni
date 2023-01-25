@@ -37,7 +37,8 @@ target_toolchain_stm32f429i_disc1 = {
     defaults = {
       forward_variables_from(_toolchain_base.defaults, "*", _excluded_defaults)
       forward_variables_from(toolchain_overrides, "*")
-      app_common_BACKEND = "//applications/app_common_impl:stm32"
+      app_common_BACKEND =
+          "$dir_pigweed_experimental/applications/app_common_impl:stm32"
       pw_board_led_BACKEND = "$dir_pw_board_led_stm32f429i_disc1"
       pw_spin_delay_BACKEND = "$dir_pw_spin_delay_stm32f429i_disc1"
     }
