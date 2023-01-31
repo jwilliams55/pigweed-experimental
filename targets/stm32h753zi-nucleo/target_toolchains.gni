@@ -30,8 +30,9 @@ _target_config = {
       get_path_info("stm32h753zi_executable.gni", "abspath")
 
   pw_third_party_freertos_CONFIG =
-      "//targets/stm32h753zi-nucleo:freertos_config"
-  pw_third_party_freertos_PORT = "//third_party/freertos:arm_cm4f_freertos_port"
+      "$dir_pigweed_experimental/targets/stm32h753zi-nucleo:freertos_config"
+  pw_third_party_freertos_PORT =
+      "$dir_pigweed_experimental/third_party/freertos:arm_cm4f_freertos_port"
 
   # Path to the bloaty config file for the output binaries.
   # pw_bloat_BLOATY_CONFIG = "$dir_pw_boot_cortex_m/bloaty_config.bloaty"

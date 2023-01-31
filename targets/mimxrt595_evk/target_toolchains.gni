@@ -50,9 +50,9 @@ target_toolchain_mimxrt595_evk = {
       pw_board_led_BACKEND = "$dir_pw_board_led_mimxrt595_evk"
       pw_spin_delay_BACKEND = "$dir_pw_spin_delay_mcuxpresso"
       pw_touchscreen_BACKEND = "$dir_pw_touchscreen_null"
-      pw_third_party_freertos_CONFIG = "//targets/mimxrt595_evk:freertos_config"
-      pw_third_party_freertos_PORT =
-          "//third_party/freertos:arm_cm33_ntz_freertos_port"
+      pw_third_party_freertos_CONFIG =
+          "$dir_pigweed_experimental/targets/mimxrt595_evk:freertos_config"
+      pw_third_party_freertos_PORT = "$dir_pigweed_experimental/third_party/freertos:arm_cm33_ntz_freertos_port"
     }
   }
 }
