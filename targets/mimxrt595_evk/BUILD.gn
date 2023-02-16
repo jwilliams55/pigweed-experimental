@@ -23,7 +23,7 @@ import("$dir_pw_toolchain/generate_toolchain.gni")
 import("target_toolchains.gni")
 
 generate_toolchains("target_toolchains") {
-  toolchains = toolchains_list
+  toolchains = pw_target_toolchain_mimxrt595_evk_list
 }
 
 declare_args() {
@@ -32,7 +32,9 @@ declare_args() {
   pw_MIMXRT595_EVK_SDK = ""
 
   # When compiling with an MCUXpresso SDK, this variable is set to the path of
-  # the manifest file within the SDK installation.
+  # the manifest file within the SDK installation. When set, a pw_source_set
+  # for a sample project SDK is created at
+  # "//targets/mimxrt595_evk/sample_sdk".
   pw_target_mimxrt595_evk_MANIFEST = ""
 
   # This list should contain the necessary defines for setting linker script
@@ -89,7 +91,7 @@ config("sdk_defines") {
 if (current_toolchain != default_toolchain) {
   pw_linker_script("flash_linker_script") {
     defines = pw_target_mimxrt595_evk_LINK_CONFIG_DEFINES
-    linker_script = "$dir_pigweed/targets/mimxrt595_evk/mimxrt595_flash.ld"
+    linker_script = "mimxrt595_flash.ld"
   }
 }
 
@@ -111,11 +113,13 @@ if (pw_third_party_mcuxpresso_SDK != "") {
       deps += [ "$dir_pw_malloc" ]
     }
     sources = [
-      "$dir_pigweed/targets/mimxrt595_evk/vector_table.c",
       "boot.cc",
+      "vector_table.c",
     ]
   }
+}
 
+if (pw_third_party_mcuxpresso_SDK != "") {
   pw_mcuxpresso_sdk("mimxrt595_sdk") {
     manifest = pw_target_mimxrt595_evk_MANIFEST
     include = [
