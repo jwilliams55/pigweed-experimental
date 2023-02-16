@@ -44,7 +44,7 @@ using DisplayDriver = pw::display_driver::DisplayDriverST7789;
 using pw::Status;
 using pw::digital_io::PicoDigitalOut;
 using pw::display::Display;
-using pw::framebuffer::FramebufferRgb565;
+using pw::framebuffer::Framebuffer;
 using pw::spi::Device;
 using pw::spi::Initiator;
 using pw::spi::PicoChipSelector;

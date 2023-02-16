@@ -18,12 +18,12 @@
 
 #include "pw_color/color.h"
 #include "pw_draw/sprite_sheet.h"
-#include "pw_framebuffer/rgb565.h"
+#include "pw_framebuffer/framebuffer.h"
 
 using pw::color::color_rgb565_t;
 using pw::coordinates::Size;
 using pw::coordinates::Vector2;
-using pw::framebuffer::FramebufferRgb565;
+using pw::framebuffer::Framebuffer;
 
 namespace pw::draw {
 
@@ -33,7 +33,7 @@ namespace {
 Size<int> DrawSpace(Vector2<int> pos,
                     color_rgb565_t bg_color,
                     const FontSet& font,
-                    FramebufferRgb565& framebuffer) {
+                    Framebuffer& framebuffer) {
   for (int font_row = 0; font_row < font.height; font_row++) {
     for (int font_column = 0; font_column < font.width; font_column++) {
       framebuffer.SetPixel(pos.x + font_column, pos.y + font_row, bg_color);
@@ -44,12 +44,8 @@ Size<int> DrawSpace(Vector2<int> pos,
 
 }  // namespace
 
-void DrawLine(FramebufferRgb565& fb,
-              int x1,
-              int y1,
-              int x2,
-              int y2,
-              color_rgb565_t pen_color) {
+void DrawLine(
+    Framebuffer& fb, int x1, int y1, int x2, int y2, color_rgb565_t pen_color) {
   // Bresenham's Line Algorithm
   int16_t steep_gradient = abs(y2 - y1) > abs(x2 - x1);
   // Swap values
@@ -92,7 +88,7 @@ void DrawLine(FramebufferRgb565& fb,
 
 // Draw a circle at center_x, center_y with given radius and color. Only a
 // one-pixel outline is drawn if filled is false.
-void DrawCircle(FramebufferRgb565& fb,
+void DrawCircle(Framebuffer& fb,
                 int center_x,
                 int center_y,
                 int radius,
@@ -132,13 +128,13 @@ void DrawCircle(FramebufferRgb565& fb,
 }
 
 void DrawHLine(
-    FramebufferRgb565& fb, int x1, int x2, int y, color_rgb565_t pen_color) {
+    Framebuffer& fb, int x1, int x2, int y, color_rgb565_t pen_color) {
   for (int i = x1; i <= x2; i++) {
     fb.SetPixel(i, y, pen_color);
   }
 }
 
-void DrawRect(FramebufferRgb565& fb,
+void DrawRect(Framebuffer& fb,
               int x1,
               int y1,
               int x2,
@@ -160,7 +156,7 @@ void DrawRect(FramebufferRgb565& fb,
   }
 }
 
-void DrawRectWH(FramebufferRgb565& fb,
+void DrawRectWH(Framebuffer& fb,
                 int x,
                 int y,
                 int w,
@@ -170,11 +166,9 @@ void DrawRectWH(FramebufferRgb565& fb,
   DrawRect(fb, x, y, x - 1 + w, y - 1 + h, pen_color, filled);
 }
 
-void Fill(FramebufferRgb565& fb, color_rgb565_t pen_color) {
-  fb.Fill(pen_color);
-}
+void Fill(Framebuffer& fb, color_rgb565_t pen_color) { fb.Fill(pen_color); }
 
-void DrawSprite(FramebufferRgb565& fb,
+void DrawSprite(Framebuffer& fb,
                 int x,
                 int y,
                 pw::draw::SpriteSheet* sprite_sheet,
@@ -201,7 +195,7 @@ void DrawSprite(FramebufferRgb565& fb,
   }
 }
 
-void DrawTestPattern(FramebufferRgb565& fb) {
+void DrawTestPattern(Framebuffer& fb) {
   color_rgb565_t color = pw::color::ColorRGBA(0x00, 0xFF, 0xFF).ToRgb565();
   // Create a Test Pattern
   for (int x = 0; x < fb.GetWidth(); x++) {
@@ -218,7 +212,7 @@ Size<int> DrawCharacter(int ch,
                         color_rgb565_t fg_color,
                         color_rgb565_t bg_color,
                         const FontSet& font,
-                        FramebufferRgb565& framebuffer) {
+                        Framebuffer& framebuffer) {
   if (ch == ' ' || ch == '\0') {
     // The font doesn't have a space glyph (why?), so special-case this.
     return DrawSpace(pos, bg_color, font, framebuffer);
@@ -246,7 +240,7 @@ Size<int> DrawString(std::wstring_view str,
                      color_rgb565_t fg_color,
                      color_rgb565_t bg_color,
                      const FontSet& font,
-                     FramebufferRgb565& framebuffer) {
+                     Framebuffer& framebuffer) {
   Size<int> string_dimensions{0, font.height};
   for (const wchar_t& ch : str) {
     auto char_dimensions =

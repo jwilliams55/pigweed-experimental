@@ -21,7 +21,7 @@
 
 using pw::color::color_rgb565_t;
 using pw::display_driver::DisplayDriver;
-using pw::framebuffer::FramebufferRgb565;
+using pw::framebuffer::Framebuffer;
 using Size = pw::coordinates::Size<int>;
 
 namespace pw::display {
@@ -51,19 +51,19 @@ struct CallParams {
 
 class TestDisplayDriver : public DisplayDriver {
  public:
-  TestDisplayDriver(FramebufferRgb565 fb) : framebuffer_(std::move(fb)) {}
+  TestDisplayDriver(Framebuffer fb) : framebuffer_(std::move(fb)) {}
   virtual ~TestDisplayDriver() = default;
 
   Status Init() override { return OkStatus(); }
 
-  FramebufferRgb565 GetFramebuffer() override {
-    return FramebufferRgb565(framebuffer_.GetFramebufferData(),
-                             framebuffer_.GetWidth(),
-                             framebuffer_.GetHeight(),
-                             framebuffer_.GetRowBytes());
+  Framebuffer GetFramebuffer() override {
+    return Framebuffer(framebuffer_.GetFramebufferData(),
+                       framebuffer_.GetWidth(),
+                       framebuffer_.GetHeight(),
+                       framebuffer_.GetRowBytes());
   }
 
-  Status ReleaseFramebuffer(FramebufferRgb565 framebuffer) override {
+  Status ReleaseFramebuffer(Framebuffer framebuffer) override {
     if (next_call_param_idx_ < kMaxSavedParams) {
       call_params_[next_call_param_idx_].call_func =
           CallFunc::ReleaseFramebuffer;
@@ -111,7 +111,7 @@ class TestDisplayDriver : public DisplayDriver {
  private:
   size_t next_call_param_idx_ = 0;
   std::array<CallParams, kMaxSavedParams> call_params_;
-  const FramebufferRgb565 framebuffer_;
+  const Framebuffer framebuffer_;
 };
 
 TEST(Display, ReleaseNoResize) {
@@ -123,10 +123,10 @@ TEST(Display, ReleaseNoResize) {
       sizeof(color_rgb565_t) * kFramebufferWidth;
   color_rgb565_t pixel_data[kNumPixels];
 
-  TestDisplayDriver test_driver(FramebufferRgb565(
+  TestDisplayDriver test_driver(Framebuffer(
       pixel_data, kFramebufferWidth, kFramebufferHeight, kFramebufferRowBytes));
   Display display(test_driver, kDisplaySize);
-  FramebufferRgb565 fb = display.GetFramebuffer();
+  Framebuffer fb = display.GetFramebuffer();
   EXPECT_TRUE(fb.IsValid());
   EXPECT_EQ(kFramebufferWidth, fb.GetWidth());
   EXPECT_EQ(kFramebufferHeight, fb.GetHeight());
@@ -148,10 +148,10 @@ TEST(Display, ReleaseSmallResize) {
       sizeof(color_rgb565_t) * kFramebufferWidth;
   color_rgb565_t pixel_data[kNumPixels];
 
-  TestDisplayDriver test_driver(FramebufferRgb565(
+  TestDisplayDriver test_driver(Framebuffer(
       pixel_data, kFramebufferWidth, kFramebufferHeight, kFramebufferRowBytes));
   Display display(test_driver, kDisplaySize);
-  FramebufferRgb565 fb = display.GetFramebuffer();
+  Framebuffer fb = display.GetFramebuffer();
   EXPECT_TRUE(fb.IsValid());
   EXPECT_EQ(kFramebufferWidth, fb.GetWidth());
   EXPECT_EQ(kFramebufferHeight, fb.GetHeight());
@@ -194,10 +194,10 @@ TEST(Display, ReleaseWideResize) {
       sizeof(color_rgb565_t) * kFramebufferWidth;
   color_rgb565_t pixel_data[kNumPixels];
 
-  TestDisplayDriver test_driver(FramebufferRgb565(
+  TestDisplayDriver test_driver(Framebuffer(
       pixel_data, kFramebufferWidth, kFramebufferHeight, kFramebufferRowBytes));
   Display display(test_driver, kDisplaySize);
-  FramebufferRgb565 fb = display.GetFramebuffer();
+  Framebuffer fb = display.GetFramebuffer();
   EXPECT_TRUE(fb.IsValid());
   EXPECT_EQ(kFramebufferWidth, fb.GetWidth());
   EXPECT_EQ(kFramebufferHeight, fb.GetHeight());

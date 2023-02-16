@@ -17,7 +17,6 @@
 #include "pw_status/try.h"
 
 using pw::Status;
-using pw::framebuffer::FramebufferRgb565;
 
 namespace {
 

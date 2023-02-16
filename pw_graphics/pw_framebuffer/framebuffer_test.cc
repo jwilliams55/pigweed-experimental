@@ -12,13 +12,14 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
+#include "pw_framebuffer/framebuffer.h"
+
 #include <cstdint>
 
 #include "gtest/gtest.h"
 #include "pw_color/color.h"
 #include "pw_color/colors_endesga32.h"
 #include "pw_color/colors_pico8.h"
-#include "pw_framebuffer/rgb565.h"
 #include "pw_log/log.h"
 
 using pw::color::color_rgb565_t;
@@ -26,16 +27,16 @@ using pw::color::color_rgb565_t;
 namespace pw::framebuffer {
 namespace {
 
-TEST(FramebufferRgb565, Init) {
+TEST(Framebuffer, Init) {
   uint16_t data[32 * 32];
-  FramebufferRgb565 fb(data, 32, 32, 32 * sizeof(data[0]));
+  Framebuffer fb(data, 32, 32, 32 * sizeof(data[0]));
   EXPECT_EQ(fb.GetWidth(), 32);
   EXPECT_EQ(fb.GetHeight(), 32);
 }
 
-TEST(FramebufferRgb565, Fill) {
+TEST(Framebuffer, Fill) {
   uint16_t data[8 * 8];
-  FramebufferRgb565 fb(data, 8, 8, 8 * sizeof(data[0]));
+  Framebuffer fb(data, 8, 8, 8 * sizeof(data[0]));
   color_rgb565_t* const pixel_data = fb.GetFramebufferData();
   color_rgb565_t indigo = 0x83b3;
   fb.Fill(indigo);
@@ -45,9 +46,9 @@ TEST(FramebufferRgb565, Fill) {
   EXPECT_EQ(pixel_data[8 * 8 - 1], 0x83b3);
 }
 
-TEST(FramebufferRgb565, SetPixelGetPixel) {
+TEST(Framebuffer, SetPixelGetPixel) {
   uint16_t data[8 * 8];
-  FramebufferRgb565 fb(data, 8, 8, 8 * sizeof(data[0]));
+  Framebuffer fb(data, 8, 8, 8 * sizeof(data[0]));
   color_rgb565_t* const pixel_data = fb.GetFramebufferData();
   color_rgb565_t indigo = 0x83b3;
   fb.Fill(0);
@@ -74,9 +75,9 @@ TEST(FramebufferRgb565, SetPixelGetPixel) {
   EXPECT_EQ(c.value(), indigo);
 }
 
-TEST(FramebufferRgb565, Blit) {
+TEST(Framebuffer, Blit) {
   uint16_t data[8 * 8];
-  FramebufferRgb565 fb(data, 8, 8, 8 * sizeof(data[0]));
+  Framebuffer fb(data, 8, 8, 8 * sizeof(data[0]));
   color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   fb.Fill(indigo);
   color_rgb565_t* const pixel_data = fb.GetFramebufferData();
@@ -86,7 +87,7 @@ TEST(FramebufferRgb565, Blit) {
   EXPECT_EQ(pixel_data[8 * 8 - 1], indigo);
 
   uint16_t data2[4 * 4];
-  FramebufferRgb565 fb2(data2, 4, 4, 4 * sizeof(data2[0]));
+  Framebuffer fb2(data2, 4, 4, 4 * sizeof(data2[0]));
   color_rgb565_t orange = 0xfd00;
   fb2.Fill(orange);
 

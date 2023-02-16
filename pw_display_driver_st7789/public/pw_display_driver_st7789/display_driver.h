@@ -45,8 +45,8 @@ class DisplayDriverST7789 : public DisplayDriver {
 
   // DisplayDriver implementation:
   Status Init() override;
-  FramebufferRgb565 GetFramebuffer(void) override;
-  Status ReleaseFramebuffer(FramebufferRgb565 framebuffer) override;
+  Framebuffer GetFramebuffer(void) override;
+  Status ReleaseFramebuffer(Framebuffer framebuffer) override;
   Status WriteRow(span<uint16_t> row_pixels, int row_idx, int col_idx) override;
   int GetWidth() const override { return config_.screen_width; }
   int GetHeight() const override { return config_.screen_height; }

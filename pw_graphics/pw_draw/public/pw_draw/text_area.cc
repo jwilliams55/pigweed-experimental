@@ -17,14 +17,14 @@
 #include "pw_color/color.h"
 #include "pw_draw/draw.h"
 #include "pw_draw/font_set.h"
-#include "pw_framebuffer/rgb565.h"
+#include "pw_framebuffer/framebuffer.h"
 
 using pw::color::color_rgb565_t;
 using pw::coordinates::Vector2;
 
 namespace pw::draw {
 
-TextArea::TextArea(pw::framebuffer::FramebufferRgb565& fb, const FontSet* font)
+TextArea::TextArea(pw::framebuffer::Framebuffer& fb, const FontSet* font)
     : framebuffer(fb) {
   SetFont(font);
   // Default colors: White on Black

@@ -18,25 +18,25 @@
 
 namespace pw::framebuffer {
 
-class FramebufferRgb565 {
+class Framebuffer {
  public:
   // Construct a default invalid framebuffer. Using an
   // invalid framebuffer will result in a failed PW_CHECK.
-  FramebufferRgb565();
+  Framebuffer();
 
   // Construct a framebuffer of the specified dimensions which *does not* own
   // the |data| - i.e. this instance may write to the data, but will never
   // attempt to free it.
-  FramebufferRgb565(pw::color::color_rgb565_t* data,
-                    int width,
-                    int height,
-                    int row_bytes);
+  Framebuffer(pw::color::color_rgb565_t* data,
+              int width,
+              int height,
+              int row_bytes);
 
-  FramebufferRgb565(const FramebufferRgb565&) = delete;
-  FramebufferRgb565(FramebufferRgb565&& other);
+  Framebuffer(const Framebuffer&) = delete;
+  Framebuffer(Framebuffer&& other);
 
-  FramebufferRgb565& operator=(const FramebufferRgb565&) = delete;
-  FramebufferRgb565& operator=(FramebufferRgb565&&);
+  Framebuffer& operator=(const Framebuffer&) = delete;
+  Framebuffer& operator=(Framebuffer&&);
 
   // Has the framebuffer been properly initialized?
   bool IsValid() const { return pixel_data_ != nullptr; };
@@ -50,7 +50,7 @@ class FramebufferRgb565 {
   void SetPixel(int x, int y, pw::color::color_rgb565_t rgb565_color);
 
   // Copy the colors from another framebuffer into this one at position x, y.
-  void Blit(const FramebufferRgb565& fb, int x, int y);
+  void Blit(const Framebuffer& fb, int x, int y);
 
   // Fill the entire buffer with a color.
   void Fill(pw::color::color_rgb565_t color);

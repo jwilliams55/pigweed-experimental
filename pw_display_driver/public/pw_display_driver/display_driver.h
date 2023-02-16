@@ -15,7 +15,7 @@
 
 #include <cstddef>
 
-#include "pw_framebuffer/rgb565.h"
+#include "pw_framebuffer/framebuffer.h"
 #include "pw_span/span.h"
 #include "pw_status/status.h"
 
@@ -34,12 +34,12 @@ class DisplayDriver {
 
   // Return a framebuffer to which the caller may draw. When drawing is complete
   // the framebuffer must be returned using ReleaseFramebuffer().
-  virtual pw::framebuffer::FramebufferRgb565 GetFramebuffer() = 0;
+  virtual pw::framebuffer::Framebuffer GetFramebuffer() = 0;
 
   // Send all pixels in the supplied |framebuffer| to the display controller
   // for display.
   virtual Status ReleaseFramebuffer(
-      pw::framebuffer::FramebufferRgb565 framebuffer) = 0;
+      pw::framebuffer::Framebuffer framebuffer) = 0;
 
   // Send a row of pixels to the display. The number of pixels must be <=
   // display width.

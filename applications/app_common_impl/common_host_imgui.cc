@@ -18,7 +18,6 @@
 
 using pw::Status;
 using pw::color::color_rgb565_t;
-using pw::framebuffer::FramebufferRgb565;
 
 namespace {
 

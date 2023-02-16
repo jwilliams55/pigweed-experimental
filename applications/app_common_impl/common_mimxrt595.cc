@@ -23,7 +23,6 @@ using pw::Status;
 using pw::color::color_rgb565_t;
 using pw::display::Display;
 using pw::display_driver::DisplayDriverMipiDsi;
-using pw::framebuffer::FramebufferRgb565;
 using pw::mipi::dsi::MCUXpressoDevice;
 
 namespace {

@@ -45,9 +45,8 @@ class MCUXpressoDevice : public Device {
   Status Init();
 
   // pw::mipi::dsi::Device implementation:
-  pw::framebuffer::FramebufferRgb565 GetFramebuffer() override;
-  Status ReleaseFramebuffer(
-      pw::framebuffer::FramebufferRgb565 framebuffer) override;
+  pw::framebuffer::Framebuffer GetFramebuffer() override;
+  Status ReleaseFramebuffer(pw::framebuffer::Framebuffer framebuffer) override;
 
  public:
   static status_t DSI_Transfer(dsi_transfer_t* xfer);

@@ -26,7 +26,7 @@
 #include "pin_mux.h"
 
 using pw::color::color_rgb565_t;
-using pw::framebuffer::FramebufferRgb565;
+using pw::framebuffer::Framebuffer;
 
 namespace pw::mipi::dsi {
 
@@ -143,15 +143,14 @@ Status MCUXpressoDevice::Init() {
   return fbdev_.Enable();
 }
 
-FramebufferRgb565 MCUXpressoDevice::GetFramebuffer() {
-  return FramebufferRgb565(
-      static_cast<color_rgb565_t*>(fbdev_.GetFramebuffer()),
-      fb_pool_.size.width,
-      fb_pool_.size.height,
-      fb_pool_.row_bytes);
+Framebuffer MCUXpressoDevice::GetFramebuffer() {
+  return Framebuffer(static_cast<color_rgb565_t*>(fbdev_.GetFramebuffer()),
+                     fb_pool_.size.width,
+                     fb_pool_.size.height,
+                     fb_pool_.row_bytes);
 }
 
-Status MCUXpressoDevice::ReleaseFramebuffer(FramebufferRgb565 framebuffer) {
+Status MCUXpressoDevice::ReleaseFramebuffer(Framebuffer framebuffer) {
   if (!framebuffer.IsValid())
     return Status::InvalidArgument();
   void* data = framebuffer.GetFramebufferData();

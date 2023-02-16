@@ -14,12 +14,10 @@
 
 #pragma once
 
-#include "pw_framebuffer/rgb565.h"
+#include "pw_framebuffer/framebuffer.h"
 #include "pw_status/status.h"
 
 namespace pw::mipi::dsi {
-
-using pw::framebuffer::FramebufferRgb565;
 
 // Interface for to a MIPI Display Serial Interface(1) implementation.
 //
@@ -33,11 +31,11 @@ class Device {
   // Retrieve a framebuffer for rendering. An invalid framebuffer will be
   // returned if there are no available framebuffers which can happen if
   // all framebuffers are in the process of being sent to the display.
-  virtual pw::framebuffer::FramebufferRgb565 GetFramebuffer(void) = 0;
+  virtual pw::framebuffer::Framebuffer GetFramebuffer(void) = 0;
 
   // Begin the process of transporting the |framebuffer| to the display.
   virtual Status ReleaseFramebuffer(
-      pw::framebuffer::FramebufferRgb565 framebuffer) = 0;
+      pw::framebuffer::Framebuffer framebuffer) = 0;
 
  protected:
   Device() = default;

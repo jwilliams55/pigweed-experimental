@@ -25,7 +25,7 @@ using pw::Status;
 using pw::digital_io::Stm32CubeDigitalOut;
 using pw::display::Display;
 using pw::display_driver::DisplayDriverILI9341;
-using pw::framebuffer::FramebufferRgb565;
+using pw::framebuffer::Framebuffer;
 using pw::spi::Device;
 using pw::spi::Initiator;
 using pw::spi::Stm32CubeChipSelector;

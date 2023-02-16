@@ -15,7 +15,7 @@
 
 #include "pw_coordinates/vec_int.h"
 #include "pw_display_driver/display_driver.h"
-#include "pw_framebuffer/rgb565.h"
+#include "pw_framebuffer/framebuffer.h"
 #include "pw_framebuffer_pool/framebuffer_pool.h"
 #include "pw_status/status.h"
 
@@ -35,7 +35,7 @@ class Display {
   // the framebuffer must be returned using ReleaseFramebuffer(). An invalid
   // framebuffer may be returned, so the caller should verify it is valid
   // before use.
-  pw::framebuffer::FramebufferRgb565 GetFramebuffer();
+  pw::framebuffer::Framebuffer GetFramebuffer();
 
   // Release the framebuffer back to the display. The display will
   // send the framebuffer data to the screen. This function will block until
@@ -43,7 +43,7 @@ class Display {
   //
   // This function should only be passed a valid framebuffer returned by
   // a paired call to GetFramebuffer.
-  Status ReleaseFramebuffer(pw::framebuffer::FramebufferRgb565 framebuffer);
+  Status ReleaseFramebuffer(pw::framebuffer::Framebuffer framebuffer);
 
   // Return the width (in pixels) of the associated display.
   int GetWidth() const { return size_.width; }
@@ -65,8 +65,7 @@ class Display {
  private:
   // Update screen while scaling the framebuffer using nearest
   // neighbor algorithm.
-  Status UpdateNearestNeighbor(
-      const pw::framebuffer::FramebufferRgb565& framebuffer);
+  Status UpdateNearestNeighbor(const pw::framebuffer::Framebuffer& framebuffer);
 
   pw::display_driver::DisplayDriver& display_driver_;
   const pw::coordinates::Size<int> size_;

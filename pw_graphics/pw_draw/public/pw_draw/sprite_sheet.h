@@ -14,7 +14,7 @@
 #pragma once
 
 #include "pw_color/color.h"
-#include "pw_framebuffer/rgb565.h"
+#include "pw_framebuffer/framebuffer.h"
 
 namespace pw::draw {
 

@@ -17,7 +17,7 @@
 namespace {
 
 pw::display_driver::DisplayDriverNULL s_display_driver;
-pw::display::Display s_display(pw::framebuffer::FramebufferRgb565(),
+pw::display::Display s_display(pw::framebuffer::Framebuffer(),
                                s_display_driver);
 
 }  // namespace

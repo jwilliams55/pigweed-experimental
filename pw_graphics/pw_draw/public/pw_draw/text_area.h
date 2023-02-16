@@ -15,7 +15,7 @@
 
 #include "pw_color/color.h"
 #include "pw_draw/font_set.h"
-#include "pw_framebuffer/rgb565.h"
+#include "pw_framebuffer/framebuffer.h"
 
 namespace pw::draw {
 
@@ -28,9 +28,9 @@ class TextArea {
   const FontSet* current_font;
   pw::color::color_rgb565_t foreground_color;
   pw::color::color_rgb565_t background_color;
-  pw::framebuffer::FramebufferRgb565& framebuffer;
+  pw::framebuffer::Framebuffer& framebuffer;
 
-  TextArea(pw::framebuffer::FramebufferRgb565& fb, const FontSet* font);
+  TextArea(pw::framebuffer::Framebuffer& fb, const FontSet* font);
 
   // Change the current font.
   void SetFont(const FontSet* new_font);

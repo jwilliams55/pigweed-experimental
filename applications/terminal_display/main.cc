@@ -34,7 +34,7 @@
 #include "pw_draw/draw.h"
 #include "pw_draw/font_set.h"
 #include "pw_draw/pigweed_farm.h"
-#include "pw_framebuffer/rgb565.h"
+#include "pw_framebuffer/framebuffer.h"
 #include "pw_log/log.h"
 #include "pw_ring_buffer/prefixed_entry_ring_buffer.h"
 #include "pw_spin_delay/delay.h"
@@ -54,7 +54,7 @@ using pw::coordinates::Size;
 using pw::coordinates::Vector2;
 using pw::display::Display;
 using pw::draw::FontSet;
-using pw::framebuffer::FramebufferRgb565;
+using pw::framebuffer::Framebuffer;
 using pw::ring_buffer::PrefixedEntryRingBuffer;
 
 // TODO(cmumford): move this code into a pre_init section (i.e. boot.cc) which
@@ -144,7 +144,7 @@ StaticTask_t s_freertos_tcb;
 
 void DrawButton(const Button& button,
                 color_rgb565_t bg_color,
-                FramebufferRgb565& framebuffer) {
+                Framebuffer& framebuffer) {
   pw::draw::DrawRectWH(framebuffer,
                        button.tl_.x,
                        button.tl_.y,
@@ -164,7 +164,7 @@ Vector2<int> DrawTestFontSheet(Vector2<int> tl,
                                color_rgb565_t fg_color,
                                color_rgb565_t bg_color,
                                const FontSet& font,
-                               FramebufferRgb565& framebuffer) {
+                               Framebuffer& framebuffer) {
   Vector2<int> max_extents = tl;
   const int initial_x = tl.x;
   for (int c = font.starting_character; c <= font.ending_character; c++) {
@@ -187,7 +187,7 @@ Vector2<int> DrawColorFontSheet(Vector2<int> tl,
                                 int num_columns,
                                 color_rgb565_t fg_color,
                                 const FontSet& font,
-                                FramebufferRgb565& framebuffer) {
+                                Framebuffer& framebuffer) {
   constexpr int kNumColors = sizeof(pw::color::colors_endesga32_rgb565) /
                              sizeof(pw::color::colors_endesga32_rgb565[0]);
   const int initial_x = tl.x;
@@ -225,7 +225,7 @@ void LogCallback(std::string_view log) {
 
 // Draw the Pigweed sprite and artwork at the top of the display.
 // Returns the bottom Y coordinate drawn.
-int DrawPigweedSprite(FramebufferRgb565& framebuffer) {
+int DrawPigweedSprite(Framebuffer& framebuffer) {
   int sprite_pos_x = 10;
   int sprite_pos_y = 24;
   int sprite_scale = 4;
@@ -302,7 +302,7 @@ int DrawPigweedSprite(FramebufferRgb565& framebuffer) {
 }
 
 void DrawFPS(Vector2<int> tl,
-             FramebufferRgb565& framebuffer,
+             Framebuffer& framebuffer,
              std::wstring_view fps_msg) {
   if (fps_msg.empty())
     return;
@@ -317,7 +317,7 @@ void DrawFPS(Vector2<int> tl,
 
 // Draw the pigweed text banner.
 // Returns the bottom Y coordinate of the bottommost pixel set.
-int DrawPigweedBanner(Vector2<int> tl, FramebufferRgb565& framebuffer) {
+int DrawPigweedBanner(Vector2<int> tl, Framebuffer& framebuffer) {
   constexpr std::array<std::wstring_view, 5> pigweed_banner = {
       L"▒█████▄   █▓  ▄███▒  ▒█    ▒█ ░▓████▒ ░▓████▒ ▒▓████▄",
       L" ▒█░  █░ ░█▒ ██▒ ▀█▒ ▒█░ █ ▒█  ▒█   ▀  ▒█   ▀  ▒█  ▀█▌",
@@ -340,7 +340,7 @@ int DrawPigweedBanner(Vector2<int> tl, FramebufferRgb565& framebuffer) {
 
 // Draw the font sheets.
 // Returns the bottom Y coordinate drawn.
-int DrawFontSheets(Vector2<int> tl, FramebufferRgb565& framebuffer) {
+int DrawFontSheets(Vector2<int> tl, Framebuffer& framebuffer) {
   constexpr int kFontSheetVerticalPadding = 4;
   constexpr int kFontSheetNumColumns = 48;
 
@@ -385,7 +385,7 @@ int DrawFontSheets(Vector2<int> tl, FramebufferRgb565& framebuffer) {
 
 // Draw the application header section which is mostly static text/graphics.
 // Return the height (in pixels) of the header.
-int DrawHeader(FramebufferRgb565& framebuffer, std::wstring_view fps_msg) {
+int DrawHeader(Framebuffer& framebuffer, std::wstring_view fps_msg) {
   DrawButton(
       g_button, /*bg_color=*/colors_pico8_rgb565[COLOR_BLUE], framebuffer);
   Vector2<int> tl = {0, 0};
@@ -400,9 +400,7 @@ int DrawHeader(FramebufferRgb565& framebuffer, std::wstring_view fps_msg) {
   return DrawFontSheets(tl, framebuffer);
 }
 
-void DrawLogTextBuffer(int top,
-                       const FontSet& font,
-                       FramebufferRgb565& framebuffer) {
+void DrawLogTextBuffer(int top, const FontSet& font, Framebuffer& framebuffer) {
   constexpr int kLeft = 0;
   Vector2<int> loc;
   Vector2<int> pos{kLeft, top};
@@ -425,7 +423,7 @@ void DrawLogTextBuffer(int top,
   }
 }
 
-void DrawFrame(FramebufferRgb565& framebuffer, std::wstring_view fps_msg) {
+void DrawFrame(Framebuffer& framebuffer, std::wstring_view fps_msg) {
   constexpr int kHeaderMargin = 4;
   int header_bottom = DrawHeader(framebuffer, fps_msg);
   DrawLogTextBuffer(
@@ -478,7 +476,7 @@ void MainTask(void* pvParameters) {
   PW_CHECK_OK(Common::Init());
 
   Display& display = Common::GetDisplay();
-  FramebufferRgb565 framebuffer = display.GetFramebuffer();
+  Framebuffer framebuffer = display.GetFramebuffer();
   PW_ASSERT(framebuffer.IsValid());
 
   pw::draw::Fill(framebuffer, kBlack);

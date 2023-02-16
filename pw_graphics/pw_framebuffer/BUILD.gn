@@ -29,8 +29,8 @@ pw_source_set("pw_framebuffer") {
     "$dir_pw_color",
     "$dir_pw_result",
   ]
-  public = [ "public/pw_framebuffer/rgb565.h" ]
-  sources = [ "rgb565.cc" ]
+  public = [ "public/pw_framebuffer/framebuffer.h" ]
+  sources = [ "framebuffer.cc" ]
 }
 
 pw_test("framebuffer_test") {

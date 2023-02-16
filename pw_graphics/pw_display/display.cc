@@ -15,12 +15,12 @@
 
 #include <utility>
 
-#include "pw_framebuffer/rgb565.h"
+#include "pw_framebuffer/framebuffer.h"
 #include "pw_framebuffer_pool/framebuffer_pool.h"
 #include "pw_status/try.h"
 
 using pw::color::color_rgb565_t;
-using pw::framebuffer::FramebufferRgb565;
+using pw::framebuffer::Framebuffer;
 
 namespace pw::display {
 
@@ -30,7 +30,7 @@ Display::Display(pw::display_driver::DisplayDriver& display_driver,
 
 Display::~Display() = default;
 
-Status Display::UpdateNearestNeighbor(const FramebufferRgb565& framebuffer) {
+Status Display::UpdateNearestNeighbor(const Framebuffer& framebuffer) {
   PW_ASSERT(framebuffer.IsValid());
   if (!framebuffer.GetWidth() || !framebuffer.GetHeight())
     return Status::Internal();
@@ -79,11 +79,11 @@ Status Display::UpdateNearestNeighbor(const FramebufferRgb565& framebuffer) {
   return OkStatus();
 }
 
-FramebufferRgb565 Display::GetFramebuffer() {
+Framebuffer Display::GetFramebuffer() {
   return display_driver_.GetFramebuffer();
 }
 
-Status Display::ReleaseFramebuffer(FramebufferRgb565 framebuffer) {
+Status Display::ReleaseFramebuffer(Framebuffer framebuffer) {
   if (!framebuffer.IsValid())
     return Status::InvalidArgument();
   if (framebuffer.GetWidth() != size_.width ||

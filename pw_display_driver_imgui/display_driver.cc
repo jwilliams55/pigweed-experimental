@@ -34,7 +34,7 @@
 
 using pw::color::color_rgb565_t;
 using pw::coordinates::Vec3Int;
-using pw::framebuffer::FramebufferRgb565;
+using pw::framebuffer::Framebuffer;
 
 namespace pw::display_driver {
 
@@ -392,14 +392,14 @@ void DisplayDriverImgUI::Render() {
   }
 }
 
-FramebufferRgb565 DisplayDriverImgUI::GetFramebuffer() {
-  return FramebufferRgb565(pool_data_.fb_addr[0],
-                           pool_data_.size.width,
-                           pool_data_.size.height,
-                           pool_data_.row_bytes);
+Framebuffer DisplayDriverImgUI::GetFramebuffer() {
+  return Framebuffer(pool_data_.fb_addr[0],
+                     pool_data_.size.width,
+                     pool_data_.size.height,
+                     pool_data_.row_bytes);
 }
 
-Status DisplayDriverImgUI::ReleaseFramebuffer(FramebufferRgb565 framebuffer) {
+Status DisplayDriverImgUI::ReleaseFramebuffer(Framebuffer framebuffer) {
   if (!framebuffer.IsValid())
     return Status::InvalidArgument();
   RecreateLcdTexture();

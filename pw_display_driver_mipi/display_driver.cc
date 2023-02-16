@@ -14,7 +14,7 @@
 
 #include "pw_display_driver_mipi/display_driver.h"
 
-using pw::framebuffer::FramebufferRgb565;
+using pw::framebuffer::Framebuffer;
 
 namespace pw::display_driver {
 
@@ -26,11 +26,11 @@ DisplayDriverMipiDsi::~DisplayDriverMipiDsi() = default;
 
 Status DisplayDriverMipiDsi::Init() { return OkStatus(); }
 
-FramebufferRgb565 DisplayDriverMipiDsi::GetFramebuffer() {
+Framebuffer DisplayDriverMipiDsi::GetFramebuffer() {
   return device_.GetFramebuffer();
 }
 
-Status DisplayDriverMipiDsi::ReleaseFramebuffer(FramebufferRgb565 framebuffer) {
+Status DisplayDriverMipiDsi::ReleaseFramebuffer(Framebuffer framebuffer) {
   return device_.ReleaseFramebuffer(std::move(framebuffer));
 };
 
