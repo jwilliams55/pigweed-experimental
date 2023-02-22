@@ -1,0 +1,57 @@
+# Copyright 2023 The Pigweed Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
+declare_args() {
+  # LCD width in pixels (ex. "320")
+  pw_lcd_width = ""
+
+  # LCD height in pixels (ex. "240")
+  pw_lcd_height = ""
+
+  # LCD backlight pin (ex "4", or "-1" if unused)
+  pw_lcd_backlight = "-1"
+
+  # LCD reset GPIO pin (ex "2", or "-1" if unused)
+  pw_lcd_rst_pin_num = "-1"
+
+  # GPIO Port of LCD CS pin (ex. "A")
+  pw_lcd_cs_port_char = ""
+
+  # GPIO Pin of LDD CS (ex. "10")
+  pw_lcd_cs_pin_num = ""
+
+  # GPIO Port of LCD DC pin (ex. "B")
+  pw_lcd_dc_port_char = ""
+
+  # GPIO Pin of LDD dc (ex. "11")
+  pw_lcd_dc_pin_num = ""
+
+  # SPI bus MISO pin (ex. "12", or "-1" if unusedsable)
+  pw_spi_miso_pin_num = "-1"
+
+  # SPI bus MOSI pin (ex. "13")
+  pw_spi_mosi_pin_num = ""
+
+  # SPI bus clock pin (ex. "14")
+  pw_spi_clock_pin_num = ""
+
+  # framebuffer width in pixels (ex. "320")
+  pw_nxp_buffer_width = ""
+
+  # framebuffer start pixel X coord (ex. "4")
+  pw_nxp_buffer_start_x = "0"
+
+  # framebuffer start pixel Y coord (ex. "4")
+  pw_nxp_buffer_start_y = "0"
+}
