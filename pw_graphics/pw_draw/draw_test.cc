@@ -36,10 +36,10 @@ void PrintFramebufferAsANSI(const Framebuffer& fb) {
   pw::StringBuffer<4096> line;
   pw::StringBuffer<128> color_string;
 
-  for (int y = 0; y < fb.GetHeight(); y += 2) {
+  for (int y = 0; y < fb.size().height; y += 2) {
     line.clear();
 
-    for (int x = 0; x < fb.GetWidth(); x++) {
+    for (int x = 0; x < fb.size().width; x++) {
       color_string.clear();
       auto row1_color = fb.GetPixel(x, y);
       pw::color::ColorRGBA row1(row1_color.ok() ? row1_color.value() : kBlack);
@@ -67,18 +67,18 @@ void PrintFramebufferAsANSI(const Framebuffer& fb) {
 
 TEST(DrawLine, Diagonal) {
   uint16_t data[4 * 4];
-  Framebuffer fb(data, 4, 4, 4 * sizeof(data[0]));
+  Framebuffer fb(data, {4, 4}, 4 * sizeof(data[0]));
   color_rgb565_t indigo = color::colors_pico8_rgb565[12];
 
   fb.Fill(0);
 
-  DrawLine(fb, 0, 0, fb.GetWidth(), fb.GetHeight(), indigo);
+  DrawLine(fb, 0, 0, fb.size().width, fb.size().height, indigo);
   PrintFramebufferAsANSI(fb);
 
   // Check the diagonal is set to indigo, everything else should be 0.
   Result<color_rgb565_t> c;
-  for (int x = 0; x < fb.GetWidth(); x++) {
-    for (int y = 0; y < fb.GetHeight(); y++) {
+  for (int x = 0; x < fb.size().width; x++) {
+    for (int y = 0; y < fb.size().height; y++) {
       c = fb.GetPixel(x, y);
       ASSERT_TRUE(c.ok());
       if (x == y) {
@@ -92,17 +92,17 @@ TEST(DrawLine, Diagonal) {
 
 TEST(DrawHLine, Top) {
   uint16_t data[4 * 4];
-  Framebuffer fb(data, 4, 4, 4 * sizeof(data[0]));
+  Framebuffer fb(data, {4, 4}, 4 * sizeof(data[0]));
   color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   fb.Fill(0);
 
   // Horizonal line at y = 0
-  DrawHLine(fb, 0, fb.GetWidth(), 0, indigo);
+  DrawHLine(fb, 0, fb.size().width, 0, indigo);
   PrintFramebufferAsANSI(fb);
 
   // Check color at y = 0 is indigo, y = 1 should be 0.
   Result<color_rgb565_t> c;
-  for (int x = 0; x < fb.GetWidth(); x++) {
+  for (int x = 0; x < fb.size().width; x++) {
     c = fb.GetPixel(x, 0);
     ASSERT_TRUE(c.ok());
     EXPECT_EQ(c.value(), indigo);
@@ -114,7 +114,7 @@ TEST(DrawHLine, Top) {
 
 TEST(DrawRect, Empty) {
   uint16_t data[5 * 5];
-  Framebuffer fb(data, 5, 5, 5 * sizeof(data[0]));
+  Framebuffer fb(data, {5, 5}, 5 * sizeof(data[0]));
   color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   fb.Fill(0);
 
@@ -206,7 +206,7 @@ TEST(DrawRect, Empty) {
 
 TEST(DrawRect, Filled) {
   uint16_t data[5 * 5];
-  Framebuffer fb(data, 5, 5, 5 * sizeof(data[0]));
+  Framebuffer fb(data, {5, 5}, 5 * sizeof(data[0]));
   color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   fb.Fill(0);
 
@@ -293,7 +293,7 @@ TEST(DrawRect, Filled) {
 
 TEST(DrawRectWH, WidthHeightCorrect) {
   uint16_t data[5 * 5];
-  Framebuffer fb(data, 5, 5, 5 * sizeof(data[0]));
+  Framebuffer fb(data, {5, 5}, 5 * sizeof(data[0]));
   color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   fb.Fill(0);
 
@@ -385,7 +385,7 @@ TEST(DrawRectWH, WidthHeightCorrect) {
 
 TEST(DrawCircle, Empty) {
   uint16_t data[7 * 7];
-  Framebuffer fb(data, 7, 7, 7 * sizeof(data[0]));
+  Framebuffer fb(data, {7, 7}, 7 * sizeof(data[0]));
   color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   fb.Fill(0);
 
@@ -559,7 +559,7 @@ TEST(DrawCircle, Empty) {
 
 TEST(DrawText, WithFgBg) {
   uint16_t data[(5 * 6) * (3 * 8)];
-  Framebuffer fb(data, 5 * 6, 3 * 8, (5 * 6) * sizeof(data[0]));
+  Framebuffer fb(data, {5 * 6, 3 * 8}, (5 * 6) * sizeof(data[0]));
   fb.Fill(0);
 
   pw::draw::TextArea text_area(fb, &font6x8);

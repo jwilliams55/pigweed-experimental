@@ -198,8 +198,8 @@ void DrawSprite(Framebuffer& fb,
 void DrawTestPattern(Framebuffer& fb) {
   color_rgb565_t color = pw::color::ColorRGBA(0x00, 0xFF, 0xFF).ToRgb565();
   // Create a Test Pattern
-  for (int x = 0; x < fb.GetWidth(); x++) {
-    for (int y = 0; y < fb.GetHeight(); y++) {
+  for (int x = 0; x < fb.size().width; x++) {
+    for (int y = 0; y < fb.size().height; y++) {
       if (y % 10 != x % 10) {
         fb.SetPixel(x, y, color);
       }

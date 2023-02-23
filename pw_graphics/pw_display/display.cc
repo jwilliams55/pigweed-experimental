@@ -32,11 +32,11 @@ Display::~Display() = default;
 
 Status Display::UpdateNearestNeighbor(const Framebuffer& framebuffer) {
   PW_ASSERT(framebuffer.IsValid());
-  if (!framebuffer.GetWidth() || !framebuffer.GetHeight())
+  if (!framebuffer.size().width || !framebuffer.size().height)
     return Status::Internal();
 
-  const int fb_last_row_idx = framebuffer.GetHeight() - 1;
-  const int fb_last_col_idx = framebuffer.GetWidth() - 1;
+  const int fb_last_row_idx = framebuffer.size().height - 1;
+  const int fb_last_col_idx = framebuffer.size().width - 1;
 
   constexpr int kResizeBufferNumPixels = 80;
   color_rgb565_t resize_buffer[kResizeBufferNumPixels];
@@ -50,13 +50,13 @@ Status Display::UpdateNearestNeighbor(const Framebuffer& framebuffer) {
   for (int dst_row_idx = 0; dst_row_idx < num_dst_rows; dst_row_idx++) {
     int src_row_idx = dst_row_idx * fb_last_row_idx / (num_dst_rows - 1);
     PW_ASSERT(src_row_idx >= 0);
-    PW_ASSERT(src_row_idx < framebuffer.GetHeight());
+    PW_ASSERT(src_row_idx < framebuffer.size().height);
     int next_buff_idx = 0;
     int dst_col_write_idx = 0;
     for (int dst_col_idx = 0; dst_col_idx < num_dst_cols; dst_col_idx++) {
       int src_col_idx = dst_col_idx * fb_last_col_idx / (num_dst_cols - 1);
       PW_ASSERT(src_col_idx >= 0);
-      PW_ASSERT(src_col_idx < framebuffer.GetWidth());
+      PW_ASSERT(src_col_idx < framebuffer.size().width);
       int src_pixel_idx = src_row_idx * num_src_row_pixels + src_col_idx;
       resize_buffer[next_buff_idx++] = fbdata[src_pixel_idx];
       if (next_buff_idx == kResizeBufferNumPixels) {
@@ -86,8 +86,7 @@ Framebuffer Display::GetFramebuffer() {
 Status Display::ReleaseFramebuffer(Framebuffer framebuffer) {
   if (!framebuffer.IsValid())
     return Status::InvalidArgument();
-  if (framebuffer.GetWidth() != size_.width ||
-      framebuffer.GetHeight() != size_.height) {
+  if (framebuffer.size() != size_) {
     return UpdateNearestNeighbor(framebuffer);
   }
   return display_driver_.ReleaseFramebuffer(std::move(framebuffer));

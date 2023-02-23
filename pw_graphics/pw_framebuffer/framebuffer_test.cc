@@ -29,14 +29,14 @@ namespace {
 
 TEST(Framebuffer, Init) {
   uint16_t data[32 * 32];
-  Framebuffer fb(data, 32, 32, 32 * sizeof(data[0]));
-  EXPECT_EQ(fb.GetWidth(), 32);
-  EXPECT_EQ(fb.GetHeight(), 32);
+  Framebuffer fb(data, {32, 32}, 32 * sizeof(data[0]));
+  EXPECT_EQ(fb.size().width, 32);
+  EXPECT_EQ(fb.size().height, 32);
 }
 
 TEST(Framebuffer, Fill) {
   uint16_t data[8 * 8];
-  Framebuffer fb(data, 8, 8, 8 * sizeof(data[0]));
+  Framebuffer fb(data, {8, 8}, 8 * sizeof(data[0]));
   color_rgb565_t* const pixel_data = fb.GetFramebufferData();
   color_rgb565_t indigo = 0x83b3;
   fb.Fill(indigo);
@@ -48,7 +48,7 @@ TEST(Framebuffer, Fill) {
 
 TEST(Framebuffer, SetPixelGetPixel) {
   uint16_t data[8 * 8];
-  Framebuffer fb(data, 8, 8, 8 * sizeof(data[0]));
+  Framebuffer fb(data, {8, 8}, 8 * sizeof(data[0]));
   color_rgb565_t* const pixel_data = fb.GetFramebufferData();
   color_rgb565_t indigo = 0x83b3;
   fb.Fill(0);
@@ -77,7 +77,7 @@ TEST(Framebuffer, SetPixelGetPixel) {
 
 TEST(Framebuffer, Blit) {
   uint16_t data[8 * 8];
-  Framebuffer fb(data, 8, 8, 8 * sizeof(data[0]));
+  Framebuffer fb(data, {8, 8}, 8 * sizeof(data[0]));
   color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   fb.Fill(indigo);
   color_rgb565_t* const pixel_data = fb.GetFramebufferData();
@@ -87,7 +87,7 @@ TEST(Framebuffer, Blit) {
   EXPECT_EQ(pixel_data[8 * 8 - 1], indigo);
 
   uint16_t data2[4 * 4];
-  Framebuffer fb2(data2, 4, 4, 4 * sizeof(data2[0]));
+  Framebuffer fb2(data2, {4, 4}, 4 * sizeof(data2[0]));
   color_rgb565_t orange = 0xfd00;
   fb2.Fill(orange);
 

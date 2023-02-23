@@ -145,8 +145,7 @@ Status MCUXpressoDevice::Init() {
 
 Framebuffer MCUXpressoDevice::GetFramebuffer() {
   return Framebuffer(static_cast<color_rgb565_t*>(fbdev_.GetFramebuffer()),
-                     fb_pool_.size.width,
-                     fb_pool_.size.height,
+                     fb_pool_.size,
                      fb_pool_.row_bytes);
 }
 

@@ -58,8 +58,7 @@ class TestDisplayDriver : public DisplayDriver {
 
   Framebuffer GetFramebuffer() override {
     return Framebuffer(framebuffer_.GetFramebufferData(),
-                       framebuffer_.GetWidth(),
-                       framebuffer_.GetHeight(),
+                       framebuffer_.size(),
                        framebuffer_.GetRowBytes());
   }
 
@@ -88,9 +87,9 @@ class TestDisplayDriver : public DisplayDriver {
     return OkStatus();
   }
 
-  int GetWidth() const override { return framebuffer_.GetWidth(); }
+  int GetWidth() const override { return framebuffer_.size().width; }
 
-  int GetHeight() const override { return framebuffer_.GetHeight(); }
+  int GetHeight() const override { return framebuffer_.size().height; }
 
   int GetNumCalls() const {
     int count = 0;
@@ -115,21 +114,19 @@ class TestDisplayDriver : public DisplayDriver {
 };
 
 TEST(Display, ReleaseNoResize) {
-  constexpr int kFramebufferWidth = 2;
-  constexpr int kFramebufferHeight = 1;
-  constexpr Size kDisplaySize = {kFramebufferWidth, kFramebufferHeight};
-  constexpr int kNumPixels = kFramebufferWidth * kFramebufferHeight;
+  constexpr pw::coordinates::Size<int> kFramebufferSize{2, 1};
+  constexpr Size kDisplaySize = kFramebufferSize;
+  constexpr int kNumPixels = kFramebufferSize.width * kFramebufferSize.height;
   constexpr int kFramebufferRowBytes =
-      sizeof(color_rgb565_t) * kFramebufferWidth;
+      sizeof(color_rgb565_t) * kFramebufferSize.width;
   color_rgb565_t pixel_data[kNumPixels];
 
-  TestDisplayDriver test_driver(Framebuffer(
-      pixel_data, kFramebufferWidth, kFramebufferHeight, kFramebufferRowBytes));
+  TestDisplayDriver test_driver(
+      Framebuffer(pixel_data, kFramebufferSize, kFramebufferRowBytes));
   Display display(test_driver, kDisplaySize);
   Framebuffer fb = display.GetFramebuffer();
   EXPECT_TRUE(fb.IsValid());
-  EXPECT_EQ(kFramebufferWidth, fb.GetWidth());
-  EXPECT_EQ(kFramebufferHeight, fb.GetHeight());
+  EXPECT_EQ(kFramebufferSize, fb.size());
   EXPECT_EQ(0, test_driver.GetNumCalls());
 
   display.ReleaseFramebuffer(std::move(fb));
@@ -141,20 +138,18 @@ TEST(Display, ReleaseNoResize) {
 
 TEST(Display, ReleaseSmallResize) {
   constexpr Size kDisplaySize = {8, 4};
-  constexpr int kFramebufferWidth = 2;
-  constexpr int kFramebufferHeight = 1;
-  constexpr int kNumPixels = kFramebufferWidth * kFramebufferHeight;
+  constexpr pw::coordinates::Size<int> kFramebufferSize{2, 1};
+  constexpr int kNumPixels = kFramebufferSize.width * kFramebufferSize.height;
   constexpr int kFramebufferRowBytes =
-      sizeof(color_rgb565_t) * kFramebufferWidth;
+      sizeof(color_rgb565_t) * kFramebufferSize.width;
   color_rgb565_t pixel_data[kNumPixels];
 
-  TestDisplayDriver test_driver(Framebuffer(
-      pixel_data, kFramebufferWidth, kFramebufferHeight, kFramebufferRowBytes));
+  TestDisplayDriver test_driver(
+      Framebuffer(pixel_data, kFramebufferSize, kFramebufferRowBytes));
   Display display(test_driver, kDisplaySize);
   Framebuffer fb = display.GetFramebuffer();
   EXPECT_TRUE(fb.IsValid());
-  EXPECT_EQ(kFramebufferWidth, fb.GetWidth());
-  EXPECT_EQ(kFramebufferHeight, fb.GetHeight());
+  EXPECT_EQ(kFramebufferSize, fb.size());
   EXPECT_EQ(0, test_driver.GetNumCalls());
 
   display.ReleaseFramebuffer(std::move(fb));
@@ -187,20 +182,18 @@ TEST(Display, ReleaseSmallResize) {
 TEST(Display, ReleaseWideResize) {
   // Display width > resize buffer (80 px.) will cause two writes per row.
   constexpr Size kDisplaySize = {90, 4};
-  constexpr int kFramebufferWidth = 2;
-  constexpr int kFramebufferHeight = 1;
-  constexpr int kNumPixels = kFramebufferWidth * kFramebufferHeight;
+  constexpr pw::coordinates::Size<int> kFramebufferSize{2, 1};
+  constexpr int kNumPixels = kFramebufferSize.width * kFramebufferSize.height;
   constexpr int kFramebufferRowBytes =
-      sizeof(color_rgb565_t) * kFramebufferWidth;
+      sizeof(color_rgb565_t) * kFramebufferSize.width;
   color_rgb565_t pixel_data[kNumPixels];
 
-  TestDisplayDriver test_driver(Framebuffer(
-      pixel_data, kFramebufferWidth, kFramebufferHeight, kFramebufferRowBytes));
+  TestDisplayDriver test_driver(
+      Framebuffer(pixel_data, kFramebufferSize, kFramebufferRowBytes));
   Display display(test_driver, kDisplaySize);
   Framebuffer fb = display.GetFramebuffer();
   EXPECT_TRUE(fb.IsValid());
-  EXPECT_EQ(kFramebufferWidth, fb.GetWidth());
-  EXPECT_EQ(kFramebufferHeight, fb.GetHeight());
+  EXPECT_EQ(kFramebufferSize, fb.size());
   EXPECT_EQ(0, test_driver.GetNumCalls());
 
   display.ReleaseFramebuffer(std::move(fb));

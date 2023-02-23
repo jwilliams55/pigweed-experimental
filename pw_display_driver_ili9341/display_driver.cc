@@ -296,8 +296,7 @@ Status DisplayDriverILI9341::Init() {
 
 Framebuffer DisplayDriverILI9341::GetFramebuffer() {
   return Framebuffer(config_.pool_data.fb_addr[0],
-                     config_.pool_data.size.width,
-                     config_.pool_data.size.height,
+                     config_.pool_data.size,
                      config_.pool_data.row_bytes);
 }
 

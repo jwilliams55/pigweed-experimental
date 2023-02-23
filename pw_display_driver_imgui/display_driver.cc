@@ -393,10 +393,8 @@ void DisplayDriverImgUI::Render() {
 }
 
 Framebuffer DisplayDriverImgUI::GetFramebuffer() {
-  return Framebuffer(pool_data_.fb_addr[0],
-                     pool_data_.size.width,
-                     pool_data_.size.height,
-                     pool_data_.row_bytes);
+  return Framebuffer(
+      pool_data_.fb_addr[0], pool_data_.size, pool_data_.row_bytes);
 }
 
 Status DisplayDriverImgUI::ReleaseFramebuffer(Framebuffer framebuffer) {

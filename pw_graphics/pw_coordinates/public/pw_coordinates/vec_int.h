@@ -33,6 +33,13 @@ template <typename T>
 struct Size {
   T width;
   T height;
+
+  bool operator!=(const Size<T>& rhs) const {
+    return width != rhs.width || height != rhs.height;
+  }
+  bool operator==(const Size<T>& rhs) const {
+    return width == rhs.width && height == rhs.height;
+  }
 };
 
 }  // namespace pw::coordinates

@@ -65,7 +65,7 @@ void TextArea::InsertLineBreak() {
   cursor_x = cursor_x - (column_count * current_font->width);
   column_count = 0;
 
-  if (cursor_y >= framebuffer.GetHeight()) {
+  if (cursor_y >= framebuffer.size().height) {
     ScrollUp(1);
     cursor_y = cursor_y - current_font->height;
   }
@@ -85,7 +85,7 @@ void TextArea::DrawCharacter(int character) {
   }
 
   if (character_wrap_enabled &&
-      (current_font->width + cursor_x) > framebuffer.GetWidth()) {
+      (current_font->width + cursor_x) > framebuffer.size().width) {
     InsertLineBreak();
   }
 
@@ -147,8 +147,8 @@ void TextArea::ScrollUp(int lines) {
   int start_x = 0;
   int start_y = pixel_height;
 
-  for (int current_x = 0; current_x < framebuffer.GetWidth(); current_x++) {
-    for (int current_y = start_y; current_y < framebuffer.GetHeight();
+  for (int current_x = 0; current_x < framebuffer.size().width; current_x++) {
+    for (int current_y = start_y; current_y < framebuffer.size().height;
          current_y++) {
       if (auto pixel_color = framebuffer.GetPixel(current_x, current_y);
           pixel_color.ok()) {
@@ -160,9 +160,9 @@ void TextArea::ScrollUp(int lines) {
 
   // Draw a filled background_color rectangle at the bottom to erase the old
   // text.
-  for (int x = 0; x < framebuffer.GetWidth(); x++) {
-    for (int y = framebuffer.GetHeight() - pixel_height;
-         y < framebuffer.GetHeight();
+  for (int x = 0; x < framebuffer.size().width; x++) {
+    for (int y = framebuffer.size().height - pixel_height;
+         y < framebuffer.size().height;
          y++) {
       framebuffer.SetPixel(x, y, background_color);
     }

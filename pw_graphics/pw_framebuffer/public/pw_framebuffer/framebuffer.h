@@ -14,6 +14,7 @@
 #pragma once
 
 #include "pw_color/color.h"
+#include "pw_coordinates/vec_int.h"
 #include "pw_result/result.h"
 
 namespace pw::framebuffer {
@@ -28,8 +29,7 @@ class Framebuffer {
   // the |data| - i.e. this instance may write to the data, but will never
   // attempt to free it.
   Framebuffer(pw::color::color_rgb565_t* data,
-              int width,
-              int height,
+              pw::coordinates::Size<int> size,
               int row_bytes);
 
   Framebuffer(const Framebuffer&) = delete;
@@ -55,19 +55,16 @@ class Framebuffer {
   // Fill the entire buffer with a color.
   void Fill(pw::color::color_rgb565_t color);
 
-  // Return framebuffer width in pixels.
-  int GetWidth() const { return width_; }
-
-  // Return framebuffer height in pixels.
-  int GetHeight() const { return height_; }
+  // Return the framebuffer size which is the width and height of the
+  // framebuffer in pixels.
+  pw::coordinates::Size<int> size() const { return size_; }
 
   // Return the number of bytes per row of pixel data.
   int GetRowBytes() const { return row_bytes_; }
 
  private:
   pw::color::color_rgb565_t* pixel_data_;
-  int width_;
-  int height_;
+  pw::coordinates::Size<int> size_;
   int row_bytes_;
 };
 
