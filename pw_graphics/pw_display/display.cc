@@ -30,6 +30,7 @@ Display::Display(pw::display_driver::DisplayDriver& display_driver,
 
 Display::~Display() = default;
 
+#if DISPLAY_RESIZE
 Status Display::UpdateNearestNeighbor(const Framebuffer& framebuffer) {
   PW_ASSERT(framebuffer.IsValid());
   if (!framebuffer.size().width || !framebuffer.size().height)
@@ -78,6 +79,7 @@ Status Display::UpdateNearestNeighbor(const Framebuffer& framebuffer) {
   }
   return OkStatus();
 }
+#endif  // DISPLAY_RESIZE
 
 Framebuffer Display::GetFramebuffer() {
   return display_driver_.GetFramebuffer();
@@ -87,8 +89,13 @@ Status Display::ReleaseFramebuffer(Framebuffer framebuffer) {
   if (!framebuffer.IsValid())
     return Status::InvalidArgument();
   if (framebuffer.size() != size_) {
+#if DISPLAY_RESIZE
     return UpdateNearestNeighbor(framebuffer);
+#else
+    return Status::Unimplemented();
+#endif  // if DISPLAY_RESIZE
   }
+
   return display_driver_.ReleaseFramebuffer(std::move(framebuffer));
 }
 

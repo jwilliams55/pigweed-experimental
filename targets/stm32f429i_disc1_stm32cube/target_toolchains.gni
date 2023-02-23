@@ -67,6 +67,8 @@ _target_config = {
       "$dir_pigweed/targets/stm32f429i_disc1:system_rpc_server"
   pw_malloc_BACKEND = dir_pw_malloc_freelist
 
+  pw_display_DISPLAY_RESIZE = 1
+
   pw_boot_cortex_m_LINK_CONFIG_DEFINES = [
     "PW_BOOT_FLASH_BEGIN=0x08000200",
     "PW_BOOT_FLASH_SIZE=2048K",

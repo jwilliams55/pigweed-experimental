@@ -43,6 +43,10 @@ class Display {
   //
   // This function should only be passed a valid framebuffer returned by
   // a paired call to GetFramebuffer.
+  //
+  // If The pw_display_DISPLAY_RESIZE build variable is set and the display
+  // size is different than the framebuffer size then the framebuffer contents
+  // will be resized using the nearest-neighbor algorithm.
   Status ReleaseFramebuffer(pw::framebuffer::Framebuffer framebuffer);
 
   // Return the width (in pixels) of the associated display.
@@ -63,9 +67,11 @@ class Display {
   }
 
  private:
+#if DISPLAY_RESIZE
   // Update screen while scaling the framebuffer using nearest
   // neighbor algorithm.
   Status UpdateNearestNeighbor(const pw::framebuffer::Framebuffer& framebuffer);
+#endif  // if DISPLAY_RESIZE
 
   pw::display_driver::DisplayDriver& display_driver_;
   const pw::coordinates::Size<int> size_;

@@ -136,6 +136,7 @@ TEST(Display, ReleaseNoResize) {
   EXPECT_EQ(pixel_data, call.release_framebuffer.fb_data);
 }
 
+#if DISPLAY_RESIZE
 TEST(Display, ReleaseSmallResize) {
   constexpr Size kDisplaySize = {8, 4};
   constexpr pw::coordinates::Size<int> kFramebufferSize{2, 1};
@@ -246,6 +247,7 @@ TEST(Display, ReleaseWideResize) {
   EXPECT_EQ(3, call.write_row.row_idx);
   EXPECT_EQ(80, call.write_row.col_idx);
 }
+#endif  // if DISPLAY_RESIZE
 
 }  // namespace
 

@@ -81,6 +81,7 @@ generate_toolchain("rp2040") {
         "$dir_pigweed_experimental/targets/rp2040:freertos_config"
     pw_third_party_freertos_PORT =
         "$dir_pigweed_experimental/third_party/freertos:arm_cm0_freertos_port"
+    pw_display_DISPLAY_RESIZE = 1
 
     # Silence GN variable overwrite warning.
     pw_build_LINK_DEPS = []

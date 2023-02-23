@@ -40,6 +40,7 @@ target_toolchain_arduino = {
       pw_app_common_DISPLAY_CS_GPIO = "32"
       pw_app_common_DISPLAY_DC_GPIO = "9"
       pw_app_common_DISPLAY_RESET_GPIO = "3"
+      pw_display_DISPLAY_RESIZE = 1
 
       # pw_spi_arduino currently uses the Arduino SPI API which uses hard
       # coded (via the board config) SPI pin assignments. These are currently

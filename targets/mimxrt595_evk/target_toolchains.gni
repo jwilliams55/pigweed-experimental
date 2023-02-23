@@ -50,6 +50,7 @@ _target_config = {
   pw_app_common_FRAMEBUFFER_WIDTH = 400
   pw_app_common_FRAMEBUFFER_START_X = 4
   pw_app_common_FRAMEBUFFER_START_Y = 0
+  pw_display_DISPLAY_RESIZE = 1
 
   pw_board_led_BACKEND = "$dir_pw_board_led_mimxrt595_evk"
   pw_spin_delay_BACKEND = "$dir_pw_spin_delay_mcuxpresso"
