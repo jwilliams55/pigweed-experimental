@@ -35,18 +35,18 @@ target_toolchain_arduino = {
 
       app_common_BACKEND =
           "$dir_pigweed_experimental/applications/app_common_impl:arduino"
-      pw_lcd_width = "320"
-      pw_lcd_height = "240"
-      pw_lcd_cs_pin_num = "32"
-      pw_lcd_dc_pin_num = "9"
-      pw_lcd_rst_pin_num = "3"
+      pw_app_common_DISPLAY_WIDTH = "320"
+      pw_app_common_DISPLAY_HEIGHT = "240"
+      pw_app_common_DISPLAY_CS_GPIO = "32"
+      pw_app_common_DISPLAY_DC_GPIO = "9"
+      pw_app_common_DISPLAY_RESET_GPIO = "3"
 
       # pw_spi_arduino currently uses the Arduino SPI API which uses hard
       # coded (via the board config) SPI pin assignments. These are currently
       # ignored.
-      pw_spi_miso_pin_num = "-1"  # Pin 12 on Teensy 4.1
-      pw_spi_mosi_pin_num = "-1"  # Pin 11 on Teensy 4.1
-      pw_spi_clock_pin_num = "-1"  # Pin 13 on Teensy 4.1
+      pw_app_common_SPI_MISO_GPIO = "-1"  # Pin 12 on Teensy 4.1
+      pw_app_common_SPI_MOSI_GPIO = "-1"  # Pin 11 on Teensy 4.1
+      pw_app_common_SPI_CLOCK_GPIO = "-1"  # Pin 13 on Teensy 4.1
 
       # Configure backend for pw_board_led
       pw_board_led_BACKEND = "$dir_pw_board_led_arduino"

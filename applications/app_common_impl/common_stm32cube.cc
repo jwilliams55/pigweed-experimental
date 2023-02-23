@@ -54,9 +54,17 @@ struct SpiValues {
   pw::spi::Device device;
 };
 
-constexpr int kNumPixels = LCD_WIDTH * LCD_HEIGHT;
-constexpr int kDisplayRowBytes = sizeof(uint16_t) * LCD_WIDTH;
-constexpr pw::coordinates::Size<int> kDisplaySize = {LCD_WIDTH, LCD_HEIGHT};
+static_assert(DISPLAY_WIDTH > 0);
+static_assert(DISPLAY_HEIGHT > 0);
+
+constexpr int kFramebufferWidth =
+    FRAMEBUFFER_WIDTH >= 0 ? FRAMEBUFFER_WIDTH : DISPLAY_WIDTH;
+constexpr int kFramebufferHeight = DISPLAY_HEIGHT;
+
+constexpr int kNumPixels = kFramebufferWidth * kFramebufferHeight;
+constexpr int kDisplayRowBytes = sizeof(uint16_t) * kFramebufferWidth;
+constexpr pw::coordinates::Size<int> kDisplaySize = {DISPLAY_WIDTH,
+                                                     DISPLAY_HEIGHT};
 constexpr pw::spi::Config kSpiConfig8Bit{
     .polarity = pw::spi::ClockPolarity::kActiveHigh,
     .phase = pw::spi::ClockPhase::kFallingEdge,
@@ -92,7 +100,7 @@ constexpr pw::framebuffer::pool::PoolData s_fb_pool_data = {
             nullptr,
         },
     .num_fb = 1,
-    .size = {LCD_WIDTH, LCD_HEIGHT},
+    .size = {kFramebufferWidth, kFramebufferHeight},
     .row_bytes = kDisplayRowBytes,
     .start = {0, 0},
 };

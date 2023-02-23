@@ -20,7 +20,8 @@ using pw::Status;
 
 namespace {
 
-constexpr pw::coordinates::Size<int> kDisplaySize = {LCD_WIDTH, LCD_HEIGHT};
+constexpr pw::coordinates::Size<int> kDisplaySize = {DISPLAY_WIDTH,
+                                                     DISPLAY_HEIGHT};
 
 pw::display_driver::DisplayDriverNULL s_display_driver;
 pw::display::Display s_display(s_display_driver, kDisplaySize);

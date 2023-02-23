@@ -52,8 +52,8 @@ target_toolchain_host = {
 
       app_common_BACKEND =
           "$dir_pigweed_experimental/applications/app_common_impl:host_null"
-      pw_lcd_width = "320"
-      pw_lcd_height = "240"
+      pw_app_common_DISPLAY_WIDTH = "320"
+      pw_app_common_DISPLAY_HEIGHT = "240"
 
       # pw_display_host_imgui uses imgui and opengl3
       # See //pw_display_host_imgui/README.md for instructions.

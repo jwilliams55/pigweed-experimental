@@ -13,45 +13,49 @@
 # the License.
 
 declare_args() {
-  # LCD width in pixels (ex. "320")
-  pw_lcd_width = ""
+  # Display width in pixels (ex. "320")
+  pw_app_common_DISPLAY_WIDTH = "0"
 
-  # LCD height in pixels (ex. "240")
-  pw_lcd_height = ""
+  # Display height in pixels (ex. "240")
+  pw_app_common_DISPLAY_HEIGHT = "0"
 
-  # LCD backlight pin (ex "4", or "-1" if unused)
-  pw_lcd_backlight = "-1"
+  # Framebuffer width in pixels (ex. "320")
+  # A value of -1 will cause the framebuffer to have the same value as
+  # pw_app_common_DISPLAY_WIDTH
+  pw_app_common_FRAMEBUFFER_WIDTH = "-1"
 
-  # LCD reset GPIO pin (ex "2", or "-1" if unused)
-  pw_lcd_rst_pin_num = "-1"
+  # Framebuffer start pixel X coord (ex. "4")
+  pw_app_common_FRAMEBUFFER_START_X = "0"
 
-  # GPIO Port of LCD CS pin (ex. "A")
-  pw_lcd_cs_port_char = ""
+  # Framebuffer start pixel Y coord (ex. "4")
+  pw_app_common_FRAMEBUFFER_START_Y = "0"
 
-  # GPIO Pin of LDD CS (ex. "10")
-  pw_lcd_cs_pin_num = ""
+  # Display backlight pin (ex "4", or "-1" if unused)
+  pw_app_common_BACKLIGHT_GPIO = "-1"
 
-  # GPIO Port of LCD DC pin (ex. "B")
-  pw_lcd_dc_port_char = ""
+  # Display reset GPIO pin (ex "2", or "-1" if unused)
+  pw_app_common_DISPLAY_RESET_GPIO = "-1"
 
-  # GPIO Pin of LDD dc (ex. "11")
-  pw_lcd_dc_pin_num = ""
+  # GPIO Port of display CS pin (ex. "A")
+  # Only used on STM32 targets.
+  pw_app_common_STM32_DISPLAY_CS_PORT = ""
+
+  # GPIO Pin of display CS (ex. "10")
+  pw_app_common_DISPLAY_CS_GPIO = ""
+
+  # GPIO Port of display DC pin (ex. "B")
+  # Only used on STM32 targets.
+  pw_app_common_STM32_DISPLAY_DC_PORT = ""
+
+  # GPIO Pin of display dc (ex. "11")
+  pw_app_common_DISPLAY_DC_GPIO = ""
 
   # SPI bus MISO pin (ex. "12", or "-1" if unusedsable)
-  pw_spi_miso_pin_num = "-1"
+  pw_app_common_SPI_MISO_GPIO = "-1"
 
   # SPI bus MOSI pin (ex. "13")
-  pw_spi_mosi_pin_num = ""
+  pw_app_common_SPI_MOSI_GPIO = ""
 
   # SPI bus clock pin (ex. "14")
-  pw_spi_clock_pin_num = ""
-
-  # framebuffer width in pixels (ex. "320")
-  pw_nxp_buffer_width = ""
-
-  # framebuffer start pixel X coord (ex. "4")
-  pw_nxp_buffer_start_x = "0"
-
-  # framebuffer start pixel Y coord (ex. "4")
-  pw_nxp_buffer_start_y = "0"
+  pw_app_common_SPI_CLOCK_GPIO = ""
 }

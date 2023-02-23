@@ -19,52 +19,49 @@ import("$dir_pw_build/target_types.gni")
 import("$dir_pw_third_party/mcuxpresso/mcuxpresso.gni")
 import("app_common_vars.gni")
 
-config("common_standard_flags") {
+config("common_flags") {
   cflags = [
-    "-DLCD_WIDTH=" + pw_lcd_width,
-    "-DLCD_HEIGHT=" + pw_lcd_height,
-    "-DTFT_BL=" + pw_lcd_backlight,
-    "-DTFT_CS=" + pw_lcd_cs_pin_num,
-    "-DTFT_DC=" + pw_lcd_dc_pin_num,
-    "-DTFT_RST=" + pw_lcd_rst_pin_num,
-    "-DTFT_MISO=" + pw_spi_miso_pin_num,
-    "-DTFT_MOSI=" + pw_spi_mosi_pin_num,
-    "-DTFT_SCLK=" + pw_spi_clock_pin_num,
+    "-DDISPLAY_WIDTH=" + pw_app_common_DISPLAY_WIDTH,
+    "-DDISPLAY_HEIGHT=" + pw_app_common_DISPLAY_HEIGHT,
+    "-DDISPLAY_RESET_GPIO=" + pw_app_common_DISPLAY_RESET_GPIO,
+    "-DBACKLIGHT_GPIO=" + pw_app_common_BACKLIGHT_GPIO,
+    "-DFRAMEBUFFER_WIDTH=" + pw_app_common_FRAMEBUFFER_WIDTH,
+    "-DFRAMEBUFFER_START_X=" + pw_app_common_FRAMEBUFFER_START_X,
+    "-DFRAMEBUFFER_START_Y=" + pw_app_common_FRAMEBUFFER_START_Y,
   ]
 }
 
-config("common_stm32_flags") {
+config("spi_flags") {
   cflags = [
-    "-DLCD_WIDTH=" + pw_lcd_width,
-    "-DLCD_HEIGHT=" + pw_lcd_height,
-    "-DLCD_BL=" + pw_lcd_backlight,
-    "-DLCD_CS_PORT_CHAR=" + pw_lcd_cs_port_char,
-    "-DLCD_CS_PIN_NUM=" + pw_lcd_cs_pin_num,
-    "-DLCD_DC_PORT_CHAR=" + pw_lcd_dc_port_char,
-    "-DLCD_DC_PIN_NUM=" + pw_lcd_dc_pin_num,
-    "-DLCD_RST_PIN_NUM=" + pw_lcd_rst_pin_num,
+    "-DDISPLAY_CS_GPIO=" + pw_app_common_DISPLAY_CS_GPIO,
+    "-DDISPLAY_DC_GPIO=" + pw_app_common_DISPLAY_DC_GPIO,
+    "-DSPI_MISO_GPIO=" + pw_app_common_SPI_MISO_GPIO,
+    "-DSPI_MOSI_GPIO=" + pw_app_common_SPI_MOSI_GPIO,
+    "-DSPI_CLOCK_GPIO=" + pw_app_common_SPI_CLOCK_GPIO,
   ]
 }
 
-config("common_mimxrt595_flags") {
+# STM32 uses a macro to concatenate two strings to create a new constant that
+# is from the SDK. These "LCD*" constants are substrings in those SDK constants
+# and therefore must have specific names.
+config("spi_stm32_flags") {
   cflags = [
-    "-DLCD_WIDTH=" + pw_lcd_width,
-    "-DLCD_HEIGHT=" + pw_lcd_height,
-    "-DFRAMEBUFFER_WIDTH=" + pw_nxp_buffer_width,
-    "-DFRAMEBUFFER_START_X=" + pw_nxp_buffer_start_x,
-    "-DFRAMEBUFFER_START_Y=" + pw_nxp_buffer_start_y,
-  ]
-}
-
-config("common_host_flags") {
-  cflags = [
-    "-DLCD_WIDTH=" + pw_lcd_width,
-    "-DLCD_HEIGHT=" + pw_lcd_height,
+    "-DSPI_MISO_GPIO=" + pw_app_common_SPI_MISO_GPIO,
+    "-DSPI_MOSI_GPIO=" + pw_app_common_SPI_MOSI_GPIO,
+    "-DSPI_CLOCK_GPIO=" + pw_app_common_SPI_CLOCK_GPIO,
+    "-DLCD_CS_PORT_CHAR=" + pw_app_common_STM32_DISPLAY_CS_PORT,
+    "-DLCD_CS_PIN_NUM=" + pw_app_common_DISPLAY_CS_GPIO,
+    "-DLCD_DC_PORT_CHAR=" + pw_app_common_STM32_DISPLAY_DC_PORT,
+    "-DLCD_DC_PIN_NUM=" + pw_app_common_DISPLAY_DC_GPIO,
+    "-DLCD_RST_PIN_NUM=" + pw_app_common_DISPLAY_RESET_GPIO,
   ]
 }
 
 pw_source_set("stm32cube") {
-  public_configs = [ ":common_stm32_flags" ]
+  public_configs = [
+    ":common_flags",
+    ":spi_stm32_flags",
+  ]
   deps = [
     "$dir_pigweed_experimental/applications/app_common:app_common.facade",
     "$dir_pw_digital_io_stm32cube",
@@ -86,7 +83,10 @@ pw_source_set("stm32") {
 }
 
 pw_source_set("arduino") {
-  public_configs = [ ":common_standard_flags" ]
+  public_configs = [
+    ":common_flags",
+    ":spi_flags",
+  ]
   deps = [
     "$dir_pigweed_experimental/applications/app_common:app_common.facade",
     "$dir_pw_digital_io_arduino",
@@ -103,7 +103,7 @@ pw_source_set("arduino") {
 
 if (pw_third_party_mcuxpresso_SDK != "") {
   pw_source_set("mimxrt595") {
-    public_configs = [ ":common_mimxrt595_flags" ]
+    public_configs = [ ":common_flags" ]
     deps = [
       "$dir_pigweed_experimental/applications/app_common:app_common.facade",
       "$dir_pw_display",
@@ -131,7 +131,10 @@ _pico_common_deps = [
 ]
 
 pw_source_set("pico_ili9341") {
-  public_configs = [ ":common_standard_flags" ]
+  public_configs = [
+    ":common_flags",
+    ":spi_flags",
+  ]
   cflags = [ "-DDISPLAY_TYPE_ILI9341" ]
   deps = _pico_common_deps
   deps += [ "$dir_pw_display_driver_ili9341" ]
@@ -140,7 +143,10 @@ pw_source_set("pico_ili9341") {
 }
 
 pw_source_set("pico_st7789") {
-  public_configs = [ ":common_standard_flags" ]
+  public_configs = [
+    ":common_flags",
+    ":spi_flags",
+  ]
   cflags = [ "-DDISPLAY_TYPE_ST7789" ]
   deps = _pico_common_deps
   deps += [ "$dir_pw_display_driver_st7789" ]
@@ -149,7 +155,10 @@ pw_source_set("pico_st7789") {
 }
 
 pw_source_set("pico_st7735") {
-  public_configs = [ ":common_standard_flags" ]
+  public_configs = [
+    ":common_flags",
+    ":spi_flags",
+  ]
   cflags = [ "-DDISPLAY_TYPE_ST7735" ]
   deps = _pico_common_deps
   deps += [ "$dir_pw_display_driver_st7735" ]
@@ -158,7 +167,7 @@ pw_source_set("pico_st7735") {
 }
 
 pw_source_set("host_imgui") {
-  public_configs = [ ":common_host_flags" ]
+  public_configs = [ ":common_flags" ]
   deps = [
     "$dir_pigweed_experimental/applications/app_common:app_common.facade",
     "$dir_pw_display_driver_imgui",
@@ -168,7 +177,7 @@ pw_source_set("host_imgui") {
 }
 
 pw_source_set("host_null") {
-  public_configs = [ ":common_host_flags" ]
+  public_configs = [ ":common_flags" ]
   deps = [
     "$dir_pigweed_experimental/applications/app_common:app_common.facade",
     "$dir_pw_display",

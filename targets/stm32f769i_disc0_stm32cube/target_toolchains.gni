@@ -95,13 +95,13 @@ _target_config = {
   pw_board_led_stm32cube_gpio_pin = "13"
   app_common_BACKEND =
       "$dir_pigweed_experimental/applications/app_common_impl:stm32cube"
-  pw_lcd_width = "320"
-  pw_lcd_height = "240"
-  pw_lcd_cs_port_char = "C"
-  pw_lcd_cs_pin_num = "2"
-  pw_lcd_dc_port_char = "D"
-  pw_lcd_dc_pin_num = "13"
-  pw_lcd_rst_pin_num = "-1"
+  pw_app_common_DISPLAY_WIDTH = "320"
+  pw_app_common_DISPLAY_HEIGHT = "240"
+  pw_app_common_STM32_DISPLAY_CS_PORT = "C"
+  pw_app_common_DISPLAY_CS_GPIO = "2"
+  pw_app_common_STM32_DISPLAY_DC_PORT = "D"
+  pw_app_common_DISPLAY_DC_GPIO = "13"
+  pw_app_common_DISPLAY_RESET_GPIO = "-1"
 
   pw_spin_delay_BACKEND = dir_pw_spin_delay_stm32cube
 

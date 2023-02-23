@@ -27,13 +27,21 @@ using pw::mipi::dsi::MCUXpressoDevice;
 
 namespace {
 
+static_assert(DISPLAY_WIDTH > 0);
+static_assert(DISPLAY_HEIGHT > 0);
+
 // Framebuffer addresses in on-board PSRAM.
 constexpr uint32_t kBuffer0Addr = 0x28000000U;
 constexpr uint32_t kBuffer1Addr = 0x28200000U;
 constexpr video_pixel_format_t kPixelFormat = kVIDEO_PixelFormatRGB565;
+
+constexpr int kFramebufferWidth =
+    FRAMEBUFFER_WIDTH >= 0 ? FRAMEBUFFER_WIDTH : DISPLAY_WIDTH;
+constexpr int kFramebufferHeight = DISPLAY_HEIGHT;
 constexpr uint16_t kBufferStrideBytes =
-    FRAMEBUFFER_WIDTH * pw::mipi::dsi::kBytesPerPixel;
-constexpr pw::coordinates::Size<int> kDisplaySize = {LCD_WIDTH, LCD_HEIGHT};
+    kFramebufferWidth * pw::mipi::dsi::kBytesPerPixel;
+constexpr pw::coordinates::Size<int> kDisplaySize = {DISPLAY_WIDTH,
+                                                     DISPLAY_HEIGHT};
 
 const pw::framebuffer::pool::PoolData s_fb_pool_data = {
     .fb_addr =
@@ -43,13 +51,14 @@ const pw::framebuffer::pool::PoolData s_fb_pool_data = {
             nullptr,
         },
     .num_fb = 2,
-    .size = {LCD_WIDTH, LCD_HEIGHT},
+    .size = {kFramebufferWidth, kFramebufferHeight},
     .row_bytes = kBufferStrideBytes,
     .start = {FRAMEBUFFER_START_X, FRAMEBUFFER_START_Y},
 };
 
 MCUXpressoDevice s_mipi_device(s_fb_pool_data,
-                               {.width = LCD_WIDTH, .height = LCD_HEIGHT},
+                               {.width = DISPLAY_WIDTH,
+                                .height = DISPLAY_HEIGHT},
                                kPixelFormat);
 DisplayDriverMipiDsi s_display_driver(
     {

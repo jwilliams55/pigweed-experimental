@@ -44,9 +44,17 @@ struct SpiValues {
   pw::spi::Device device;
 };
 
-constexpr pw::coordinates::Size<int> kDisplaySize = {LCD_WIDTH, LCD_HEIGHT};
-constexpr int kNumPixels = LCD_WIDTH * LCD_HEIGHT;
-constexpr int kDisplayRowBytes = sizeof(uint16_t) * LCD_WIDTH;
+static_assert(DISPLAY_WIDTH > 0);
+static_assert(DISPLAY_HEIGHT > 0);
+
+constexpr int kFramebufferWidth =
+    FRAMEBUFFER_WIDTH >= 0 ? FRAMEBUFFER_WIDTH : DISPLAY_WIDTH;
+constexpr int kFramebufferHeight = DISPLAY_HEIGHT;
+
+constexpr pw::coordinates::Size<int> kDisplaySize = {DISPLAY_WIDTH,
+                                                     DISPLAY_HEIGHT};
+constexpr int kNumPixels = kFramebufferWidth * kFramebufferHeight;
+constexpr int kDisplayRowBytes = sizeof(uint16_t) * kFramebufferWidth;
 
 constexpr pw::spi::Config kSpiConfig8Bit{
     .polarity = pw::spi::ClockPolarity::kActiveHigh,
@@ -61,11 +69,11 @@ constexpr pw::spi::Config kSpiConfig16Bit{
     .bit_order = pw::spi::BitOrder::kMsbFirst,
 };
 
-DigitalOut s_display_dc_pin(TFT_DC);
-#if TFT_RST != -1
-DigitalOut s_display_reset_pin(TFT_RST);
+DigitalOut s_display_dc_pin(DISPLAY_DC_GPIO);
+#if DISPLAY_RESET_GPIO != -1
+DigitalOut s_display_reset_pin(DISPLAY_RESET_GPIO);
 #endif
-DigitalOut s_display_cs_pin(TFT_CS);
+DigitalOut s_display_cs_pin(DISPLAY_CS_GPIO);
 SpiChipSelector s_spi_chip_selector(s_display_cs_pin);
 SpiInitiator s_spi_initiator;
 VirtualMutex s_spi_initiator_mutex;
@@ -86,13 +94,13 @@ constexpr pw::framebuffer::pool::PoolData s_fb_pool_data = {
             nullptr,
         },
     .num_fb = 1,
-    .size = {LCD_WIDTH, LCD_HEIGHT},
+    .size = {kFramebufferWidth, kFramebufferHeight},
     .row_bytes = kDisplayRowBytes,
     .start = {0, 0},
 };
 DisplayDriver s_display_driver({
   .data_cmd_gpio = s_display_dc_pin,
-#if TFT_RST != -1
+#if DISPLAY_RESET_GPIO != -1
   .reset_gpio = &s_display_reset_pin,
 #else
   .reset_gpio = nullptr,
@@ -114,7 +122,7 @@ SpiValues::SpiValues(pw::spi::Config config,
 Status Common::Init() {
   s_display_cs_pin.Enable();
   s_display_dc_pin.Enable();
-#if TFT_RST != -1
+#if DISPLAY_RESET_GPIO != -1
   s_display_reset_pin.Enable();
 #endif
 

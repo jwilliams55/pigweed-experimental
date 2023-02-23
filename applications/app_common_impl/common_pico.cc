@@ -67,10 +67,17 @@ struct SpiValues {
   pw::spi::Device device;
 };
 
+static_assert(DISPLAY_WIDTH > 0);
+static_assert(DISPLAY_HEIGHT > 0);
+
 constexpr int kDisplayScaleFactor = 1;
-constexpr pw::coordinates::Size<int> kDisplaySize{LCD_WIDTH, LCD_HEIGHT};
-constexpr int kFramebufferWidth = LCD_WIDTH / kDisplayScaleFactor;
-constexpr int kFramebufferHeight = LCD_HEIGHT / kDisplayScaleFactor;
+constexpr int kFramebufferWidth = FRAMEBUFFER_WIDTH >= 0
+                                      ? FRAMEBUFFER_WIDTH / kDisplayScaleFactor
+                                      : DISPLAY_WIDTH / kDisplayScaleFactor;
+constexpr int kFramebufferHeight = DISPLAY_HEIGHT / kDisplayScaleFactor;
+
+constexpr pw::coordinates::Size<int> kDisplaySize{DISPLAY_WIDTH,
+                                                  DISPLAY_HEIGHT};
 constexpr int kNumPixels = kFramebufferWidth * kFramebufferHeight;
 constexpr int kFramebufferRowBytes = sizeof(uint16_t) * kFramebufferWidth;
 
@@ -88,11 +95,11 @@ constexpr pw::spi::Config kSpiConfig16Bit{
     .bit_order = pw::spi::BitOrder::kMsbFirst,
 };
 
-PicoDigitalOut s_display_dc_pin(TFT_DC);
-#if TFT_RST != -1
-PicoDigitalOut s_display_reset_pin(TFT_RST);
+PicoDigitalOut s_display_dc_pin(DISPLAY_DC_GPIO);
+#if DISPLAY_RESET_GPIO != -1
+PicoDigitalOut s_display_reset_pin(DISPLAY_RESET_GPIO);
 #endif
-PicoDigitalOut s_display_cs_pin(TFT_CS);
+PicoDigitalOut s_display_cs_pin(DISPLAY_CS_GPIO);
 PicoChipSelector s_spi_chip_selector(s_display_cs_pin);
 PicoInitiator s_spi_initiator(SPI_PORT);
 VirtualMutex s_spi_initiator_mutex;
@@ -119,7 +126,7 @@ constexpr pw::framebuffer::pool::PoolData s_fb_pool_data = {
 };
 DisplayDriver s_display_driver({
   .data_cmd_gpio = s_display_dc_pin,
-#if TFT_RST != -1
+#if DISPLAY_RESET_GPIO != -1
   .reset_gpio = &s_display_reset_pin,
 #else
   .reset_gpio = nullptr,
@@ -129,14 +136,14 @@ DisplayDriver s_display_driver({
 });
 Display s_display(s_display_driver, kDisplaySize);
 
-#if TFT_BL != -1
+#if BACKLIGHT_GPIO != -1
 void SetBacklight(uint16_t brightness) {
   pwm_config cfg = pwm_get_default_config();
-  pwm_set_wrap(pwm_gpio_to_slice_num(TFT_BL), 65535);
-  pwm_init(pwm_gpio_to_slice_num(TFT_BL), &cfg, true);
-  gpio_set_function(TFT_BL, GPIO_FUNC_PWM);
+  pwm_set_wrap(pwm_gpio_to_slice_num(BACKLIGHT_GPIO), 65535);
+  pwm_init(pwm_gpio_to_slice_num(BACKLIGHT_GPIO), &cfg, true);
+  gpio_set_function(BACKLIGHT_GPIO, GPIO_FUNC_PWM);
 
-  pwm_set_gpio_level(TFT_BL, brightness);
+  pwm_set_gpio_level(BACKLIGHT_GPIO, brightness);
 }
 #endif
 
@@ -160,22 +167,22 @@ Status Common::Init() {
 
   s_display_cs_pin.Enable();
   s_display_dc_pin.Enable();
-#if TFT_RST != -1
+#if DISPLAY_RESET_GPIO != -1
   s_display_reset_pin.Enable();
 #endif
 
-#if TFT_BL != -1
+#if BACKLIGHT_GPIO != -1
   SetBacklight(0xffff);  // Full brightness.
 #endif
 
   unsigned actual_baudrate = spi_init(SPI_PORT, kBaudRate);
   PW_LOG_DEBUG("Actual Baudrate: %u", actual_baudrate);
 
-#if TFT_MISO != -1
-  gpio_set_function(TFT_MISO, GPIO_FUNC_SPI);
+#if SPI_MISO_GPIO != -1
+  gpio_set_function(SPI_MISO_GPIO, GPIO_FUNC_SPI);
 #endif
-  gpio_set_function(TFT_SCLK, GPIO_FUNC_SPI);
-  gpio_set_function(TFT_MOSI, GPIO_FUNC_SPI);
+  gpio_set_function(SPI_CLOCK_GPIO, GPIO_FUNC_SPI);
+  gpio_set_function(SPI_MOSI_GPIO, GPIO_FUNC_SPI);
 
   return s_display_driver.Init();
 }
