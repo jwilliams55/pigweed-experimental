@@ -47,7 +47,7 @@ _target_config = {
   pw_mipi_dsi_use_smart_dma = 1
   pw_app_common_DISPLAY_WIDTH = 400
   pw_app_common_DISPLAY_HEIGHT = 392
-  pw_app_common_FRAMEBUFFER_WIDTH = 392
+  pw_app_common_FRAMEBUFFER_WIDTH = 400
   pw_app_common_FRAMEBUFFER_START_X = 4
   pw_app_common_FRAMEBUFFER_START_Y = 0
 
