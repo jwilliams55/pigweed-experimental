@@ -91,9 +91,9 @@ Status Display::ReleaseFramebuffer(Framebuffer framebuffer) {
   if (framebuffer.size() != size_) {
 #if DISPLAY_RESIZE
     return UpdateNearestNeighbor(framebuffer);
-#else
-    return Status::Unimplemented();
-#endif  // if DISPLAY_RESIZE
+#endif
+    // Rely on display driver's ability to support size mismatch. It is
+    // expected to return an error if it cannot.
   }
 
   return display_driver_.ReleaseFramebuffer(std::move(framebuffer));
