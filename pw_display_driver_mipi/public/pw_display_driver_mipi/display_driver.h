@@ -13,7 +13,7 @@
 // the License.
 #pragma once
 
-#include "pw_coordinates/vec_int.h"
+#include "pw_coordinates/size.h"
 #include "pw_display_driver/display_driver.h"
 #include "pw_mipi_dsi/device.h"
 

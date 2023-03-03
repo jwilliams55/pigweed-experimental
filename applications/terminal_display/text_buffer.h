@@ -16,7 +16,8 @@
 #include <array>
 
 #include "pw_color/color.h"
-#include "pw_coordinates/vec_int.h"
+#include "pw_coordinates/size.h"
+#include "pw_coordinates/vector2.h"
 #include "pw_result/result.h"
 
 constexpr size_t kNumCharsWide = 52;

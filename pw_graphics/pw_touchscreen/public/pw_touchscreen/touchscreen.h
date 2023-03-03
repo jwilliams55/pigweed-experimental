@@ -13,7 +13,7 @@
 // the License.
 #pragma once
 
-#include "pw_coordinates/vec_int.h"
+#include "pw_coordinates/vector3.h"
 
 namespace pw::touchscreen {
 

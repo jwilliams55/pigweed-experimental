@@ -1,4 +1,4 @@
-// Copyright 2022 The Pigweed Authors
+// Copyright 2023 The Pigweed Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not
 // use this file except in compliance with the License. You may obtain a copy of
@@ -11,27 +11,21 @@
 // WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 // License for the specific language governing permissions and limitations under
 // the License.
+#pragma once
 
-#include "pw_touchscreen/touchscreen.h"
+namespace pw::coordinates {
 
-#include <cinttypes>
+template <typename T>
+struct Size {
+  T width;
+  T height;
 
-#include "pw_coordinates/vector3.h"
+  bool operator!=(const Size<T>& rhs) const {
+    return width != rhs.width || height != rhs.height;
+  }
+  bool operator==(const Size<T>& rhs) const {
+    return width == rhs.width && height == rhs.height;
+  }
+};
 
-namespace pw::touchscreen {
-
-void Init() {}
-
-bool Available() { return false; }
-
-bool NewTouchEvent() { return false; }
-
-pw::coordinates::Vec3Int GetTouchPoint() {
-  pw::coordinates::Vec3Int point;
-  point.x = 0;
-  point.y = 0;
-  point.z = 0;
-  return point;
-}
-
-}  // namespace pw::touchscreen
+}  // namespace pw::coordinates

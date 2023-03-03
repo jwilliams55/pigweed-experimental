@@ -17,7 +17,8 @@
 #include <array>
 
 #include "pw_color/color.h"
-#include "pw_coordinates/vec_int.h"
+#include "pw_coordinates/size.h"
+#include "pw_coordinates/vector2.h"
 
 namespace pw::framebuffer::pool {
 

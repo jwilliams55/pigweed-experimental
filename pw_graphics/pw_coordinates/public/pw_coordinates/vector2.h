@@ -11,27 +11,14 @@
 // WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 // License for the specific language governing permissions and limitations under
 // the License.
+#pragma once
 
-#include "pw_touchscreen/touchscreen.h"
+namespace pw::coordinates {
 
-#include <cinttypes>
+template <typename T>
+struct Vector2 {
+  T x;
+  T y;
+};
 
-#include "pw_coordinates/vector3.h"
-
-namespace pw::touchscreen {
-
-void Init() {}
-
-bool Available() { return false; }
-
-bool NewTouchEvent() { return false; }
-
-pw::coordinates::Vec3Int GetTouchPoint() {
-  pw::coordinates::Vec3Int point;
-  point.x = 0;
-  point.y = 0;
-  point.z = 0;
-  return point;
-}
-
-}  // namespace pw::touchscreen
+}  // namespace pw::coordinates

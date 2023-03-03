@@ -18,7 +18,7 @@
 #include "fsl_mipi_dsi.h"
 #include "fsl_mipi_dsi_smartdma.h"
 #include "fsl_rm67162.h"
-#include "pw_coordinates/vec_int.h"
+#include "pw_coordinates/size.h"
 #include "pw_framebuffer_pool/framebuffer_pool.h"
 #include "pw_mipi_dsi/device.h"
 #include "pw_mipi_dsi_mcuxpresso/framebuffer_device.h"
