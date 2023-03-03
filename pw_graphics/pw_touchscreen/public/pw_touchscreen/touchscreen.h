@@ -20,6 +20,6 @@ namespace pw::touchscreen {
 void Init();
 bool Available();
 bool NewTouchEvent();
-pw::coordinates::Vec3Int GetTouchPoint();
+pw::coordinates::Vector3<int> GetTouchPoint();
 
 }  // namespace pw::touchscreen

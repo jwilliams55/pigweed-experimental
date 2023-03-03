@@ -24,7 +24,7 @@ DisplayImgUI::~DisplayImgUI() = default;
 
 bool DisplayImgUI::NewTouchEvent() { return display_driver_.NewTouchEvent(); }
 
-pw::coordinates::Vec3Int DisplayImgUI::GetTouchPoint() {
+pw::coordinates::Vector3<int> DisplayImgUI::GetTouchPoint() {
   return display_driver_.GetTouchPoint();
 }
 

@@ -26,12 +26,6 @@ bool Available() { return false; }
 
 bool NewTouchEvent() { return false; }
 
-pw::coordinates::Vec3Int GetTouchPoint() {
-  pw::coordinates::Vec3Int point;
-  point.x = 0;
-  point.y = 0;
-  point.z = 0;
-  return point;
-}
+pw::coordinates::Vector3<int> GetTouchPoint() { return {0, 0, 0}; }
 
 }  // namespace pw::touchscreen

@@ -29,7 +29,7 @@ class DisplayImgUI : public Display {
 
   bool TouchscreenAvailable() const override { return true; }
   bool NewTouchEvent() override;
-  pw::coordinates::Vec3Int GetTouchPoint() override;
+  pw::coordinates::Vector3<int> GetTouchPoint() override;
 
  private:
   pw::display_driver::DisplayDriverImgUI& display_driver_;

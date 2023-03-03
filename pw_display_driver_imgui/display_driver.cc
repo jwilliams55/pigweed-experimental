@@ -33,7 +33,6 @@
 #include "imgui_impl_opengl3.h"
 
 using pw::color::color_rgb565_t;
-using pw::coordinates::Vec3Int;
 using pw::framebuffer::Framebuffer;
 
 namespace pw::display_driver {
@@ -435,13 +434,13 @@ int DisplayDriverImgUI::GetHeight() const { return kDisplayHeight; }
 
 bool DisplayDriverImgUI::NewTouchEvent() { return left_mouse_pressed; }
 
-Vec3Int DisplayDriverImgUI::GetTouchPoint() {
+pw::coordinates::Vector3<int> DisplayDriverImgUI::GetTouchPoint() {
   if (left_mouse_pressed && texture_mouse_x >= 0 &&
       texture_mouse_x < kDisplayWidth && texture_mouse_y >= 0 &&
       texture_mouse_y < kDisplayHeight) {
-    return Vec3Int{texture_mouse_x, texture_mouse_y, 1};
+    return {texture_mouse_x, texture_mouse_y, 1};
   }
-  return Vec3Int{0, 0, 0};
+  return {0, 0, 0};
 }
 
 }  // namespace pw::display_driver

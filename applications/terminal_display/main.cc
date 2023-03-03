@@ -484,7 +484,7 @@ void MainTask(void* pvParameters) {
   PW_LOG_INFO("pw::touchscreen::Init()");
   pw::touchscreen::Init();
 
-  pw::coordinates::Vec3Int last_frame_touch_state(0, 0, 0);
+  pw::coordinates::Vector3<int> last_frame_touch_state(0, 0, 0);
 
   DrawFrame(framebuffer, fps_view);
   // Push the frame buffer to the screen.
@@ -492,7 +492,7 @@ void MainTask(void* pvParameters) {
 
   // The display loop.
   while (1) {
-    pw::coordinates::Vec3Int point = display.GetTouchPoint();
+    pw::coordinates::Vector3<int> point = display.GetTouchPoint();
     // Check for touchscreen events.
     if (display.TouchscreenAvailable() && display.NewTouchEvent()) {
       if (point.z > 0) {

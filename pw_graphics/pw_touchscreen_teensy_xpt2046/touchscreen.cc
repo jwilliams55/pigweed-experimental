@@ -43,8 +43,8 @@ bool Available() { return true; }
 
 bool NewTouchEvent() { return touch_screen.touched(); }
 
-pw::coordinates::Vec3Int GetTouchPoint() {
-  pw::coordinates::Vec3Int point;
+pw::coordinates::Vector3<int> GetTouchPoint() {
+  pw::coordinates::Vector3<int> point;
   TS_Point p = touch_screen.getPoint();
   point.x = map(p.x, kTouchscreenMinX, kTouchscreenMaxX, 0, ScreenPixelWidth);
   point.y = map(p.y, kTouchscreenMinY, kTouchscreenMaxY, 0, ScreenPixelHeight);

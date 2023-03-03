@@ -63,9 +63,7 @@ class Display {
   virtual bool NewTouchEvent() { return false; }
 
   // Return the new touch point.
-  virtual pw::coordinates::Vec3Int GetTouchPoint() {
-    return pw::coordinates::Vec3Int{0, 0, 0};
-  }
+  virtual pw::coordinates::Vector3<int> GetTouchPoint() { return {0, 0, 0}; }
 
  private:
 #if DISPLAY_RESIZE

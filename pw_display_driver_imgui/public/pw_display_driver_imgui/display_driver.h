@@ -24,7 +24,7 @@ class DisplayDriverImgUI : public DisplayDriver {
   DisplayDriverImgUI(const pw::framebuffer::pool::PoolData& pool_data);
 
   bool NewTouchEvent();
-  pw::coordinates::Vec3Int GetTouchPoint();
+  pw::coordinates::Vector3<int> GetTouchPoint();
 
   // pw::display_driver::DisplayDriver implementation:
   Status Init() override;
