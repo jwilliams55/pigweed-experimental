@@ -24,8 +24,5 @@ config("default_config") {
 
 pw_source_set("pw_coordinates") {
   public_configs = [ ":default_config" ]
-  public = [
-    "public/pw_coordinates/vec2.h",
-    "public/pw_coordinates/vec_int.h",
-  ]
+  public = [ "public/pw_coordinates/vec_int.h" ]
 }
