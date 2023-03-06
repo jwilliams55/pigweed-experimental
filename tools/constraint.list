@@ -1,4 +1,4 @@
 # //applications/tls_example/trust_store/py
 pyOpenSSL==22.0.0
 # //pw_graphics/py
-Pillow==9.1.1
+Pillow==9.4.0
