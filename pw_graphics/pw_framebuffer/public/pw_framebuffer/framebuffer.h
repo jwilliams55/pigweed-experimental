@@ -13,6 +13,8 @@
 // the License.
 #pragma once
 
+#include <cstdint>
+
 #include "pw_color/color.h"
 #include "pw_coordinates/size.h"
 #include "pw_result/result.h"
@@ -29,8 +31,8 @@ class Framebuffer {
   // the |data| - i.e. this instance may write to the data, but will never
   // attempt to free it.
   Framebuffer(pw::color::color_rgb565_t* data,
-              pw::coordinates::Size<int> size,
-              int row_bytes);
+              pw::coordinates::Size<uint16_t> size,
+              uint16_t row_bytes);
 
   Framebuffer(const Framebuffer&) = delete;
   Framebuffer(Framebuffer&& other);
@@ -44,28 +46,28 @@ class Framebuffer {
   pw::color::color_rgb565_t* GetFramebufferData() const { return pixel_data_; }
 
   // Return the RGB565 color at position x, y. Bounds are checked.
-  Result<pw::color::color_rgb565_t> GetPixel(int x, int y) const;
+  Result<pw::color::color_rgb565_t> GetPixel(uint16_t x, uint16_t y) const;
 
   // Draw a color at (x, y) if it's a valid position.
-  void SetPixel(int x, int y, pw::color::color_rgb565_t rgb565_color);
+  void SetPixel(uint16_t x, uint16_t y, pw::color::color_rgb565_t rgb565_color);
 
   // Copy the colors from another framebuffer into this one at position x, y.
-  void Blit(const Framebuffer& fb, int x, int y);
+  void Blit(const Framebuffer& fb, uint16_t x, uint16_t y);
 
   // Fill the entire buffer with a color.
   void Fill(pw::color::color_rgb565_t color);
 
   // Return the framebuffer size which is the width and height of the
   // framebuffer in pixels.
-  pw::coordinates::Size<int> size() const { return size_; }
+  pw::coordinates::Size<uint16_t> size() const { return size_; }
 
   // Return the number of bytes per row of pixel data.
-  int GetRowBytes() const { return row_bytes_; }
+  uint16_t GetRowBytes() const { return row_bytes_; }
 
  private:
   pw::color::color_rgb565_t* pixel_data_;
-  pw::coordinates::Size<int> size_;
-  int row_bytes_;
+  pw::coordinates::Size<uint16_t> size_;
+  uint16_t row_bytes_;
 };
 
 }  // namespace pw::framebuffer

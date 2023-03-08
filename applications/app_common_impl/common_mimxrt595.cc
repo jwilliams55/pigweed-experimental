@@ -35,13 +35,13 @@ constexpr uint32_t kBuffer0Addr = 0x28000000U;
 constexpr uint32_t kBuffer1Addr = 0x28200000U;
 constexpr video_pixel_format_t kPixelFormat = kVIDEO_PixelFormatRGB565;
 
-constexpr int kFramebufferWidth =
+constexpr uint16_t kFramebufferWidth =
     FRAMEBUFFER_WIDTH >= 0 ? FRAMEBUFFER_WIDTH : DISPLAY_WIDTH;
-constexpr int kFramebufferHeight = DISPLAY_HEIGHT;
+constexpr uint16_t kFramebufferHeight = DISPLAY_HEIGHT;
 constexpr uint16_t kBufferStrideBytes =
     kFramebufferWidth * pw::mipi::dsi::kBytesPerPixel;
-constexpr pw::coordinates::Size<int> kDisplaySize = {DISPLAY_WIDTH,
-                                                     DISPLAY_HEIGHT};
+constexpr pw::coordinates::Size<uint16_t> kDisplaySize = {DISPLAY_WIDTH,
+                                                          DISPLAY_HEIGHT};
 
 const pw::framebuffer::pool::PoolData s_fb_pool_data = {
     .fb_addr =

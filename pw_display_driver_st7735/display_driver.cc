@@ -317,7 +317,7 @@ Status DisplayDriverST7735::Update(
   auto transaction = config_.spi_device_16_bit.StartTransaction(
       ChipSelectBehavior::kPerWriteRead);
   const uint16_t* fb_data = framebuffer->GetFramebufferData();
-  const int num_pixels = config_.screen_width * config_.screen_height;
+  const size_t num_pixels = config_.screen_width * config_.screen_height;
   return transaction.Write(
       ConstByteSpan(reinterpret_cast<const byte*>(fb_data), num_pixels));
 }

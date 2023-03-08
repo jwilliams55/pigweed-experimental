@@ -330,8 +330,8 @@ Status DisplayDriverILI9341::ReleaseFramebuffer(Framebuffer frame_buffer) {
 }
 
 Status DisplayDriverILI9341::WriteRow(span<uint16_t> row_pixels,
-                                      int row_idx,
-                                      int col_idx) {
+                                      uint16_t row_idx,
+                                      uint16_t col_idx) {
   {
     // Let controller know a write is coming.
     auto transaction = config_.spi_device_8_bit.StartTransaction(
@@ -368,9 +368,9 @@ Status DisplayDriverILI9341::WriteRow(span<uint16_t> row_pixels,
                     row_pixels.size()));
 }
 
-int DisplayDriverILI9341::GetWidth() const { return kDisplayWidth; }
+uint16_t DisplayDriverILI9341::GetWidth() const { return kDisplayWidth; }
 
-int DisplayDriverILI9341::GetHeight() const { return kDisplayHeight; }
+uint16_t DisplayDriverILI9341::GetHeight() const { return kDisplayHeight; }
 
 Status DisplayDriverILI9341::Reset() {
   if (!config_.reset_gpio)

@@ -29,7 +29,7 @@ namespace pw::display {
 class Display {
  public:
   Display(pw::display_driver::DisplayDriver& display_driver,
-          pw::coordinates::Size<int> size);
+          pw::coordinates::Size<uint16_t> size);
   virtual ~Display();
 
   // Return a framebuffer to which the caller may draw. When drawing is complete
@@ -51,10 +51,10 @@ class Display {
   Status ReleaseFramebuffer(pw::framebuffer::Framebuffer framebuffer);
 
   // Return the width (in pixels) of the associated display.
-  int GetWidth() const { return size_.width; }
+  uint16_t GetWidth() const { return size_.width; }
 
   // Return the height (in pixels) of the associated display.
-  int GetHeight() const { return size_.height; }
+  uint16_t GetHeight() const { return size_.height; }
 
   // Does the associated screen have a touch screen?
   virtual bool TouchscreenAvailable() const { return false; }
@@ -73,7 +73,7 @@ class Display {
 #endif  // if DISPLAY_RESIZE
 
   pw::display_driver::DisplayDriver& display_driver_;
-  const pw::coordinates::Size<int> size_;
+  const pw::coordinates::Size<uint16_t> size_;
 };
 
 }  // namespace pw::display

@@ -30,9 +30,11 @@ class DisplayDriverImgUI : public DisplayDriver {
   Status Init() override;
   pw::framebuffer::Framebuffer GetFramebuffer() override;
   Status ReleaseFramebuffer(pw::framebuffer::Framebuffer framebuffer) override;
-  Status WriteRow(span<uint16_t> row_pixels, int row_idx, int col_idx) override;
-  int GetWidth() const override;
-  int GetHeight() const override;
+  Status WriteRow(span<uint16_t> row_pixels,
+                  uint16_t row_idx,
+                  uint16_t col_idx) override;
+  uint16_t GetWidth() const override;
+  uint16_t GetHeight() const override;
 
  private:
   void RecreateLcdTexture();

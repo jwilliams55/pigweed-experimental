@@ -19,7 +19,7 @@ using pw::framebuffer::Framebuffer;
 namespace pw::display_driver {
 
 DisplayDriverMipiDsi::DisplayDriverMipiDsi(
-    pw::mipi::dsi::Device& device, pw::coordinates::Size<int> display_size)
+    pw::mipi::dsi::Device& device, pw::coordinates::Size<uint16_t> display_size)
     : device_(device), display_size_(display_size) {}
 
 DisplayDriverMipiDsi::~DisplayDriverMipiDsi() = default;
@@ -35,14 +35,16 @@ Status DisplayDriverMipiDsi::ReleaseFramebuffer(Framebuffer framebuffer) {
 };
 
 Status DisplayDriverMipiDsi::WriteRow(span<uint16_t> row_pixels,
-                                      int row_idx,
-                                      int col_idx) {
+                                      uint16_t row_idx,
+                                      uint16_t col_idx) {
   // TODO(cmumford): Implement for debugging purposes.
   return Status::Unimplemented();
 }
 
-int DisplayDriverMipiDsi::GetWidth() const { return display_size_.width; };
+uint16_t DisplayDriverMipiDsi::GetWidth() const { return display_size_.width; };
 
-int DisplayDriverMipiDsi::GetHeight() const { return display_size_.height; }
+uint16_t DisplayDriverMipiDsi::GetHeight() const {
+  return display_size_.height;
+}
 
 }  // namespace pw::display_driver

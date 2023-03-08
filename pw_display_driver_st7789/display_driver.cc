@@ -208,8 +208,8 @@ Status DisplayDriverST7789::ReleaseFramebuffer(
 }
 
 Status DisplayDriverST7789::WriteRow(span<uint16_t> row_pixels,
-                                     int row_idx,
-                                     int col_idx) {
+                                     uint16_t row_idx,
+                                     uint16_t col_idx) {
   {
     // Let controller know a write is coming.
     auto transaction = config_.spi_device_8_bit.StartTransaction(

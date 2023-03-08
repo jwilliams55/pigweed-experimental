@@ -22,7 +22,7 @@
 using pw::color::color_rgb565_t;
 using pw::display_driver::DisplayDriver;
 using pw::framebuffer::Framebuffer;
-using Size = pw::coordinates::Size<int>;
+using Size = pw::coordinates::Size<uint16_t>;
 
 namespace pw::display {
 
@@ -44,8 +44,8 @@ struct CallParams {
   } release_framebuffer;
   struct {
     size_t num_pixels = 0;
-    int row_idx = 0;
-    int col_idx = 0;
+    uint16_t row_idx = 0;
+    uint16_t col_idx = 0;
   } write_row;
 };
 
@@ -74,8 +74,8 @@ class TestDisplayDriver : public DisplayDriver {
   }
 
   Status WriteRow(span<uint16_t> pixel_data,
-                  int row_idx,
-                  int col_idx) override {
+                  uint16_t row_idx,
+                  uint16_t col_idx) override {
     if (next_call_param_idx_ < kMaxSavedParams) {
       call_params_[next_call_param_idx_].call_func = CallFunc::WriteRow;
       call_params_[next_call_param_idx_].write_row.num_pixels =
@@ -87,9 +87,9 @@ class TestDisplayDriver : public DisplayDriver {
     return OkStatus();
   }
 
-  int GetWidth() const override { return framebuffer_.size().width; }
+  uint16_t GetWidth() const override { return framebuffer_.size().width; }
 
-  int GetHeight() const override { return framebuffer_.size().height; }
+  uint16_t GetHeight() const override { return framebuffer_.size().height; }
 
   int GetNumCalls() const {
     int count = 0;
@@ -114,10 +114,11 @@ class TestDisplayDriver : public DisplayDriver {
 };
 
 TEST(Display, ReleaseNoResize) {
-  constexpr pw::coordinates::Size<int> kFramebufferSize{2, 1};
+  constexpr pw::coordinates::Size<uint16_t> kFramebufferSize{2, 1};
   constexpr Size kDisplaySize = kFramebufferSize;
-  constexpr int kNumPixels = kFramebufferSize.width * kFramebufferSize.height;
-  constexpr int kFramebufferRowBytes =
+  constexpr size_t kNumPixels =
+      kFramebufferSize.width * kFramebufferSize.height;
+  constexpr uint16_t kFramebufferRowBytes =
       sizeof(color_rgb565_t) * kFramebufferSize.width;
   color_rgb565_t pixel_data[kNumPixels];
 
@@ -139,9 +140,10 @@ TEST(Display, ReleaseNoResize) {
 #if DISPLAY_RESIZE
 TEST(Display, ReleaseSmallResize) {
   constexpr Size kDisplaySize = {8, 4};
-  constexpr pw::coordinates::Size<int> kFramebufferSize{2, 1};
-  constexpr int kNumPixels = kFramebufferSize.width * kFramebufferSize.height;
-  constexpr int kFramebufferRowBytes =
+  constexpr pw::coordinates::Size<uint16_t> kFramebufferSize{2, 1};
+  constexpr size_t kNumPixels =
+      kFramebufferSize.width * kFramebufferSize.height;
+  constexpr uint16_t kFramebufferRowBytes =
       sizeof(color_rgb565_t) * kFramebufferSize.width;
   color_rgb565_t pixel_data[kNumPixels];
 
@@ -183,9 +185,10 @@ TEST(Display, ReleaseSmallResize) {
 TEST(Display, ReleaseWideResize) {
   // Display width > resize buffer (80 px.) will cause two writes per row.
   constexpr Size kDisplaySize = {90, 4};
-  constexpr pw::coordinates::Size<int> kFramebufferSize{2, 1};
-  constexpr int kNumPixels = kFramebufferSize.width * kFramebufferSize.height;
-  constexpr int kFramebufferRowBytes =
+  constexpr pw::coordinates::Size<uint16_t> kFramebufferSize{2, 1};
+  constexpr size_t kNumPixels =
+      kFramebufferSize.width * kFramebufferSize.height;
+  constexpr uint16_t kFramebufferRowBytes =
       sizeof(color_rgb565_t) * kFramebufferSize.width;
   color_rgb565_t pixel_data[kNumPixels];
 

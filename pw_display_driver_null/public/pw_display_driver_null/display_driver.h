@@ -31,9 +31,11 @@ class DisplayDriverNULL : public DisplayDriver {
   Status ReleaseFramebuffer(pw::framebuffer::Framebuffer) override {
     return OkStatus();
   }
-  Status WriteRow(span<uint16_t>, int, int) override { return pw::OkStatus(); }
-  int GetWidth() const override { return 0; };
-  int GetHeight() const override { return 0; };
+  Status WriteRow(span<uint16_t>, uint16_t, uint16_t) override {
+    return pw::OkStatus();
+  }
+  uint16_t GetWidth() const override { return 0; };
+  uint16_t GetHeight() const override { return 0; };
 };
 
 }  // namespace pw::display_driver

@@ -37,8 +37,8 @@ class DisplayDriverST7789 : public DisplayDriver {
     // data.
     pw::spi::Device& spi_device_16_bit;
     const pw::framebuffer::pool::PoolData& pool_data;
-    int screen_width = 320;
-    int screen_height = 240;
+    uint16_t screen_width = 320;
+    uint16_t screen_height = 240;
   };
 
   DisplayDriverST7789(const Config& config);
@@ -47,9 +47,11 @@ class DisplayDriverST7789 : public DisplayDriver {
   Status Init() override;
   Framebuffer GetFramebuffer(void) override;
   Status ReleaseFramebuffer(Framebuffer framebuffer) override;
-  Status WriteRow(span<uint16_t> row_pixels, int row_idx, int col_idx) override;
-  int GetWidth() const override { return config_.screen_width; }
-  int GetHeight() const override { return config_.screen_height; }
+  Status WriteRow(span<uint16_t> row_pixels,
+                  uint16_t row_idx,
+                  uint16_t col_idx) override;
+  uint16_t GetWidth() const override { return config_.screen_width; }
+  uint16_t GetHeight() const override { return config_.screen_height; }
 
  private:
   enum class Mode {

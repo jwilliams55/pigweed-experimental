@@ -70,16 +70,16 @@ struct SpiValues {
 static_assert(DISPLAY_WIDTH > 0);
 static_assert(DISPLAY_HEIGHT > 0);
 
-constexpr int kDisplayScaleFactor = 1;
-constexpr int kFramebufferWidth = FRAMEBUFFER_WIDTH >= 0
-                                      ? FRAMEBUFFER_WIDTH / kDisplayScaleFactor
-                                      : DISPLAY_WIDTH / kDisplayScaleFactor;
-constexpr int kFramebufferHeight = DISPLAY_HEIGHT / kDisplayScaleFactor;
+constexpr uint16_t kDisplayScaleFactor = 1;
+constexpr uint16_t kFramebufferWidth =
+    FRAMEBUFFER_WIDTH >= 0 ? FRAMEBUFFER_WIDTH / kDisplayScaleFactor
+                           : DISPLAY_WIDTH / kDisplayScaleFactor;
+constexpr uint16_t kFramebufferHeight = DISPLAY_HEIGHT / kDisplayScaleFactor;
 
-constexpr pw::coordinates::Size<int> kDisplaySize{DISPLAY_WIDTH,
-                                                  DISPLAY_HEIGHT};
-constexpr int kNumPixels = kFramebufferWidth * kFramebufferHeight;
-constexpr int kFramebufferRowBytes = sizeof(uint16_t) * kFramebufferWidth;
+constexpr pw::coordinates::Size<uint16_t> kDisplaySize{DISPLAY_WIDTH,
+                                                       DISPLAY_HEIGHT};
+constexpr size_t kNumPixels = kFramebufferWidth * kFramebufferHeight;
+constexpr uint16_t kFramebufferRowBytes = sizeof(uint16_t) * kFramebufferWidth;
 
 constexpr uint32_t kBaudRate = 31'250'000;
 constexpr pw::spi::Config kSpiConfig8Bit{

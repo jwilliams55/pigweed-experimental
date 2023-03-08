@@ -24,20 +24,22 @@ namespace pw::display_driver {
 class DisplayDriverMipiDsi : public DisplayDriver {
  public:
   DisplayDriverMipiDsi(pw::mipi::dsi::Device& device,
-                       pw::coordinates::Size<int> display_size);
+                       pw::coordinates::Size<uint16_t> display_size);
   ~DisplayDriverMipiDsi() override;
 
   // pw::display_driver::DisplayDriver implementation:
   Status Init() override;
   pw::framebuffer::Framebuffer GetFramebuffer(void) override;
   Status ReleaseFramebuffer(pw::framebuffer::Framebuffer framebuffer) override;
-  Status WriteRow(span<uint16_t> row_pixels, int row_idx, int col_idx) override;
-  int GetWidth() const override;
-  int GetHeight() const override;
+  Status WriteRow(span<uint16_t> row_pixels,
+                  uint16_t row_idx,
+                  uint16_t col_idx) override;
+  uint16_t GetWidth() const override;
+  uint16_t GetHeight() const override;
 
  private:
   pw::mipi::dsi::Device& device_;
-  const pw::coordinates::Size<int> display_size_;
+  const pw::coordinates::Size<uint16_t> display_size_;
 };
 
 }  // namespace pw::display_driver

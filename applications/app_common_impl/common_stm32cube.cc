@@ -57,14 +57,14 @@ struct SpiValues {
 static_assert(DISPLAY_WIDTH > 0);
 static_assert(DISPLAY_HEIGHT > 0);
 
-constexpr int kFramebufferWidth =
+constexpr uint16_t kFramebufferWidth =
     FRAMEBUFFER_WIDTH >= 0 ? FRAMEBUFFER_WIDTH : DISPLAY_WIDTH;
-constexpr int kFramebufferHeight = DISPLAY_HEIGHT;
+constexpr uint16_t kFramebufferHeight = DISPLAY_HEIGHT;
 
-constexpr int kNumPixels = kFramebufferWidth * kFramebufferHeight;
-constexpr int kDisplayRowBytes = sizeof(uint16_t) * kFramebufferWidth;
-constexpr pw::coordinates::Size<int> kDisplaySize = {DISPLAY_WIDTH,
-                                                     DISPLAY_HEIGHT};
+constexpr size_t kNumPixels = kFramebufferWidth * kFramebufferHeight;
+constexpr uint16_t kDisplayRowBytes = sizeof(uint16_t) * kFramebufferWidth;
+constexpr pw::coordinates::Size<uint16_t> kDisplaySize = {DISPLAY_WIDTH,
+                                                          DISPLAY_HEIGHT};
 constexpr pw::spi::Config kSpiConfig8Bit{
     .polarity = pw::spi::ClockPolarity::kActiveHigh,
     .phase = pw::spi::ClockPhase::kFallingEdge,

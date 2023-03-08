@@ -39,9 +39,9 @@ namespace pw::display_driver {
 
 namespace {
 
-constexpr int kDisplayWidth = 320;
-constexpr int kDisplayHeight = 240;
-constexpr int kDisplayDataSize = kDisplayWidth * kDisplayHeight;
+constexpr uint16_t kDisplayWidth = 320;
+constexpr uint16_t kDisplayHeight = 240;
+constexpr size_t kDisplayDataSize = kDisplayWidth * kDisplayHeight;
 
 // OpenGL texture data.
 GLuint lcd_pixel_data[kDisplayDataSize];
@@ -415,8 +415,8 @@ Status DisplayDriverImgUI::ReleaseFramebuffer(Framebuffer framebuffer) {
 }
 
 Status DisplayDriverImgUI::WriteRow(span<uint16_t> row_pixels,
-                                    int row_idx,
-                                    int col_idx) {
+                                    uint16_t row_idx,
+                                    uint16_t col_idx) {
   RecreateLcdTexture();
 
   for (auto c : row_pixels) {
@@ -428,9 +428,9 @@ Status DisplayDriverImgUI::WriteRow(span<uint16_t> row_pixels,
   return OkStatus();
 }
 
-int DisplayDriverImgUI::GetWidth() const { return kDisplayWidth; }
+uint16_t DisplayDriverImgUI::GetWidth() const { return kDisplayWidth; }
 
-int DisplayDriverImgUI::GetHeight() const { return kDisplayHeight; }
+uint16_t DisplayDriverImgUI::GetHeight() const { return kDisplayHeight; }
 
 bool DisplayDriverImgUI::NewTouchEvent() { return left_mouse_pressed; }
 

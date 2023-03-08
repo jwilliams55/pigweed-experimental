@@ -21,13 +21,13 @@ using pw::color::color_rgb565_t;
 
 namespace {
 
-constexpr int kDisplayScaleFactor = 1;
-constexpr int kFramebufferWidth = DISPLAY_WIDTH / kDisplayScaleFactor;
-constexpr int kFramebufferHeight = DISPLAY_HEIGHT / kDisplayScaleFactor;
-constexpr int kNumPixels = kFramebufferWidth * kFramebufferHeight;
-constexpr int kFramebufferRowBytes = sizeof(uint16_t) * kFramebufferWidth;
-constexpr pw::coordinates::Size<int> kDisplaySize = {DISPLAY_WIDTH,
-                                                     DISPLAY_HEIGHT};
+constexpr uint16_t kDisplayScaleFactor = 1;
+constexpr uint16_t kFramebufferWidth = DISPLAY_WIDTH / kDisplayScaleFactor;
+constexpr uint16_t kFramebufferHeight = DISPLAY_HEIGHT / kDisplayScaleFactor;
+constexpr size_t kNumPixels = kFramebufferWidth * kFramebufferHeight;
+constexpr uint16_t kFramebufferRowBytes = sizeof(uint16_t) * kFramebufferWidth;
+constexpr pw::coordinates::Size<uint16_t> kDisplaySize = {DISPLAY_WIDTH,
+                                                          DISPLAY_HEIGHT};
 
 color_rgb565_t s_pixel_data[kNumPixels];
 constexpr pw::framebuffer::pool::PoolData s_fb_pool_data = {

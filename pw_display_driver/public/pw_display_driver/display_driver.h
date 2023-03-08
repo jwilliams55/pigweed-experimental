@@ -14,6 +14,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 
 #include "pw_framebuffer/framebuffer.h"
 #include "pw_span/span.h"
@@ -44,12 +45,12 @@ class DisplayDriver {
   // Send a row of pixels to the display. The number of pixels must be <=
   // display width.
   virtual Status WriteRow(span<uint16_t> row_pixels,
-                          int row_idx,
-                          int col_idx) = 0;
+                          uint16_t row_idx,
+                          uint16_t col_idx) = 0;
 
-  virtual int GetWidth() const = 0;
+  virtual uint16_t GetWidth() const = 0;
 
-  virtual int GetHeight() const = 0;
+  virtual uint16_t GetHeight() const = 0;
 };
 
 }  // namespace pw::display_driver

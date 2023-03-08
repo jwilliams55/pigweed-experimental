@@ -52,7 +52,7 @@ TEST(Framebuffer, SetPixelGetPixel) {
   color_rgb565_t* const pixel_data = fb.GetFramebufferData();
   color_rgb565_t indigo = 0x83b3;
   fb.Fill(0);
-  for (int i = 0; i < 8; i++) {
+  for (uint16_t i = 0; i < 8; i++) {
     fb.SetPixel(i, i, indigo);
   }
   EXPECT_EQ(pixel_data[0], indigo);

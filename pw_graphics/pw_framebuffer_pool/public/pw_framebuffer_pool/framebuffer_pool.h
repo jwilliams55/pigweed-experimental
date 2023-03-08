@@ -15,6 +15,7 @@
 #pragma once
 
 #include <array>
+#include <cstdint>
 
 #include "pw_color/color.h"
 #include "pw_coordinates/size.h"
@@ -27,9 +28,9 @@ constexpr size_t kMaxFramebufferCount = 3;
 struct PoolData {
   std::array<pw::color::color_rgb565_t*, kMaxFramebufferCount> fb_addr;
   size_t num_fb;  // <= fb_addr.size().
-  pw::coordinates::Size<int> size;
-  int row_bytes;
-  pw::coordinates::Vector2<int> start;
+  pw::coordinates::Size<uint16_t> size;
+  uint16_t row_bytes;
+  pw::coordinates::Vector2<uint16_t> start;
 };
 
 }  // namespace pw::framebuffer::pool

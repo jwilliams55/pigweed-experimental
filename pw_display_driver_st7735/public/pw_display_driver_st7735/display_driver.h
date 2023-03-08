@@ -36,8 +36,8 @@ class DisplayDriverST7735 : public DisplayDriver {
     // The SPI device to which the display controller is connected for 16-bit
     // data.
     pw::spi::Device& spi_device_16_bit;
-    int screen_width = 160;
-    int screen_height = 128;
+    uint16_t screen_width = 160;
+    uint16_t screen_height = 128;
   };
 
   // A command and optional data to write to the ST7735.

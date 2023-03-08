@@ -25,7 +25,7 @@ using pw::framebuffer::Framebuffer;
 namespace pw::display {
 
 Display::Display(pw::display_driver::DisplayDriver& display_driver,
-                 pw::coordinates::Size<int> size)
+                 pw::coordinates::Size<uint16_t> size)
     : display_driver_(display_driver), size_(size) {}
 
 Display::~Display() = default;
