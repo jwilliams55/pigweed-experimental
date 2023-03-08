@@ -42,7 +42,8 @@ Status Display::UpdateNearestNeighbor(const Framebuffer& framebuffer) {
   constexpr int kResizeBufferNumPixels = 80;
   color_rgb565_t resize_buffer[kResizeBufferNumPixels];
 
-  const color_rgb565_t* fbdata = framebuffer.GetFramebufferData();
+  const color_rgb565_t* fbdata =
+      static_cast<const color_rgb565_t*>(framebuffer.GetFramebufferData());
   constexpr int kBytesPerPixel = sizeof(color_rgb565_t);
   const int num_src_row_pixels = framebuffer.GetRowBytes() / kBytesPerPixel;
 

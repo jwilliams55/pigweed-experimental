@@ -31,9 +31,11 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "pw_framebuffer/reader.h"
 
 using pw::color::color_rgb565_t;
 using pw::framebuffer::Framebuffer;
+using pw::framebuffer::FramebufferReader;
 
 namespace pw::display_driver {
 
@@ -401,10 +403,11 @@ Status DisplayDriverImgUI::ReleaseFramebuffer(Framebuffer framebuffer) {
     return Status::InvalidArgument();
   RecreateLcdTexture();
 
+  FramebufferReader reader(framebuffer);
   // Copy frame_buffer into lcd_pixel_data
   for (GLuint x = 0; x < kDisplayWidth; x++) {
     for (GLuint y = 0; y < kDisplayHeight; y++) {
-      if (auto c = framebuffer.GetPixel(x, y); c.ok()) {
+      if (auto c = reader.GetPixel(x, y); c.ok()) {
         _SetTexturePixel(x, y, c.value());
       }
     }

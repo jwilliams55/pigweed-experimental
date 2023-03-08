@@ -40,7 +40,7 @@ enum class CallFunc {
 struct CallParams {
   CallFunc call_func = CallFunc::Unset;
   struct {
-    color_rgb565_t* fb_data = nullptr;
+    void* fb_data = nullptr;
   } release_framebuffer;
   struct {
     size_t num_pixels = 0;

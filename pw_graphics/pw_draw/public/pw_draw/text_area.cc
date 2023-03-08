@@ -18,8 +18,10 @@
 #include "pw_draw/draw.h"
 #include "pw_draw/font_set.h"
 #include "pw_framebuffer/framebuffer.h"
+#include "pw_framebuffer/writer.h"
 
 using pw::color::color_rgb565_t;
+using pw::framebuffer::FramebufferWriter;
 using pw::math::Vector2;
 
 namespace pw::draw {
@@ -147,13 +149,13 @@ void TextArea::ScrollUp(int lines) {
   int start_x = 0;
   int start_y = pixel_height;
 
+  FramebufferWriter writer(framebuffer);
   for (int current_x = 0; current_x < framebuffer.size().width; current_x++) {
     for (int current_y = start_y; current_y < framebuffer.size().height;
          current_y++) {
-      if (auto pixel_color = framebuffer.GetPixel(current_x, current_y);
+      if (auto pixel_color = writer.GetPixel(current_x, current_y);
           pixel_color.ok()) {
-        framebuffer.SetPixel(
-            start_x + current_x, current_y - start_y, *pixel_color);
+        writer.SetPixel(start_x + current_x, current_y - start_y, *pixel_color);
       }
     }
   }
@@ -164,7 +166,7 @@ void TextArea::ScrollUp(int lines) {
     for (int y = framebuffer.size().height - pixel_height;
          y < framebuffer.size().height;
          y++) {
-      framebuffer.SetPixel(x, y, background_color);
+      writer.SetPixel(x, y, background_color);
     }
   }
 }

@@ -15,24 +15,21 @@
 
 #include <cstdint>
 
-#include "pw_color/color.h"
 #include "pw_math/size.h"
 #include "pw_result/result.h"
 
 namespace pw::framebuffer {
 
+// A Framebuffer refers to a buffer of pixel data and the various attributes
+// of that pixel data (such as dimensions, rowbytes, etc.).
 class Framebuffer {
  public:
-  // Construct a default invalid framebuffer. Using an
-  // invalid framebuffer will result in a failed PW_CHECK.
+  // Construct a default invalid framebuffer.
   Framebuffer();
 
   // Construct a framebuffer of the specified dimensions which *does not* own
-  // the |data| - i.e. this instance may write to the data, but will never
-  // attempt to free it.
-  Framebuffer(pw::color::color_rgb565_t* data,
-              pw::math::Size<uint16_t> size,
-              uint16_t row_bytes);
+  // the |data| - i.e. this instance will never attempt to free it.
+  Framebuffer(void* data, pw::math::Size<uint16_t> size, uint16_t row_bytes);
 
   Framebuffer(const Framebuffer&) = delete;
   Framebuffer(Framebuffer&& other);
@@ -43,19 +40,8 @@ class Framebuffer {
   // Has the framebuffer been properly initialized?
   bool IsValid() const { return pixel_data_ != nullptr; };
 
-  pw::color::color_rgb565_t* GetFramebufferData() const { return pixel_data_; }
-
-  // Return the RGB565 color at position x, y. Bounds are checked.
-  Result<pw::color::color_rgb565_t> GetPixel(uint16_t x, uint16_t y) const;
-
-  // Draw a color at (x, y) if it's a valid position.
-  void SetPixel(uint16_t x, uint16_t y, pw::color::color_rgb565_t rgb565_color);
-
-  // Copy the colors from another framebuffer into this one at position x, y.
-  void Blit(const Framebuffer& fb, uint16_t x, uint16_t y);
-
-  // Fill the entire buffer with a color.
-  void Fill(pw::color::color_rgb565_t color);
+  // Return a pointer to the framebuffer pixel buffer.
+  void* GetFramebufferData() const { return pixel_data_; }
 
   // Return the framebuffer size which is the width and height of the
   // framebuffer in pixels.
@@ -65,9 +51,9 @@ class Framebuffer {
   uint16_t GetRowBytes() const { return row_bytes_; }
 
  private:
-  pw::color::color_rgb565_t* pixel_data_;
-  pw::math::Size<uint16_t> size_;
-  uint16_t row_bytes_;
+  void* pixel_data_;               // The pixel buffer.
+  pw::math::Size<uint16_t> size_;  // width/height (in pixels) of |pixel_data_|.
+  uint16_t row_bytes_;             // The number of bytes in each row.
 };
 
 }  // namespace pw::framebuffer

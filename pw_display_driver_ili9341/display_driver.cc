@@ -303,7 +303,8 @@ Framebuffer DisplayDriverILI9341::GetFramebuffer() {
 Status DisplayDriverILI9341::ReleaseFramebuffer(Framebuffer frame_buffer) {
   auto transaction = config_.spi_device_16_bit.StartTransaction(
       ChipSelectBehavior::kPerTransaction);
-  const uint16_t* fb_data = frame_buffer.GetFramebufferData();
+  const uint16_t* fb_data =
+      static_cast<const uint16_t*>(frame_buffer.GetFramebufferData());
   Status s;
   // TODO(cmumford): Figure out why the STM32F429I cannot send the entire
   // framebuffer in a single write, but another display can.

@@ -1,4 +1,4 @@
-// Copyright 2022 The Pigweed Authors
+// Copyright 2023 The Pigweed Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not
 // use this file except in compliance with the License. You may obtain a copy of
@@ -11,29 +11,26 @@
 // WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 // License for the specific language governing permissions and limitations under
 // the License.
-
-#include "pw_framebuffer/framebuffer.h"
-
-#include <cstdint>
-
-#include "gtest/gtest.h"
-#include "pw_color/color.h"
-#include "pw_color/colors_endesga32.h"
-#include "pw_color/colors_pico8.h"
-#include "pw_framebuffer/writer.h"
-#include "pw_log/log.h"
+#include "public/pw_framebuffer/writer.h"
+#include "pw_assert/assert.h"
 
 using pw::color::color_rgb565_t;
 
 namespace pw::framebuffer {
-namespace {
 
-TEST(Framebuffer, Init) {
-  uint16_t data[32 * 32];
-  Framebuffer fb(data, {32, 32}, 32 * sizeof(data[0]));
-  EXPECT_EQ(fb.size().width, 32);
-  EXPECT_EQ(fb.size().height, 32);
+FramebufferReader::FramebufferReader(const Framebuffer& framebuffer)
+    : framebuffer_(framebuffer) {
+  PW_ASSERT(framebuffer_.IsValid());
 }
 
-}  // namespace
+Result<color_rgb565_t> FramebufferReader::GetPixel(uint16_t x,
+                                                   uint16_t y) const {
+  const color_rgb565_t* data =
+      static_cast<const color_rgb565_t*>(framebuffer_.GetFramebufferData());
+  if (x < framebuffer_.size().width && y < framebuffer_.size().height) {
+    return data[y * framebuffer_.size().width + x];
+  }
+  return Status::OutOfRange();
+}
+
 }  // namespace pw::framebuffer

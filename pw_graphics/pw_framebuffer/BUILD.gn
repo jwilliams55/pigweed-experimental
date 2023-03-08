@@ -30,8 +30,16 @@ pw_source_set("pw_framebuffer") {
     "$dir_pw_math",
     "$dir_pw_result",
   ]
-  public = [ "public/pw_framebuffer/framebuffer.h" ]
-  sources = [ "framebuffer.cc" ]
+  public = [
+    "public/pw_framebuffer/framebuffer.h",
+    "public/pw_framebuffer/reader.h",
+    "public/pw_framebuffer/writer.h",
+  ]
+  sources = [
+    "framebuffer.cc",
+    "reader.cc",
+    "writer.cc",
+  ]
 }
 
 pw_test("framebuffer_test") {
@@ -39,7 +47,11 @@ pw_test("framebuffer_test") {
     ":pw_framebuffer",
     "$dir_pw_log",
   ]
-  sources = [ "framebuffer_test.cc" ]
+  sources = [
+    "framebuffer_test.cc",
+    "reader_test.cc",
+    "writer_test.cc",
+  ]
 }
 
 pw_test_group("tests") {

@@ -19,9 +19,11 @@
 #include "pw_color/color.h"
 #include "pw_draw/sprite_sheet.h"
 #include "pw_framebuffer/framebuffer.h"
+#include "pw_framebuffer/writer.h"
 
 using pw::color::color_rgb565_t;
 using pw::framebuffer::Framebuffer;
+using pw::framebuffer::FramebufferWriter;
 using pw::math::Size;
 using pw::math::Vector2;
 
@@ -34,9 +36,10 @@ Size<int> DrawSpace(Vector2<int> pos,
                     color_rgb565_t bg_color,
                     const FontSet& font,
                     Framebuffer& framebuffer) {
+  FramebufferWriter writer(framebuffer);
   for (int font_row = 0; font_row < font.height; font_row++) {
     for (int font_column = 0; font_column < font.width; font_column++) {
-      framebuffer.SetPixel(pos.x + font_column, pos.y + font_row, bg_color);
+      writer.SetPixel(pos.x + font_column, pos.y + font_row, bg_color);
     }
   }
   return Size<int>{font.width, font.height};
@@ -72,11 +75,12 @@ void DrawLine(
   int16_t error_value = dx / 2;
   int16_t ystep = y1 < y2 ? 1 : -1;
 
+  FramebufferWriter writer(fb);
   for (; x1 <= x2; x1++) {
     if (steep_gradient) {
-      fb.SetPixel(y1, x1, pen_color);
+      writer.SetPixel(y1, x1, pen_color);
     } else {
-      fb.SetPixel(x1, y1, pen_color);
+      writer.SetPixel(x1, y1, pen_color);
     }
     error_value -= dy;
     if (error_value < 0) {
@@ -97,6 +101,7 @@ void DrawCircle(Framebuffer& fb,
   int fx = 0, fy = 0;
   int x = -radius, y = 0;
   int error_value = 2 - 2 * radius;
+  FramebufferWriter writer(fb);
   while (x < 0) {
     if (!filled) {
       fx = x;
@@ -105,15 +110,15 @@ void DrawCircle(Framebuffer& fb,
     // Draw each quarter circle
     for (int i = x; i <= fx; i++) {
       // Lower right
-      fb.SetPixel(center_x - i, center_y + y, pen_color);
+      writer.SetPixel(center_x - i, center_y + y, pen_color);
       // Upper left
-      fb.SetPixel(center_x + i, center_y - y, pen_color);
+      writer.SetPixel(center_x + i, center_y - y, pen_color);
     }
     for (int i = fy; i <= y; i++) {
       // Lower left
-      fb.SetPixel(center_x - i, center_y - x, pen_color);
+      writer.SetPixel(center_x - i, center_y - x, pen_color);
       // Upper right
-      fb.SetPixel(center_x + i, center_y + x, pen_color);
+      writer.SetPixel(center_x + i, center_y + x, pen_color);
     }
     radius = error_value;
     if (radius <= y) {
@@ -129,8 +134,9 @@ void DrawCircle(Framebuffer& fb,
 
 void DrawHLine(
     Framebuffer& fb, int x1, int x2, int y, color_rgb565_t pen_color) {
+  FramebufferWriter writer(fb);
   for (int i = x1; i <= x2; i++) {
-    fb.SetPixel(i, y, pen_color);
+    writer.SetPixel(i, y, pen_color);
   }
 }
 
@@ -149,9 +155,10 @@ void DrawRect(Framebuffer& fb,
       DrawHLine(fb, x1, x2, y, pen_color);
     }
   } else {
+    FramebufferWriter writer(fb);
     for (int y = y1 + 1; y < y2; y++) {
-      fb.SetPixel(x1, y, pen_color);
-      fb.SetPixel(x2, y, pen_color);
+      writer.SetPixel(x1, y, pen_color);
+      writer.SetPixel(x2, y, pen_color);
     }
   }
 }
@@ -166,7 +173,10 @@ void DrawRectWH(Framebuffer& fb,
   DrawRect(fb, x, y, x - 1 + w, y - 1 + h, pen_color, filled);
 }
 
-void Fill(Framebuffer& fb, color_rgb565_t pen_color) { fb.Fill(pen_color); }
+void Fill(Framebuffer& fb, color_rgb565_t pen_color) {
+  FramebufferWriter writer(fb);
+  writer.Fill(pen_color);
+}
 
 void DrawSprite(Framebuffer& fb,
                 int x,
@@ -175,13 +185,14 @@ void DrawSprite(Framebuffer& fb,
                 int integer_scale = 1) {
   uint16_t color;
   int start_x, start_y;
+  FramebufferWriter writer(fb);
   for (int current_x = 0; current_x < sprite_sheet->width; current_x++) {
     for (int current_y = 0; current_y < sprite_sheet->height; current_y++) {
       color = sprite_sheet->GetColor(
           current_x, current_y, sprite_sheet->current_index);
       if (color != sprite_sheet->transparent_color) {
         if (integer_scale == 1) {
-          fb.SetPixel(x + current_x, y + current_y, color);
+          writer.SetPixel(x + current_x, y + current_y, color);
         }
         // If integer_scale > 1: draw a rectangle
         else if (integer_scale > 1) {
@@ -198,10 +209,11 @@ void DrawSprite(Framebuffer& fb,
 void DrawTestPattern(Framebuffer& fb) {
   color_rgb565_t color = pw::color::ColorRGBA(0x00, 0xFF, 0xFF).ToRgb565();
   // Create a Test Pattern
+  FramebufferWriter writer(fb);
   for (int x = 0; x < fb.size().width; x++) {
     for (int y = 0; y < fb.size().height; y++) {
       if (y % 10 != x % 10) {
-        fb.SetPixel(x, y, color);
+        writer.SetPixel(x, y, color);
       }
     }
   }
@@ -222,14 +234,15 @@ Size<int> DrawCharacter(int ch,
   }
   const int character_index = (int)ch - font.starting_character;
 
+  FramebufferWriter writer(framebuffer);
   for (int font_row = 0; font_row < font.height; font_row++) {
     for (int font_column = 0; font_column < font.width; font_column++) {
       const bool pixel_on =
           PW_FONT_BIT(font.width - font_column - 1,
                       font.data[font.height * character_index + font_row]);
-      framebuffer.SetPixel(pos.x + font_column,
-                           pos.y + font_row,
-                           pixel_on ? fg_color : bg_color);
+      writer.SetPixel(pos.x + font_column,
+                      pos.y + font_row,
+                      pixel_on ? fg_color : bg_color);
     }
   }
   return Size<int>{font.width, font.height};
