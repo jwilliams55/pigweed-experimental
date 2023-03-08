@@ -23,10 +23,10 @@ pw_source_set("pw_display_imgui") {
   public_configs = [ ":public_includes" ]
   public = [ "public/pw_display_imgui/display.h" ]
   public_deps = [
-    "$dir_pw_coordinates",
     "$dir_pw_display",
     "$dir_pw_display_driver_imgui",
     "$dir_pw_framebuffer",
+    "$dir_pw_math",
     "$dir_pw_status",
   ]
   sources = [ "display.cc" ]

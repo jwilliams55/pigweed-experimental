@@ -19,7 +19,7 @@
 #include <cinttypes>
 
 #include "XPT2046_Touchscreen.h"
-#include "pw_coordinates/vector3.h"
+#include "pw_math/vector3.h"
 
 namespace pw::touchscreen {
 namespace {
@@ -43,8 +43,8 @@ bool Available() { return true; }
 
 bool NewTouchEvent() { return touch_screen.touched(); }
 
-pw::coordinates::Vector3<int> GetTouchPoint() {
-  pw::coordinates::Vector3<int> point;
+pw::math::Vector3<int> GetTouchPoint() {
+  pw::math::Vector3<int> point;
   TS_Point p = touch_screen.getPoint();
   point.x = map(p.x, kTouchscreenMinX, kTouchscreenMaxX, 0, ScreenPixelWidth);
   point.y = map(p.y, kTouchscreenMinY, kTouchscreenMaxY, 0, ScreenPixelHeight);

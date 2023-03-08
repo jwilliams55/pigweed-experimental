@@ -27,7 +27,7 @@ pw_source_set("pw_framebuffer") {
   deps = [ "$dir_pw_assert" ]
   public_deps = [
     "$dir_pw_color",
-    "$dir_pw_coordinates",
+    "$dir_pw_math",
     "$dir_pw_result",
   ]
   public = [ "public/pw_framebuffer/framebuffer.h" ]

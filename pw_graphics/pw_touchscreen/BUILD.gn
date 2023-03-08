@@ -29,5 +29,5 @@ pw_facade("pw_touchscreen") {
   backend = pw_touchscreen_BACKEND
   public_configs = [ ":public_includes" ]
   public = [ "public/pw_touchscreen/touchscreen.h" ]
-  public_deps = [ "$dir_pw_coordinates" ]
+  public_deps = [ "$dir_pw_math" ]
 }

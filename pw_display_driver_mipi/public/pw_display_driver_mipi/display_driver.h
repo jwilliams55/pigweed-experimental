@@ -13,8 +13,8 @@
 // the License.
 #pragma once
 
-#include "pw_coordinates/size.h"
 #include "pw_display_driver/display_driver.h"
+#include "pw_math/size.h"
 #include "pw_mipi_dsi/device.h"
 
 namespace pw::display_driver {
@@ -24,7 +24,7 @@ namespace pw::display_driver {
 class DisplayDriverMipiDsi : public DisplayDriver {
  public:
   DisplayDriverMipiDsi(pw::mipi::dsi::Device& device,
-                       pw::coordinates::Size<uint16_t> display_size);
+                       pw::math::Size<uint16_t> display_size);
   ~DisplayDriverMipiDsi() override;
 
   // pw::display_driver::DisplayDriver implementation:
@@ -39,7 +39,7 @@ class DisplayDriverMipiDsi : public DisplayDriver {
 
  private:
   pw::mipi::dsi::Device& device_;
-  const pw::coordinates::Size<uint16_t> display_size_;
+  const pw::math::Size<uint16_t> display_size_;
 };
 
 }  // namespace pw::display_driver

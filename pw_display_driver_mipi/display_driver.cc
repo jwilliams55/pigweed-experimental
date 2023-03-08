@@ -19,7 +19,7 @@ using pw::framebuffer::Framebuffer;
 namespace pw::display_driver {
 
 DisplayDriverMipiDsi::DisplayDriverMipiDsi(
-    pw::mipi::dsi::Device& device, pw::coordinates::Size<uint16_t> display_size)
+    pw::mipi::dsi::Device& device, pw::math::Size<uint16_t> display_size)
     : device_(device), display_size_(display_size) {}
 
 DisplayDriverMipiDsi::~DisplayDriverMipiDsi() = default;

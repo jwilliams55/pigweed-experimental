@@ -26,8 +26,8 @@ pw_source_set("pw_display_driver_imgui") {
   deps = [
     "$dir_pigweed_experimental/third_party/glfw",
     "$dir_pigweed_experimental/third_party/imgui",
-    "$dir_pw_coordinates",
     "$dir_pw_log",
+    "$dir_pw_math",
   ]
   public_deps = [
     "$dir_pw_display_driver:display_driver",

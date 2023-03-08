@@ -16,7 +16,7 @@
 #include <cstdint>
 
 #include "pw_color/color.h"
-#include "pw_coordinates/size.h"
+#include "pw_math/size.h"
 #include "pw_result/result.h"
 
 namespace pw::framebuffer {
@@ -31,7 +31,7 @@ class Framebuffer {
   // the |data| - i.e. this instance may write to the data, but will never
   // attempt to free it.
   Framebuffer(pw::color::color_rgb565_t* data,
-              pw::coordinates::Size<uint16_t> size,
+              pw::math::Size<uint16_t> size,
               uint16_t row_bytes);
 
   Framebuffer(const Framebuffer&) = delete;
@@ -59,14 +59,14 @@ class Framebuffer {
 
   // Return the framebuffer size which is the width and height of the
   // framebuffer in pixels.
-  pw::coordinates::Size<uint16_t> size() const { return size_; }
+  pw::math::Size<uint16_t> size() const { return size_; }
 
   // Return the number of bytes per row of pixel data.
   uint16_t GetRowBytes() const { return row_bytes_; }
 
  private:
   pw::color::color_rgb565_t* pixel_data_;
-  pw::coordinates::Size<uint16_t> size_;
+  pw::math::Size<uint16_t> size_;
   uint16_t row_bytes_;
 };
 

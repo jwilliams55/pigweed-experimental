@@ -22,11 +22,11 @@ config("default_config") {
   include_dirs = [ "public" ]
 }
 
-pw_source_set("pw_coordinates") {
+pw_source_set("pw_math") {
   public_configs = [ ":default_config" ]
   public = [
-    "public/pw_coordinates/size.h",
-    "public/pw_coordinates/vector2.h",
-    "public/pw_coordinates/vector3.h",
+    "public/pw_math/size.h",
+    "public/pw_math/vector2.h",
+    "public/pw_math/vector3.h",
   ]
 }

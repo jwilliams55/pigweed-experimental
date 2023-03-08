@@ -48,9 +48,8 @@ declare_args() {
                     "abspath")
   dir_pw_color =
       get_path_info("$dir_pigweed_experimental/pw_graphics/pw_color", "abspath")
-  dir_pw_coordinates =
-      get_path_info("$dir_pigweed_experimental/pw_graphics/pw_coordinates",
-                    "abspath")
+  dir_pw_math =
+      get_path_info("$dir_pigweed_experimental/pw_graphics/pw_math", "abspath")
   dir_pw_digital_io_arduino =
       get_path_info("$dir_pigweed_experimental/pw_digital_io_arduino",
                     "abspath")

@@ -58,7 +58,7 @@ void SDMA_DriverIRQHandler(void) { SMARTDMA_HandleIRQ(); }
 
 MCUXpressoDevice::MCUXpressoDevice(
     const pw::framebuffer::pool::PoolData& fb_pool,
-    const pw::coordinates::Size<uint16_t>& panel_size,
+    const pw::math::Size<uint16_t>& panel_size,
     video_pixel_format_t pixel_format)
     : fb_pool_(fb_pool),
       fbdev_(kVideoLayer),

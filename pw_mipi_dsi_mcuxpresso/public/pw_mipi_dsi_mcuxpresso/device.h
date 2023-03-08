@@ -18,8 +18,8 @@
 #include "fsl_mipi_dsi.h"
 #include "fsl_mipi_dsi_smartdma.h"
 #include "fsl_rm67162.h"
-#include "pw_coordinates/size.h"
 #include "pw_framebuffer_pool/framebuffer_pool.h"
+#include "pw_math/size.h"
 #include "pw_mipi_dsi/device.h"
 #include "pw_mipi_dsi_mcuxpresso/framebuffer_device.h"
 #include "pw_status/status.h"
@@ -38,7 +38,7 @@ constexpr uint32_t kMaxDSITxArraySize =
 class MCUXpressoDevice : public Device {
  public:
   MCUXpressoDevice(const pw::framebuffer::pool::PoolData& fb_pool,
-                   const pw::coordinates::Size<uint16_t>& panel_size,
+                   const pw::math::Size<uint16_t>& panel_size,
                    video_pixel_format_t pixel_format);
   virtual ~MCUXpressoDevice();
 

@@ -39,8 +39,8 @@ pw_source_set("pw_draw") {
   ]
   public_deps = [
     "$dir_pw_color",
-    "$dir_pw_coordinates",
     "$dir_pw_framebuffer",
+    "$dir_pw_math",
   ]
 }
 

@@ -13,9 +13,9 @@
 // the License.
 #pragma once
 
-#include "pw_coordinates/vector3.h"
 #include "pw_display/display.h"
 #include "pw_display_driver_imgui/display_driver.h"
+#include "pw_math/vector3.h"
 #include "pw_status/status.h"
 
 namespace pw::display {
@@ -24,12 +24,12 @@ namespace pw::display {
 class DisplayImgUI : public Display {
  public:
   DisplayImgUI(pw::display_driver::DisplayDriverImgUI& display_driver,
-               pw::coordinates::Size<uint16_t> size);
+               pw::math::Size<uint16_t> size);
   ~DisplayImgUI();
 
   bool TouchscreenAvailable() const override { return true; }
   bool NewTouchEvent() override;
-  pw::coordinates::Vector3<int> GetTouchPoint() override;
+  pw::math::Vector3<int> GetTouchPoint() override;
 
  private:
   pw::display_driver::DisplayDriverImgUI& display_driver_;

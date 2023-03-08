@@ -16,7 +16,7 @@
 
 #include <cinttypes>
 
-#include "pw_coordinates/vector3.h"
+#include "pw_math/vector3.h"
 
 namespace pw::touchscreen {
 
@@ -26,6 +26,6 @@ bool Available() { return false; }
 
 bool NewTouchEvent() { return false; }
 
-pw::coordinates::Vector3<int> GetTouchPoint() { return {0, 0, 0}; }
+pw::math::Vector3<int> GetTouchPoint() { return {0, 0, 0}; }
 
 }  // namespace pw::touchscreen

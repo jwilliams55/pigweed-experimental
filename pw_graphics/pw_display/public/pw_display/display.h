@@ -13,11 +13,11 @@
 // the License.
 #pragma once
 
-#include "pw_coordinates/size.h"
-#include "pw_coordinates/vector3.h"
 #include "pw_display_driver/display_driver.h"
 #include "pw_framebuffer/framebuffer.h"
 #include "pw_framebuffer_pool/framebuffer_pool.h"
+#include "pw_math/size.h"
+#include "pw_math/vector3.h"
 #include "pw_status/status.h"
 
 namespace pw::display {
@@ -29,7 +29,7 @@ namespace pw::display {
 class Display {
  public:
   Display(pw::display_driver::DisplayDriver& display_driver,
-          pw::coordinates::Size<uint16_t> size);
+          pw::math::Size<uint16_t> size);
   virtual ~Display();
 
   // Return a framebuffer to which the caller may draw. When drawing is complete
@@ -63,7 +63,7 @@ class Display {
   virtual bool NewTouchEvent() { return false; }
 
   // Return the new touch point.
-  virtual pw::coordinates::Vector3<int> GetTouchPoint() { return {0, 0, 0}; }
+  virtual pw::math::Vector3<int> GetTouchPoint() { return {0, 0, 0}; }
 
  private:
 #if DISPLAY_RESIZE
@@ -73,7 +73,7 @@ class Display {
 #endif  // if DISPLAY_RESIZE
 
   pw::display_driver::DisplayDriver& display_driver_;
-  const pw::coordinates::Size<uint16_t> size_;
+  const pw::math::Size<uint16_t> size_;
 };
 
 }  // namespace pw::display

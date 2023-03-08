@@ -18,8 +18,8 @@
 #include <cstdint>
 
 #include "pw_color/color.h"
-#include "pw_coordinates/size.h"
-#include "pw_coordinates/vector2.h"
+#include "pw_math/size.h"
+#include "pw_math/vector2.h"
 
 namespace pw::framebuffer::pool {
 
@@ -28,9 +28,9 @@ constexpr size_t kMaxFramebufferCount = 3;
 struct PoolData {
   std::array<pw::color::color_rgb565_t*, kMaxFramebufferCount> fb_addr;
   size_t num_fb;  // <= fb_addr.size().
-  pw::coordinates::Size<uint16_t> size;
+  pw::math::Size<uint16_t> size;
   uint16_t row_bytes;
-  pw::coordinates::Vector2<uint16_t> start;
+  pw::math::Vector2<uint16_t> start;
 };
 
 }  // namespace pw::framebuffer::pool

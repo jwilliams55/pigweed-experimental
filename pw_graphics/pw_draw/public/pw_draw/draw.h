@@ -16,11 +16,11 @@
 #include <math.h>
 
 #include "pw_color/color.h"
-#include "pw_coordinates/size.h"
-#include "pw_coordinates/vector2.h"
 #include "pw_draw/font_set.h"
 #include "pw_draw/sprite_sheet.h"
 #include "pw_framebuffer/framebuffer.h"
+#include "pw_math/size.h"
+#include "pw_math/vector2.h"
 
 namespace pw::draw {
 
@@ -73,20 +73,18 @@ void DrawSprite(pw::framebuffer::Framebuffer& fb,
 
 void DrawTestPattern();
 
-pw::coordinates::Size<int> DrawCharacter(
-    int ch,
-    pw::coordinates::Vector2<int> pos,
-    pw::color::color_rgb565_t fg_color,
-    pw::color::color_rgb565_t bg_color,
-    const FontSet& font,
-    pw::framebuffer::Framebuffer& framebuffer);
+pw::math::Size<int> DrawCharacter(int ch,
+                                  pw::math::Vector2<int> pos,
+                                  pw::color::color_rgb565_t fg_color,
+                                  pw::color::color_rgb565_t bg_color,
+                                  const FontSet& font,
+                                  pw::framebuffer::Framebuffer& framebuffer);
 
-pw::coordinates::Size<int> DrawString(
-    std::wstring_view str,
-    pw::coordinates::Vector2<int> pos,
-    pw::color::color_rgb565_t fg_color,
-    pw::color::color_rgb565_t bg_color,
-    const FontSet& font,
-    pw::framebuffer::Framebuffer& framebuffer);
+pw::math::Size<int> DrawString(std::wstring_view str,
+                               pw::math::Vector2<int> pos,
+                               pw::color::color_rgb565_t fg_color,
+                               pw::color::color_rgb565_t bg_color,
+                               const FontSet& font,
+                               pw::framebuffer::Framebuffer& framebuffer);
 
 }  // namespace pw::draw

@@ -29,13 +29,13 @@
 #include "pw_color/color.h"
 #include "pw_color/colors_endesga32.h"
 #include "pw_color/colors_pico8.h"
-#include "pw_coordinates/vector2.h"
-#include "pw_coordinates/vector3.h"
 #include "pw_draw/draw.h"
 #include "pw_draw/font_set.h"
 #include "pw_draw/pigweed_farm.h"
 #include "pw_framebuffer/framebuffer.h"
 #include "pw_log/log.h"
+#include "pw_math/vector2.h"
+#include "pw_math/vector3.h"
 #include "pw_ring_buffer/prefixed_entry_ring_buffer.h"
 #include "pw_spin_delay/delay.h"
 #include "pw_string/string_builder.h"
@@ -50,11 +50,11 @@
 
 using pw::color::color_rgb565_t;
 using pw::color::colors_pico8_rgb565;
-using pw::coordinates::Size;
-using pw::coordinates::Vector2;
 using pw::display::Display;
 using pw::draw::FontSet;
 using pw::framebuffer::Framebuffer;
+using pw::math::Size;
+using pw::math::Vector2;
 using pw::ring_buffer::PrefixedEntryRingBuffer;
 
 // TODO(cmumford): move this code into a pre_init section (i.e. boot.cc) which
@@ -484,7 +484,7 @@ void MainTask(void* pvParameters) {
   PW_LOG_INFO("pw::touchscreen::Init()");
   pw::touchscreen::Init();
 
-  pw::coordinates::Vector3<int> last_frame_touch_state(0, 0, 0);
+  pw::math::Vector3<int> last_frame_touch_state(0, 0, 0);
 
   DrawFrame(framebuffer, fps_view);
   // Push the frame buffer to the screen.
@@ -492,7 +492,7 @@ void MainTask(void* pvParameters) {
 
   // The display loop.
   while (1) {
-    pw::coordinates::Vector3<int> point = display.GetTouchPoint();
+    pw::math::Vector3<int> point = display.GetTouchPoint();
     // Check for touchscreen events.
     if (display.TouchscreenAvailable() && display.NewTouchEvent()) {
       if (point.z > 0) {

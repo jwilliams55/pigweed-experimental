@@ -21,8 +21,8 @@
 #include <cinttypes>
 
 #include "Adafruit_STMPE610.h"
-#include "pw_coordinates/vector3.h"
 #include "pw_log/log.h"
+#include "pw_math/vector3.h"
 
 namespace pw::touchscreen {
 namespace {
@@ -60,8 +60,8 @@ bool Available() { return true; }
 
 bool NewTouchEvent() { return touch_screen.touched(); }
 
-pw::coordinates::Vector3<int> GetTouchPoint() {
-  pw::coordinates::Vector3<int> point;
+pw::math::Vector3<int> GetTouchPoint() {
+  pw::math::Vector3<int> point;
   uint16_t x, y;
   uint8_t z;
   touch_screen.readData(&x, &y, &z);

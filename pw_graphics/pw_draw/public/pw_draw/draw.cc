@@ -21,9 +21,9 @@
 #include "pw_framebuffer/framebuffer.h"
 
 using pw::color::color_rgb565_t;
-using pw::coordinates::Size;
-using pw::coordinates::Vector2;
 using pw::framebuffer::Framebuffer;
+using pw::math::Size;
+using pw::math::Vector2;
 
 namespace pw::draw {
 

@@ -63,8 +63,8 @@ constexpr uint16_t kFramebufferHeight = DISPLAY_HEIGHT;
 
 constexpr size_t kNumPixels = kFramebufferWidth * kFramebufferHeight;
 constexpr uint16_t kDisplayRowBytes = sizeof(uint16_t) * kFramebufferWidth;
-constexpr pw::coordinates::Size<uint16_t> kDisplaySize = {DISPLAY_WIDTH,
-                                                          DISPLAY_HEIGHT};
+constexpr pw::math::Size<uint16_t> kDisplaySize = {DISPLAY_WIDTH,
+                                                   DISPLAY_HEIGHT};
 constexpr pw::spi::Config kSpiConfig8Bit{
     .polarity = pw::spi::ClockPolarity::kActiveHigh,
     .phase = pw::spi::ClockPhase::kFallingEdge,

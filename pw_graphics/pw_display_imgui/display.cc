@@ -17,14 +17,14 @@ namespace pw::display {
 
 DisplayImgUI::DisplayImgUI(
     pw::display_driver::DisplayDriverImgUI& display_driver,
-    pw::coordinates::Size<uint16_t> size)
+    pw::math::Size<uint16_t> size)
     : Display(display_driver, size), display_driver_(display_driver) {}
 
 DisplayImgUI::~DisplayImgUI() = default;
 
 bool DisplayImgUI::NewTouchEvent() { return display_driver_.NewTouchEvent(); }
 
-pw::coordinates::Vector3<int> DisplayImgUI::GetTouchPoint() {
+pw::math::Vector3<int> DisplayImgUI::GetTouchPoint() {
   return display_driver_.GetTouchPoint();
 }
 

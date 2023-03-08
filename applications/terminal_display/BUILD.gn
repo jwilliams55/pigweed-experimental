@@ -35,7 +35,7 @@ group("all") {
 pw_source_set("text_buffer") {
   public_deps = [
     "$dir_pw_color",
-    "$dir_pw_coordinates",
+    "$dir_pw_math",
     "$dir_pw_result",
   ]
   sources = [
@@ -52,11 +52,11 @@ pw_executable("terminal_demo") {
     "$dir_pw_board_led",
     "$dir_pw_color",
     "$dir_pw_containers:vector",
-    "$dir_pw_coordinates",
     "$dir_pw_display",
     "$dir_pw_draw",
     "$dir_pw_framebuffer",
     "$dir_pw_log",
+    "$dir_pw_math",
     "$dir_pw_random",
     "$dir_pw_ring_buffer",
     "$dir_pw_spin_delay",

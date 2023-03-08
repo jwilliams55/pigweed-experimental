@@ -40,8 +40,8 @@ constexpr uint16_t kFramebufferWidth =
 constexpr uint16_t kFramebufferHeight = DISPLAY_HEIGHT;
 constexpr uint16_t kBufferStrideBytes =
     kFramebufferWidth * pw::mipi::dsi::kBytesPerPixel;
-constexpr pw::coordinates::Size<uint16_t> kDisplaySize = {DISPLAY_WIDTH,
-                                                          DISPLAY_HEIGHT};
+constexpr pw::math::Size<uint16_t> kDisplaySize = {DISPLAY_WIDTH,
+                                                   DISPLAY_HEIGHT};
 
 const pw::framebuffer::pool::PoolData s_fb_pool_data = {
     .fb_addr =

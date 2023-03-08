@@ -434,7 +434,7 @@ uint16_t DisplayDriverImgUI::GetHeight() const { return kDisplayHeight; }
 
 bool DisplayDriverImgUI::NewTouchEvent() { return left_mouse_pressed; }
 
-pw::coordinates::Vector3<int> DisplayDriverImgUI::GetTouchPoint() {
+pw::math::Vector3<int> DisplayDriverImgUI::GetTouchPoint() {
   if (left_mouse_pressed && texture_mouse_x >= 0 &&
       texture_mouse_x < kDisplayWidth && texture_mouse_y >= 0 &&
       texture_mouse_y < kDisplayHeight) {

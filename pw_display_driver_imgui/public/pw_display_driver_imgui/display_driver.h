@@ -13,9 +13,9 @@
 // the License.
 #pragma once
 
-#include "pw_coordinates/vector3.h"
 #include "pw_display_driver/display_driver.h"
 #include "pw_framebuffer_pool/framebuffer_pool.h"
+#include "pw_math/vector3.h"
 
 namespace pw::display_driver {
 
@@ -24,7 +24,7 @@ class DisplayDriverImgUI : public DisplayDriver {
   DisplayDriverImgUI(const pw::framebuffer::pool::PoolData& pool_data);
 
   bool NewTouchEvent();
-  pw::coordinates::Vector3<int> GetTouchPoint();
+  pw::math::Vector3<int> GetTouchPoint();
 
   // pw::display_driver::DisplayDriver implementation:
   Status Init() override;

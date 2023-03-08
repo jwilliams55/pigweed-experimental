@@ -16,8 +16,8 @@
 #include <array>
 
 #include "pw_color/color.h"
-#include "pw_coordinates/size.h"
-#include "pw_coordinates/vector2.h"
+#include "pw_math/size.h"
+#include "pw_math/vector2.h"
 #include "pw_result/result.h"
 
 constexpr size_t kNumCharsWide = 52;
@@ -62,18 +62,18 @@ class TextBuffer {
   void DrawCharacter(const Char& ch);
 
   // Return the size, in characters, of the text buffer.
-  pw::coordinates::Size<int> GetSize() const {
-    return pw::coordinates::Size<int>{kNumCharsWide, kNumRows};
+  pw::math::Size<int> GetSize() const {
+    return pw::math::Size<int>{kNumCharsWide, kNumRows};
   }
 
   // Return the character at the specified location.
-  pw::Result<Char> GetChar(pw::coordinates::Vector2<int> loc) const;
+  pw::Result<Char> GetChar(pw::math::Vector2<int> loc) const;
 
  private:
   void ScrollUp();
   void InsertNewline();
 
-  pw::coordinates::Vector2<int> cursor_ = {0, 0};
+  pw::math::Vector2<int> cursor_ = {0, 0};
   bool character_wrap_enabled_ = false;
   std::array<TextRow, kNumRows> text_rows_;
 };

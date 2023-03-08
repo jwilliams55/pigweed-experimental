@@ -13,7 +13,7 @@
 // the License.
 #pragma once
 
-namespace pw::coordinates {
+namespace pw::math {
 
 template <typename T>
 struct Size {
@@ -28,4 +28,4 @@ struct Size {
   }
 };
 
-}  // namespace pw::coordinates
+}  // namespace pw::math

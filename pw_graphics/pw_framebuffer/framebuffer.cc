@@ -24,7 +24,7 @@ namespace pw::framebuffer {
 Framebuffer::Framebuffer() : pixel_data_(nullptr), size_{0, 0}, row_bytes_(0) {}
 
 Framebuffer::Framebuffer(color_rgb565_t* data,
-                         pw::coordinates::Size<uint16_t> size,
+                         pw::math::Size<uint16_t> size,
                          uint16_t row_bytes)
     : pixel_data_(data), size_(size), row_bytes_(row_bytes) {}
 

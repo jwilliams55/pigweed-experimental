@@ -25,8 +25,8 @@ pw_source_set("pw_display_driver_mipi") {
   public = [ "public/pw_display_driver_mipi/display_driver.h" ]
   deps = [ "$dir_pw_log" ]
   public_deps = [
-    "$dir_pw_coordinates",
     "$dir_pw_display_driver:display_driver",
+    "$dir_pw_math",
     "$dir_pw_mipi_dsi",
     "$dir_pw_spi:device",
     "$dir_pw_status",

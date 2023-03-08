@@ -76,8 +76,7 @@ constexpr uint16_t kFramebufferWidth =
                            : DISPLAY_WIDTH / kDisplayScaleFactor;
 constexpr uint16_t kFramebufferHeight = DISPLAY_HEIGHT / kDisplayScaleFactor;
 
-constexpr pw::coordinates::Size<uint16_t> kDisplaySize{DISPLAY_WIDTH,
-                                                       DISPLAY_HEIGHT};
+constexpr pw::math::Size<uint16_t> kDisplaySize{DISPLAY_WIDTH, DISPLAY_HEIGHT};
 constexpr size_t kNumPixels = kFramebufferWidth * kFramebufferHeight;
 constexpr uint16_t kFramebufferRowBytes = sizeof(uint16_t) * kFramebufferWidth;
 

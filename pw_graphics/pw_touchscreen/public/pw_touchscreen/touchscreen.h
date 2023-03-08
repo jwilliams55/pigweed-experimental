@@ -13,13 +13,13 @@
 // the License.
 #pragma once
 
-#include "pw_coordinates/vector3.h"
+#include "pw_math/vector3.h"
 
 namespace pw::touchscreen {
 
 void Init();
 bool Available();
 bool NewTouchEvent();
-pw::coordinates::Vector3<int> GetTouchPoint();
+pw::math::Vector3<int> GetTouchPoint();
 
 }  // namespace pw::touchscreen

@@ -22,7 +22,7 @@
 using pw::color::color_rgb565_t;
 using pw::display_driver::DisplayDriver;
 using pw::framebuffer::Framebuffer;
-using Size = pw::coordinates::Size<uint16_t>;
+using Size = pw::math::Size<uint16_t>;
 
 namespace pw::display {
 
@@ -114,7 +114,7 @@ class TestDisplayDriver : public DisplayDriver {
 };
 
 TEST(Display, ReleaseNoResize) {
-  constexpr pw::coordinates::Size<uint16_t> kFramebufferSize{2, 1};
+  constexpr pw::math::Size<uint16_t> kFramebufferSize{2, 1};
   constexpr Size kDisplaySize = kFramebufferSize;
   constexpr size_t kNumPixels =
       kFramebufferSize.width * kFramebufferSize.height;
@@ -140,7 +140,7 @@ TEST(Display, ReleaseNoResize) {
 #if DISPLAY_RESIZE
 TEST(Display, ReleaseSmallResize) {
   constexpr Size kDisplaySize = {8, 4};
-  constexpr pw::coordinates::Size<uint16_t> kFramebufferSize{2, 1};
+  constexpr pw::math::Size<uint16_t> kFramebufferSize{2, 1};
   constexpr size_t kNumPixels =
       kFramebufferSize.width * kFramebufferSize.height;
   constexpr uint16_t kFramebufferRowBytes =
@@ -185,7 +185,7 @@ TEST(Display, ReleaseSmallResize) {
 TEST(Display, ReleaseWideResize) {
   // Display width > resize buffer (80 px.) will cause two writes per row.
   constexpr Size kDisplaySize = {90, 4};
-  constexpr pw::coordinates::Size<uint16_t> kFramebufferSize{2, 1};
+  constexpr pw::math::Size<uint16_t> kFramebufferSize{2, 1};
   constexpr size_t kNumPixels =
       kFramebufferSize.width * kFramebufferSize.height;
   constexpr uint16_t kFramebufferRowBytes =
