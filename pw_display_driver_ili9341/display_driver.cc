@@ -306,8 +306,7 @@ Status DisplayDriverILI9341::ReleaseFramebuffer(Framebuffer frame_buffer) {
   PW_ASSERT(frame_buffer.pixel_format() == PixelFormat::RGB565);
   auto transaction = config_.spi_device_16_bit.StartTransaction(
       ChipSelectBehavior::kPerTransaction);
-  const uint16_t* fb_data =
-      static_cast<const uint16_t*>(frame_buffer.GetFramebufferData());
+  const uint16_t* fb_data = static_cast<const uint16_t*>(frame_buffer.data());
   Status s;
   // TODO(cmumford): Figure out why the STM32F429I cannot send the entire
   // framebuffer in a single write, but another display can.

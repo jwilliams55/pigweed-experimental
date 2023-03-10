@@ -402,7 +402,7 @@ Framebuffer DisplayDriverImgUI::GetFramebuffer() {
 }
 
 Status DisplayDriverImgUI::ReleaseFramebuffer(Framebuffer framebuffer) {
-  if (!framebuffer.IsValid())
+  if (!framebuffer.is_valid())
     return Status::InvalidArgument();
   PW_ASSERT(framebuffer.pixel_format() == PixelFormat::RGB565);
   RecreateLcdTexture();

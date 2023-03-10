@@ -46,10 +46,10 @@ class Framebuffer {
   Framebuffer& operator=(Framebuffer&&);
 
   // Has the framebuffer been properly initialized?
-  bool IsValid() const { return pixel_data_ != nullptr; };
+  bool is_valid() const { return pixel_data_ != nullptr; };
 
   // Return a pointer to the framebuffer pixel buffer.
-  void* GetFramebufferData() const { return pixel_data_; }
+  void* data() const { return pixel_data_; }
 
   // Return the format of all pixels managed by this framebuffer.
   PixelFormat pixel_format() const { return pixel_format_; }
@@ -59,7 +59,7 @@ class Framebuffer {
   pw::math::Size<uint16_t> size() const { return size_; }
 
   // Return the number of bytes per row of pixel data.
-  uint16_t GetRowBytes() const { return row_bytes_; }
+  uint16_t row_bytes() const { return row_bytes_; }
 
  private:
   void* pixel_data_;               // The pixel buffer.

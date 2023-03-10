@@ -152,9 +152,9 @@ Framebuffer MCUXpressoDevice::GetFramebuffer() {
 }
 
 Status MCUXpressoDevice::ReleaseFramebuffer(Framebuffer framebuffer) {
-  if (!framebuffer.IsValid())
+  if (!framebuffer.is_valid())
     return Status::InvalidArgument();
-  void* data = framebuffer.GetFramebufferData();
+  void* data = framebuffer.data();
   return fbdev_.WriteFramebuffer(data);
 }
 

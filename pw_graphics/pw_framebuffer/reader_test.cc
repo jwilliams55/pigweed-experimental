@@ -33,7 +33,7 @@ TEST(FramebufferReader, SetPixelGetPixel) {
   color_rgb565_t data[8 * 8];
   Framebuffer fb(data, PixelFormat::RGB565, {8, 8}, 8 * sizeof(data[0]));
   const color_rgb565_t* pixel_data =
-      static_cast<const color_rgb565_t*>(fb.GetFramebufferData());
+      static_cast<const color_rgb565_t*>(fb.data());
   color_rgb565_t indigo = 0x83b3;
   {
     FramebufferWriter writer(fb);

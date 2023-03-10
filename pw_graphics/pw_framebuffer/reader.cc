@@ -21,7 +21,7 @@ namespace pw::framebuffer {
 FramebufferReader::FramebufferReader(const Framebuffer& framebuffer)
     : framebuffer_(framebuffer) {
   PW_ASSERT(framebuffer_.pixel_format() == PixelFormat::RGB565);
-  PW_ASSERT(framebuffer_.IsValid());
+  PW_ASSERT(framebuffer_.is_valid());
 }
 
 Result<color_rgb565_t> FramebufferReader::GetPixel(uint16_t x,
@@ -30,7 +30,7 @@ Result<color_rgb565_t> FramebufferReader::GetPixel(uint16_t x,
     return Status::OutOfRange();
   }
   const color_rgb565_t* data =
-      static_cast<const color_rgb565_t*>(framebuffer_.GetFramebufferData());
+      static_cast<const color_rgb565_t*>(framebuffer_.data());
   return data[y * framebuffer_.size().width + x];
 }
 

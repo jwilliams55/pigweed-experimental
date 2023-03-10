@@ -58,10 +58,10 @@ class TestDisplayDriver : public DisplayDriver {
   Status Init() override { return OkStatus(); }
 
   Framebuffer GetFramebuffer() override {
-    return Framebuffer(framebuffer_.GetFramebufferData(),
+    return Framebuffer(framebuffer_.data(),
                        PixelFormat::RGB565,
                        framebuffer_.size(),
-                       framebuffer_.GetRowBytes());
+                       framebuffer_.row_bytes());
   }
 
   Status ReleaseFramebuffer(Framebuffer framebuffer) override {
@@ -69,7 +69,7 @@ class TestDisplayDriver : public DisplayDriver {
       call_params_[next_call_param_idx_].call_func =
           CallFunc::ReleaseFramebuffer;
       call_params_[next_call_param_idx_].release_framebuffer.fb_data =
-          framebuffer.GetFramebufferData();
+          framebuffer.data();
       next_call_param_idx_++;
     }
     return OkStatus();
@@ -128,7 +128,7 @@ TEST(Display, ReleaseNoResize) {
       pixel_data, PixelFormat::RGB565, kFramebufferSize, kFramebufferRowBytes));
   Display display(test_driver, kDisplaySize);
   Framebuffer fb = display.GetFramebuffer();
-  EXPECT_TRUE(fb.IsValid());
+  EXPECT_TRUE(fb.is_valid());
   EXPECT_EQ(kFramebufferSize, fb.size());
   EXPECT_EQ(0, test_driver.GetNumCalls());
 
@@ -153,7 +153,7 @@ TEST(Display, ReleaseSmallResize) {
       Framebuffer(pixel_data, kFramebufferSize, kFramebufferRowBytes));
   Display display(test_driver, kDisplaySize);
   Framebuffer fb = display.GetFramebuffer();
-  EXPECT_TRUE(fb.IsValid());
+  EXPECT_TRUE(fb.is_valid());
   EXPECT_EQ(kFramebufferSize, fb.size());
   EXPECT_EQ(0, test_driver.GetNumCalls());
 
@@ -198,7 +198,7 @@ TEST(Display, ReleaseWideResize) {
       Framebuffer(pixel_data, kFramebufferSize, kFramebufferRowBytes));
   Display display(test_driver, kDisplaySize);
   Framebuffer fb = display.GetFramebuffer();
-  EXPECT_TRUE(fb.IsValid());
+  EXPECT_TRUE(fb.is_valid());
   EXPECT_EQ(kFramebufferSize, fb.size());
   EXPECT_EQ(0, test_driver.GetNumCalls());
 

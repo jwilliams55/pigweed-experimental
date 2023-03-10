@@ -305,7 +305,7 @@ Status DisplayDriverST7735::Init() {
 
 Status DisplayDriverST7735::Update(
     pw::framebuffer::FramebufferRgb565* framebuffer) {
-  PW_ASSERT(framebuffer->IsValid());
+  PW_ASSERT(framebuffer->is_valid());
   PW_ASSERT(framebuffer->pixel_format() == PixelFormat::RGB565);
   // Let controller know a write is coming.
   {
@@ -317,7 +317,7 @@ Status DisplayDriverST7735::Update(
   // Write the pixel data.
   auto transaction = config_.spi_device_16_bit.StartTransaction(
       ChipSelectBehavior::kPerWriteRead);
-  const uint16_t* fb_data = framebuffer->GetFramebufferData();
+  const uint16_t* fb_data = framebuffer->data();
   const size_t num_pixels = config_.screen_width * config_.screen_height;
   return transaction.Write(
       ConstByteSpan(reinterpret_cast<const byte*>(fb_data), num_pixels));

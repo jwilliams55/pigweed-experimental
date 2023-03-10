@@ -32,7 +32,7 @@ Display::~Display() = default;
 
 #if DISPLAY_RESIZE
 Status Display::UpdateNearestNeighbor(const Framebuffer& framebuffer) {
-  PW_ASSERT(framebuffer.IsValid());
+  PW_ASSERT(framebuffer.is_valid());
   if (!framebuffer.size().width || !framebuffer.size().height)
     return Status::Internal();
 
@@ -43,9 +43,9 @@ Status Display::UpdateNearestNeighbor(const Framebuffer& framebuffer) {
   color_rgb565_t resize_buffer[kResizeBufferNumPixels];
 
   const color_rgb565_t* fbdata =
-      static_cast<const color_rgb565_t*>(framebuffer.GetFramebufferData());
+      static_cast<const color_rgb565_t*>(framebuffer.data());
   constexpr int kBytesPerPixel = sizeof(color_rgb565_t);
-  const int num_src_row_pixels = framebuffer.GetRowBytes() / kBytesPerPixel;
+  const int num_src_row_pixels = framebuffer.row_bytes() / kBytesPerPixel;
 
   const int num_dst_rows = size_.height;
   const int num_dst_cols = size_.width;
@@ -87,7 +87,7 @@ Framebuffer Display::GetFramebuffer() {
 }
 
 Status Display::ReleaseFramebuffer(Framebuffer framebuffer) {
-  if (!framebuffer.IsValid())
+  if (!framebuffer.is_valid())
     return Status::InvalidArgument();
   if (framebuffer.size() != size_) {
 #if DISPLAY_RESIZE

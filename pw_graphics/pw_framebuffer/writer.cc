@@ -31,8 +31,7 @@ void FramebufferWriter::SetPixel(uint16_t x,
   if (x >= fb_size.width || y >= fb_size.height) {
     return;
   }
-  color_rgb565_t* data =
-      static_cast<color_rgb565_t*>(framebuffer_.GetFramebufferData());
+  color_rgb565_t* data = static_cast<color_rgb565_t*>(framebuffer_.data());
   data[y * fb_size.width + x] = pixel_value;
 }
 
@@ -50,8 +49,7 @@ void FramebufferWriter::Blit(const Framebuffer& fb, uint16_t x, uint16_t y) {
 }
 
 void FramebufferWriter::Fill(color_rgb565_t pixel_value) {
-  color_rgb565_t* data =
-      static_cast<color_rgb565_t*>(framebuffer_.GetFramebufferData());
+  color_rgb565_t* data = static_cast<color_rgb565_t*>(framebuffer_.data());
   const size_t num_pixels =
       framebuffer_.size().width * framebuffer_.size().height;
   for (size_t i = 0; i < num_pixels; i++) {

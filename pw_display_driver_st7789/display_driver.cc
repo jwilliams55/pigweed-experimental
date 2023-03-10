@@ -202,7 +202,7 @@ Status DisplayDriverST7789::ReleaseFramebuffer(
   // Write the pixel data.
   auto transaction = config_.spi_device_16_bit.StartTransaction(
       ChipSelectBehavior::kPerWriteRead);
-  const uint16_t* fb_data = frame_buffer.GetFramebufferData();
+  const uint16_t* fb_data = frame_buffer.data();
   const int num_pixels = frame_buffer.GetWidth() * frame_buffer.GetHeight();
   return transaction.Write(
       ConstByteSpan(reinterpret_cast<const byte*>(fb_data), num_pixels));

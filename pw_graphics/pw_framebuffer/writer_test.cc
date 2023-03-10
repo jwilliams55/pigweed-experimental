@@ -33,7 +33,7 @@ TEST(FramebufferWriter, Fill) {
   Framebuffer fb(data, PixelFormat::RGB565, {8, 8}, 8 * sizeof(data[0]));
   FramebufferWriter writer(fb);
   const color_rgb565_t* pixel_data =
-      static_cast<const color_rgb565_t*>(fb.GetFramebufferData());
+      static_cast<const color_rgb565_t*>(fb.data());
   color_rgb565_t indigo = 0x83b3;
   writer.Fill(indigo);
   // First pixel
@@ -49,7 +49,7 @@ TEST(FramebufferWriter, Blit) {
   color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   writer.Fill(indigo);
   const color_rgb565_t* pixel_data =
-      static_cast<const color_rgb565_t*>(fb.GetFramebufferData());
+      static_cast<const color_rgb565_t*>(fb.data());
   // First pixel
   EXPECT_EQ(pixel_data[0], indigo);
   // Last pixel
