@@ -68,8 +68,8 @@ void PrintFramebufferAsANSI(const Framebuffer& fb) {
 }
 
 TEST(DrawLine, Diagonal) {
-  uint16_t data[4 * 4];
-  Framebuffer fb(data, {4, 4}, 4 * sizeof(data[0]));
+  color_rgb565_t data[4 * 4];
+  Framebuffer fb(data, PixelFormat::RGB565, {4, 4}, 4 * sizeof(data[0]));
   FramebufferWriter writer(fb);
   color_rgb565_t indigo = color::colors_pico8_rgb565[12];
 
@@ -94,8 +94,8 @@ TEST(DrawLine, Diagonal) {
 }
 
 TEST(DrawHLine, Top) {
-  uint16_t data[4 * 4];
-  Framebuffer fb(data, {4, 4}, 4 * sizeof(data[0]));
+  color_rgb565_t data[4 * 4];
+  Framebuffer fb(data, PixelFormat::RGB565, {4, 4}, 4 * sizeof(data[0]));
   FramebufferWriter writer(fb);
   color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   writer.Fill(0);
@@ -117,8 +117,8 @@ TEST(DrawHLine, Top) {
 }
 
 TEST(DrawRect, Empty) {
-  uint16_t data[5 * 5];
-  Framebuffer fb(data, {5, 5}, 5 * sizeof(data[0]));
+  color_rgb565_t data[5 * 5];
+  Framebuffer fb(data, PixelFormat::RGB565, {5, 5}, 5 * sizeof(data[0]));
   FramebufferWriter writer(fb);
   color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   writer.Fill(0);
@@ -210,8 +210,8 @@ TEST(DrawRect, Empty) {
 }
 
 TEST(DrawRect, Filled) {
-  uint16_t data[5 * 5];
-  Framebuffer fb(data, {5, 5}, 5 * sizeof(data[0]));
+  color_rgb565_t data[5 * 5];
+  Framebuffer fb(data, PixelFormat::RGB565, {5, 5}, 5 * sizeof(data[0]));
   FramebufferWriter writer(fb);
   color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   writer.Fill(0);
@@ -298,8 +298,8 @@ TEST(DrawRect, Filled) {
 }
 
 TEST(DrawRectWH, WidthHeightCorrect) {
-  uint16_t data[5 * 5];
-  Framebuffer fb(data, {5, 5}, 5 * sizeof(data[0]));
+  color_rgb565_t data[5 * 5];
+  Framebuffer fb(data, PixelFormat::RGB565, {5, 5}, 5 * sizeof(data[0]));
   FramebufferWriter writer(fb);
   color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   writer.Fill(0);
@@ -391,8 +391,8 @@ TEST(DrawRectWH, WidthHeightCorrect) {
 }
 
 TEST(DrawCircle, Empty) {
-  uint16_t data[7 * 7];
-  Framebuffer fb(data, {7, 7}, 7 * sizeof(data[0]));
+  color_rgb565_t data[7 * 7];
+  Framebuffer fb(data, PixelFormat::RGB565, {7, 7}, 7 * sizeof(data[0]));
   FramebufferWriter writer(fb);
   color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   writer.Fill(0);
@@ -566,8 +566,9 @@ TEST(DrawCircle, Empty) {
 }
 
 TEST(DrawText, WithFgBg) {
-  uint16_t data[(5 * 6) * (3 * 8)];
-  Framebuffer fb(data, {5 * 6, 3 * 8}, (5 * 6) * sizeof(data[0]));
+  color_rgb565_t data[(5 * 6) * (3 * 8)];
+  Framebuffer fb(
+      data, PixelFormat::RGB565, {5 * 6, 3 * 8}, (5 * 6) * sizeof(data[0]));
   FramebufferWriter writer(fb);
   writer.Fill(0);
 

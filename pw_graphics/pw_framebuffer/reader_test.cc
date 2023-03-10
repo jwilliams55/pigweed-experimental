@@ -30,8 +30,8 @@ namespace pw::framebuffer {
 namespace {
 
 TEST(FramebufferReader, SetPixelGetPixel) {
-  uint16_t data[8 * 8];
-  Framebuffer fb(data, {8, 8}, 8 * sizeof(data[0]));
+  color_rgb565_t data[8 * 8];
+  Framebuffer fb(data, PixelFormat::RGB565, {8, 8}, 8 * sizeof(data[0]));
   const color_rgb565_t* pixel_data =
       static_cast<const color_rgb565_t*>(fb.GetFramebufferData());
   color_rgb565_t indigo = 0x83b3;

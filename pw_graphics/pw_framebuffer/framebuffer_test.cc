@@ -29,8 +29,8 @@ namespace pw::framebuffer {
 namespace {
 
 TEST(Framebuffer, Init) {
-  uint16_t data[32 * 32];
-  Framebuffer fb(data, {32, 32}, 32 * sizeof(data[0]));
+  color_rgb565_t data[32 * 32];
+  Framebuffer fb(data, PixelFormat::RGB565, {32, 32}, 32 * sizeof(data[0]));
   EXPECT_EQ(fb.size().width, 32);
   EXPECT_EQ(fb.size().height, 32);
 }

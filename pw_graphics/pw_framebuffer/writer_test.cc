@@ -30,7 +30,7 @@ namespace {
 
 TEST(FramebufferWriter, Fill) {
   uint16_t data[8 * 8];
-  Framebuffer fb(data, {8, 8}, 8 * sizeof(data[0]));
+  Framebuffer fb(data, PixelFormat::RGB565, {8, 8}, 8 * sizeof(data[0]));
   FramebufferWriter writer(fb);
   const color_rgb565_t* pixel_data =
       static_cast<const color_rgb565_t*>(fb.GetFramebufferData());
@@ -44,7 +44,7 @@ TEST(FramebufferWriter, Fill) {
 
 TEST(FramebufferWriter, Blit) {
   uint16_t data[8 * 8];
-  Framebuffer fb(data, {8, 8}, 8 * sizeof(data[0]));
+  Framebuffer fb(data, PixelFormat::RGB565, {8, 8}, 8 * sizeof(data[0]));
   FramebufferWriter writer(fb);
   color_rgb565_t indigo = color::colors_pico8_rgb565[12];
   writer.Fill(indigo);
@@ -57,7 +57,7 @@ TEST(FramebufferWriter, Blit) {
 
   constexpr color_rgb565_t orange = 0xfd00;
   uint16_t data2[4 * 4];
-  Framebuffer fb2(data2, {4, 4}, 4 * sizeof(data2[0]));
+  Framebuffer fb2(data2, PixelFormat::RGB565, {4, 4}, 4 * sizeof(data2[0]));
   {
     FramebufferWriter writer2(fb2);
     writer2.Fill(orange);

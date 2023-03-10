@@ -20,17 +20,18 @@ namespace pw::framebuffer {
 
 FramebufferReader::FramebufferReader(const Framebuffer& framebuffer)
     : framebuffer_(framebuffer) {
+  PW_ASSERT(framebuffer_.pixel_format() == PixelFormat::RGB565);
   PW_ASSERT(framebuffer_.IsValid());
 }
 
 Result<color_rgb565_t> FramebufferReader::GetPixel(uint16_t x,
                                                    uint16_t y) const {
+  if (x >= framebuffer_.size().width || y >= framebuffer_.size().height) {
+    return Status::OutOfRange();
+  }
   const color_rgb565_t* data =
       static_cast<const color_rgb565_t*>(framebuffer_.GetFramebufferData());
-  if (x < framebuffer_.size().width && y < framebuffer_.size().height) {
-    return data[y * framebuffer_.size().width + x];
-  }
-  return Status::OutOfRange();
+  return data[y * framebuffer_.size().width + x];
 }
 
 }  // namespace pw::framebuffer

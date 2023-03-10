@@ -23,6 +23,7 @@
 using pw::color::color_rgb565_t;
 using pw::digital_io::State;
 using pw::framebuffer::Framebuffer;
+using pw::framebuffer::PixelFormat;
 using pw::spi::ChipSelectBehavior;
 using pw::spi::Device;
 
@@ -296,11 +297,13 @@ Status DisplayDriverILI9341::Init() {
 
 Framebuffer DisplayDriverILI9341::GetFramebuffer() {
   return Framebuffer(config_.pool_data.fb_addr[0],
+                     PixelFormat::RGB565,
                      config_.pool_data.size,
                      config_.pool_data.row_bytes);
 }
 
 Status DisplayDriverILI9341::ReleaseFramebuffer(Framebuffer frame_buffer) {
+  PW_ASSERT(frame_buffer.pixel_format() == PixelFormat::RGB565);
   auto transaction = config_.spi_device_16_bit.StartTransaction(
       ChipSelectBehavior::kPerTransaction);
   const uint16_t* fb_data =

@@ -19,25 +19,40 @@
 
 namespace pw::framebuffer {
 
-Framebuffer::Framebuffer() : pixel_data_(nullptr), size_{0, 0}, row_bytes_(0) {}
+Framebuffer::Framebuffer()
+    : pixel_data_(nullptr),
+      pixel_format_(PixelFormat::None),
+      size_{0, 0},
+      row_bytes_(0) {}
 
 Framebuffer::Framebuffer(void* data,
+                         PixelFormat pixel_format,
                          pw::math::Size<uint16_t> size,
                          uint16_t row_bytes)
-    : pixel_data_(data), size_(size), row_bytes_(row_bytes) {}
+    : pixel_data_(data),
+      pixel_format_(pixel_format),
+      size_(size),
+      row_bytes_(row_bytes) {
+  PW_ASSERT(data != nullptr);
+  PW_ASSERT(pixel_format != PixelFormat::None);
+}
 
 Framebuffer::Framebuffer(Framebuffer&& other)
     : pixel_data_(other.pixel_data_),
+      pixel_format_(other.pixel_format_),
       size_(other.size_),
       row_bytes_(other.row_bytes_) {
   other.pixel_data_ = nullptr;
+  other.pixel_format_ = PixelFormat::None;
 }
 
 Framebuffer& Framebuffer::operator=(Framebuffer&& rhs) {
   pixel_data_ = rhs.pixel_data_;
+  pixel_format_ = rhs.pixel_format_;
   size_ = rhs.size_;
   row_bytes_ = rhs.row_bytes_;
   rhs.pixel_data_ = nullptr;
+  rhs.pixel_format_ = PixelFormat::None;
   return *this;
 }
 

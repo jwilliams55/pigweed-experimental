@@ -27,12 +27,13 @@ FramebufferWriter::FramebufferWriter(Framebuffer& framebuffer)
 void FramebufferWriter::SetPixel(uint16_t x,
                                  uint16_t y,
                                  color_rgb565_t pixel_value) {
+  auto fb_size = framebuffer_.size();
+  if (x >= fb_size.width || y >= fb_size.height) {
+    return;
+  }
   color_rgb565_t* data =
       static_cast<color_rgb565_t*>(framebuffer_.GetFramebufferData());
-  auto fb_size = framebuffer_.size();
-  if (x < fb_size.width && y < fb_size.height) {
-    data[y * fb_size.width + x] = pixel_value;
-  }
+  data[y * fb_size.width + x] = pixel_value;
 }
 
 void FramebufferWriter::Blit(const Framebuffer& fb, uint16_t x, uint16_t y) {

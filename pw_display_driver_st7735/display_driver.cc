@@ -306,6 +306,7 @@ Status DisplayDriverST7735::Init() {
 Status DisplayDriverST7735::Update(
     pw::framebuffer::FramebufferRgb565* framebuffer) {
   PW_ASSERT(framebuffer->IsValid());
+  PW_ASSERT(framebuffer->pixel_format() == PixelFormat::RGB565);
   // Let controller know a write is coming.
   {
     auto transaction = config_.spi_device_8_bit.StartTransaction(

@@ -22,6 +22,7 @@
 using pw::color::color_rgb565_t;
 using pw::display_driver::DisplayDriver;
 using pw::framebuffer::Framebuffer;
+using pw::framebuffer::PixelFormat;
 using Size = pw::math::Size<uint16_t>;
 
 namespace pw::display {
@@ -58,6 +59,7 @@ class TestDisplayDriver : public DisplayDriver {
 
   Framebuffer GetFramebuffer() override {
     return Framebuffer(framebuffer_.GetFramebufferData(),
+                       PixelFormat::RGB565,
                        framebuffer_.size(),
                        framebuffer_.GetRowBytes());
   }
@@ -122,8 +124,8 @@ TEST(Display, ReleaseNoResize) {
       sizeof(color_rgb565_t) * kFramebufferSize.width;
   color_rgb565_t pixel_data[kNumPixels];
 
-  TestDisplayDriver test_driver(
-      Framebuffer(pixel_data, kFramebufferSize, kFramebufferRowBytes));
+  TestDisplayDriver test_driver(Framebuffer(
+      pixel_data, PixelFormat::RGB565, kFramebufferSize, kFramebufferRowBytes));
   Display display(test_driver, kDisplaySize);
   Framebuffer fb = display.GetFramebuffer();
   EXPECT_TRUE(fb.IsValid());

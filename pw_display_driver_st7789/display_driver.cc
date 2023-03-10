@@ -191,6 +191,7 @@ Framebuffer DisplayDriverST7789::GetFramebuffer() {
 
 Status DisplayDriverST7789::ReleaseFramebuffer(
     pw::framebuffer::Framebuffer frame_buffer) {
+  PW_ASSERT(frame_buffer.pixel_format() == PixelFormat::RGB565);
   // Let controller know a write is coming.
   {
     auto transaction = config_.spi_device_8_bit.StartTransaction(

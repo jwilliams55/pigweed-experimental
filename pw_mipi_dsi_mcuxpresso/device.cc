@@ -27,6 +27,7 @@
 
 using pw::color::color_rgb565_t;
 using pw::framebuffer::Framebuffer;
+using pw::framebuffer::PixelFormat;
 
 namespace pw::mipi::dsi {
 
@@ -145,6 +146,7 @@ Status MCUXpressoDevice::Init() {
 
 Framebuffer MCUXpressoDevice::GetFramebuffer() {
   return Framebuffer(static_cast<color_rgb565_t*>(fbdev_.GetFramebuffer()),
+                     PixelFormat::RGB565,
                      fb_pool_.size,
                      fb_pool_.row_bytes);
 }

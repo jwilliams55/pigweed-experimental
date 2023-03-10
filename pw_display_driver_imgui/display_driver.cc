@@ -36,6 +36,7 @@
 using pw::color::color_rgb565_t;
 using pw::framebuffer::Framebuffer;
 using pw::framebuffer::FramebufferReader;
+using pw::framebuffer::PixelFormat;
 
 namespace pw::display_driver {
 
@@ -394,13 +395,16 @@ void DisplayDriverImgUI::Render() {
 }
 
 Framebuffer DisplayDriverImgUI::GetFramebuffer() {
-  return Framebuffer(
-      pool_data_.fb_addr[0], pool_data_.size, pool_data_.row_bytes);
+  return Framebuffer(pool_data_.fb_addr[0],
+                     PixelFormat::RGB565,
+                     pool_data_.size,
+                     pool_data_.row_bytes);
 }
 
 Status DisplayDriverImgUI::ReleaseFramebuffer(Framebuffer framebuffer) {
   if (!framebuffer.IsValid())
     return Status::InvalidArgument();
+  PW_ASSERT(framebuffer.pixel_format() == PixelFormat::RGB565);
   RecreateLcdTexture();
 
   FramebufferReader reader(framebuffer);

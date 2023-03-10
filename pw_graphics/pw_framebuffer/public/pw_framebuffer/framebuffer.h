@@ -20,6 +20,11 @@
 
 namespace pw::framebuffer {
 
+enum class PixelFormat {
+  None,
+  RGB565,
+};
+
 // A Framebuffer refers to a buffer of pixel data and the various attributes
 // of that pixel data (such as dimensions, rowbytes, etc.).
 class Framebuffer {
@@ -29,7 +34,10 @@ class Framebuffer {
 
   // Construct a framebuffer of the specified dimensions which *does not* own
   // the |data| - i.e. this instance will never attempt to free it.
-  Framebuffer(void* data, pw::math::Size<uint16_t> size, uint16_t row_bytes);
+  Framebuffer(void* data,
+              PixelFormat pixel_format,
+              pw::math::Size<uint16_t> size,
+              uint16_t row_bytes);
 
   Framebuffer(const Framebuffer&) = delete;
   Framebuffer(Framebuffer&& other);
@@ -43,6 +51,9 @@ class Framebuffer {
   // Return a pointer to the framebuffer pixel buffer.
   void* GetFramebufferData() const { return pixel_data_; }
 
+  // Return the format of all pixels managed by this framebuffer.
+  PixelFormat pixel_format() const { return pixel_format_; }
+
   // Return the framebuffer size which is the width and height of the
   // framebuffer in pixels.
   pw::math::Size<uint16_t> size() const { return size_; }
@@ -52,6 +63,7 @@ class Framebuffer {
 
  private:
   void* pixel_data_;               // The pixel buffer.
+  PixelFormat pixel_format_;       // The pixel format.
   pw::math::Size<uint16_t> size_;  // width/height (in pixels) of |pixel_data_|.
   uint16_t row_bytes_;             // The number of bytes in each row.
 };
