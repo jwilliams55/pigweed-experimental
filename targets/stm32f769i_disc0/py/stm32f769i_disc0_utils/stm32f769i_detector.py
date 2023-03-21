@@ -16,9 +16,10 @@
 
 import logging
 import typing
+from typing import Optional
 
 import coloredlogs  # type: ignore
-import serial.tools.list_ports  # type: ignore
+import serial.tools.list_ports
 
 # Vendor/device ID to search for in USB devices.
 # Note the STM32F429I-DISC1 and the STM32F769I-DISC0 have the same vendor/model.
@@ -31,7 +32,7 @@ _LOG = logging.getLogger('stm32f769i_detector')
 class BoardInfo(typing.NamedTuple):
     """Information about a connected dev board."""
     dev_name: str
-    serial_number: str
+    serial_number: Optional[str]
 
 
 def detect_boards() -> list:
@@ -71,7 +72,7 @@ def main():
     for idx, board in enumerate(boards):
         _LOG.info('Board %d:', idx)
         _LOG.info('  - Port: %s', board.dev_name)
-        _LOG.info('  - Serial #: %s', board.serial_number)
+        _LOG.info('  - Serial #: %s', board.serial_number or '<not set>')
 
 
 if __name__ == '__main__':

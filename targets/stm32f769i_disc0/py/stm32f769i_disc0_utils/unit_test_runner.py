@@ -23,7 +23,7 @@ import threading
 from typing import List
 
 import coloredlogs  # type: ignore
-import serial  # type: ignore
+import serial
 from stm32f769i_disc0_utils import stm32f769i_detector
 
 # Path used to access non-python resources in this python module.
