@@ -214,23 +214,15 @@ group("applications") {
     ]
   }
 
-  # STMicroelectronics STM32F429I-DISC1 applications steps.
-  deps += [
-    ":applications_tests(//targets/stm32f429i_disc1:stm32f429i_disc1_debug_tests)",
-    "//applications/blinky:blinky(//targets/stm32f429i_disc1:stm32f429i_disc1_debug)",
-    "//applications/rpc:all(//targets/stm32f429i_disc1:stm32f429i_disc1_debug)",
-    "//applications/strings:all(//targets/stm32f429i_disc1:stm32f429i_disc1_debug)",
-  ]
-
-  # STMicroelectronics STM32F769I-DISC0 applications steps.
-  deps += [
-    ":applications_tests(//targets/stm32f769i_disc0:stm32f769i_disc0_debug_tests)",
-    "//applications/blinky:blinky(//targets/stm32f769i_disc0:stm32f769i_disc0_debug)",
-    "//applications/rpc:all(//targets/stm32f769i_disc0:stm32f769i_disc0_debug)",
-    "//applications/strings:all(//targets/stm32f769i_disc0:stm32f769i_disc0_debug)",
-  ]
-
   if (dir_pw_third_party_stm32cube_f4 != "") {
+    # STMicroelectronics STM32F429I-DISC1 applications steps.
+    deps += [
+      ":applications_tests(//targets/stm32f429i_disc1:stm32f429i_disc1_debug_tests)",
+      "//applications/blinky:blinky(//targets/stm32f429i_disc1:stm32f429i_disc1_debug)",
+      "//applications/rpc:all(//targets/stm32f429i_disc1:stm32f429i_disc1_debug)",
+      "//applications/strings:all(//targets/stm32f429i_disc1:stm32f429i_disc1_debug)",
+    ]
+
     # STMicroelectronics STM32F429I-DISC1 STM32Cube applications steps.
     deps += [
       ":applications_tests(//targets/stm32f429i_disc1_stm32cube:stm32f429i_disc1_stm32cube_debug)",
@@ -249,7 +241,15 @@ group("applications") {
     deps += [ "//applications/blinky:blinky(//targets/stm32f207zg-nucleo:stm32f207zg_nucleo_debug)" ]
   }
 
-  if (dir_pw_third_party_stm32cube_f4 != "") {
+  if (dir_pw_third_party_stm32cube_f7 != "") {
+    # STMicroelectronics STM32F769I-DISC0 applications steps.
+    deps += [
+      ":applications_tests(//targets/stm32f769i_disc0:stm32f769i_disc0_debug_tests)",
+      "//applications/blinky:blinky(//targets/stm32f769i_disc0:stm32f769i_disc0_debug)",
+      "//applications/rpc:all(//targets/stm32f769i_disc0:stm32f769i_disc0_debug)",
+      "//applications/strings:all(//targets/stm32f769i_disc0:stm32f769i_disc0_debug)",
+    ]
+
     # STMicroelectronics STM32F769I-DISC0 STM32Cube applications steps.
     deps += [
       ":applications_tests(//targets/stm32f769i_disc0_stm32cube:stm32f769i_disc0_stm32cube_debug)",
