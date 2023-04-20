@@ -1,5 +1,29 @@
 {
   "pw": {
+    "pw_cli": {
+      "plugins": {
+	"presubmit": {
+	  "module": "pigweed_experimental_tools.presubmit_checks",
+	  "function": "main"
+	},
+	"heap-viewer": {
+	  "module": "pw_allocator.heap_viewer",
+	  "function": "main"
+	},
+	"ide": {
+	  "module": "pw_ide.__main__",
+	  "function": "main"
+	},
+	"rpc": {
+	  "module": "pw_system.console",
+	  "function": "main"
+	},
+	"package": {
+	  "module": "pigweed_experimental_tools.experimental_packages",
+	  "function": "main"
+	}
+      }
+    },
     "pw_env_setup": {
       "root_variable": "PIGWEED_EXPERIMENTAL_ROOT",
       "cipd_package_files": [
