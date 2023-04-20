@@ -85,7 +85,7 @@ call "%python%" "%PW_ROOT%\pw_env_setup\py\pw_env_setup\env_setup.py" ^
     --pw-root "%PW_ROOT%" ^
     --shell-file "%shell_file%" ^
     --install-dir "%_PW_ACTUAL_ENVIRONMENT_ROOT%" ^
-    --config-file "%PIGWEED_EXPERIMENTAL_ROOT%\env_setup.json" ^
+    --config-file "%PIGWEED_EXPERIMENTAL_ROOT%\pigweed.json" ^
     --project-root "%PW_PROJECT_ROOT%"
 goto activate_shell
 

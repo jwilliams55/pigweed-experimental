@@ -110,7 +110,7 @@ if [ "$(basename "$_BOOTSTRAP_PATH")" = "bootstrap.sh" ] || \
 # This is where pw_bootstrap is called. Most small projects will include
 # --use-pigweed-defaults.
 ######### BEGIN PROJECT-SPECIFIC CODE #########
-  pw_bootstrap --shell-file "$SETUP_SH" --install-dir "$_PW_ACTUAL_ENVIRONMENT_ROOT" --config-file "$PW_PROJECT_ROOT/env_setup.json"
+  pw_bootstrap --shell-file "$SETUP_SH" --install-dir "$_PW_ACTUAL_ENVIRONMENT_ROOT" --config-file "$PW_PROJECT_ROOT/pigweed.json"
 ########## END PROJECT-SPECIFIC CODE ##########
   pw_finalize bootstrap "$SETUP_SH"
 else
