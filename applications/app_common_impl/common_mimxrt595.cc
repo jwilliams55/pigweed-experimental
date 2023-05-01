@@ -60,11 +60,7 @@ MCUXpressoDevice s_mipi_device(s_fb_pool_data,
                                {.width = DISPLAY_WIDTH,
                                 .height = DISPLAY_HEIGHT},
                                kPixelFormat);
-DisplayDriverMipiDsi s_display_driver(
-    {
-        .mipi_device = s_mipi_device,
-    },
-    kDisplaySize);
+DisplayDriverMipiDsi s_display_driver(s_mipi_device, kDisplaySize);
 Display s_display(s_display_driver, kDisplaySize);
 
 void InitMipiPins(void) {
