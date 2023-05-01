@@ -32,29 +32,118 @@ namespace pw::display_driver {
 namespace {
 
 constexpr std::array<std::byte, 0> kEmptyByteArray = {};
-constexpr uint16_t ILI9341_MADCTL = 0x36;
-constexpr std::byte MADCTL_MY = std::byte{0x80};
-constexpr std::byte MADCTL_MX = std::byte{0x40};
-constexpr std::byte MADCTL_MV = std::byte{0x20};
-constexpr std::byte MADCTL_ML = std::byte{0x10};
-constexpr std::byte MADCTL_RGB = std::byte{0x00};
-constexpr std::byte MADCTL_BGR = std::byte{0x08};
-constexpr std::byte MADCTL_MH = std::byte{0x04};
 
-constexpr uint8_t ILI9341_CASET = 0x2a;  // Column address set.
-constexpr uint8_t ILI9341_PASET = 0x2b;  // Page address set.
-constexpr uint8_t ILI9341_RAMWR = 0x2c;  // Memory write.
-constexpr uint16_t ILI9341_PIXEL_FORMAT_SET = 0x3A;
+// clang-format off
+// Level 1 commands:
+constexpr uint8_t CMD_SWRESET            = 0x01;   // Software Reset.
+constexpr uint8_t CMD_READ_DISPLAY_ID    = 0x04;   // Read display identification information.
+constexpr uint8_t CMD_RDDST              = 0x09;   // Read Display Status.
+constexpr uint8_t CMD_RDDPM              = 0x0A;   // Read Display Power Mode.
+constexpr uint8_t CMD_RDDMADCTL          = 0x0B;   // Read Display MADCTL.
+constexpr uint8_t CMD_RDDCOLMOD          = 0x0C;   // Read Display Pixel Format.
+constexpr uint8_t CMD_RDDIM              = 0x0D;   // Read Display Image Format.
+constexpr uint8_t CMD_RDDSM              = 0x0E;   // Read Display Signal Mode.
+constexpr uint8_t CMD_RDDSDR             = 0x0F;   // Read Display Self-Diagnostic Result.
+constexpr uint8_t CMD_SPLIN              = 0x10;   // Enter Sleep Mode.
+constexpr uint8_t CMD_SLEEP_OUT          = 0x11;   // Sleep Out.
+constexpr uint8_t CMD_PTLON              = 0x12;   // Partial Mode ON.
+constexpr uint8_t CMD_NORMAL_MODE_ON     = 0x13;   // Normal Display Mode ON.
+constexpr uint8_t CMD_DINVOFF            = 0x20;   // Display Inversion OFF.
+constexpr uint8_t CMD_DINVON             = 0x21;   // Display Inversion ON.
+constexpr uint8_t CMD_GAMMA              = 0x26;   // Gamma Set.
+constexpr uint8_t CMD_DISPLAY_OFF        = 0x28;   // Display OFF.
+constexpr uint8_t CMD_DISPLAY_ON         = 0x29;   // Display ON.
+constexpr uint8_t CMD_COLUMN_ADDR        = 0x2A;   // Column Address Set.
+constexpr uint8_t CMD_PAGE_ADDR          = 0x2B;   // Page Address Set.
+constexpr uint8_t CMD_GRAM               = 0x2C;   // Memory Write.
+constexpr uint8_t CMD_RGBSET             = 0x2D;   // Color Set.
+constexpr uint8_t CMD_RAMRD              = 0x2E;   // Memory Read.
+constexpr uint8_t CMD_PLTAR              = 0x30;   // Partial Area.
+constexpr uint8_t CMD_VSCRDEF            = 0x33;   // Vertical Scrolling Definition.
+constexpr uint8_t CMD_TEOFF              = 0x34;   // Tearing Effect Line OFF.
+constexpr uint8_t CMD_TEON               = 0x35;   // Tearing Effect Line ON.
+constexpr uint8_t CMD_MADCTL             = 0x36;   // Memory Access Control.
+constexpr uint8_t CMD_VSCRSADD           = 0x37;   // Vertical Scrolling Start Address.
+constexpr uint8_t CMD_IDMOFF             = 0x38;   // Idle Mode OFF.
+constexpr uint8_t CMD_IDMON              = 0x39;   // Idle Mode ON.
+constexpr uint8_t CMD_PIXEL_FORMAT       = 0x3A;   // COLMOD: Pixel Format Set.
+constexpr uint8_t CMD_WRITE_MEM_CONTINUE = 0x3C;   // Write_Memory_Continue.
+constexpr uint8_t CMD_READ_MEM_CONTINUE  = 0x3E;   // Read_Memory_Continue.
+constexpr uint8_t CMD_SET_TEAR_SCANLINE  = 0x44;   // Set_Tear_Scanline.
+constexpr uint8_t CMD_GET_SCANLINE       = 0x45;   // Get_Scanline.
+constexpr uint8_t CMD_WDB                = 0x51;   // Write Display Brightness.
+constexpr uint8_t CMD_RDDISBV            = 0x52;   // Read Display Brightness.
+constexpr uint8_t CMD_WCD                = 0x53;   // Write CTRL Display.
+constexpr uint8_t CMD_RDCTRLD            = 0x54;   // Read CTRL Display.
+constexpr uint8_t CMD_WRCABC             = 0x55;   // Write Content Adaptive Brightness Control.
+constexpr uint8_t CMD_RDCABC             = 0x56;   // Read Content Adaptive Brightness Control.
+constexpr uint8_t CMD_WRITE_CABC         = 0x5E;   // Write CABC Minimum Brightness.
+constexpr uint8_t CMD_READ_CABC          = 0x5F;   // Read CABC Minimum Brightness.
+constexpr uint8_t CMD_READ_ID1           = 0xDA;   // Read ID1.
+constexpr uint8_t CMD_READ_ID2           = 0xDB;   // Read ID2.
+constexpr uint8_t CMD_READ_ID3           = 0xDC;   // Read ID3.
+
+// Level 2 commands:
+constexpr uint8_t CMD_RGB_INTERFACE      = 0xB0;   // RGB Interface Signal Control.
+constexpr uint8_t CMD_FRMCTR1            = 0xB1;   // Frame Rate Control (In Normal Mode/Full Colors.
+constexpr uint8_t CMD_FRMCTR2            = 0xB2;   // Frame Rate Control (In Idle Mode/8 colors).
+constexpr uint8_t CMD_FRMCTR3            = 0xB3;   // Frame Rate control (In Partial Mode/Full Colors).
+constexpr uint8_t CMD_INVTR              = 0xB4;   // Display Inversion Control.
+constexpr uint8_t CMD_BPC                = 0xB5;   // Blanking Porch Control.
+constexpr uint8_t CMD_DFC                = 0xB6;   // Display Function Control.
+constexpr uint8_t CMD_ETMOD              = 0xB7;   // Entry Mode Set.
+constexpr uint8_t CMD_BACKLIGHT1         = 0xB8;   // Backlight Control 1.
+constexpr uint8_t CMD_BACKLIGHT2         = 0xB9;   // Backlight Control 2.
+constexpr uint8_t CMD_BACKLIGHT3         = 0xBA;   // Backlight Control 3.
+constexpr uint8_t CMD_BACKLIGHT4         = 0xBB;   // Backlight Control 4.
+constexpr uint8_t CMD_BACKLIGHT5         = 0xBC;   // Backlight Control 5.
+constexpr uint8_t CMD_BACKLIGHT7         = 0xBE;   // Backlight Control 7.
+constexpr uint8_t CMD_BACKLIGHT8         = 0xBF;   // Backlight Control 8.
+constexpr uint8_t CMD_POWER1             = 0xC0;   // Power Control 1.
+constexpr uint8_t CMD_POWER2             = 0xC1;   // Power Control 2.
+constexpr uint8_t CMD_VCOM1              = 0xC5;   // VCOM Control 1.
+constexpr uint8_t CMD_VCOM2              = 0xC7;   // VCOM Control 2.
+constexpr uint8_t CMD_NVMWR              = 0xD0;   // NV Memory Write.
+constexpr uint8_t CMD_NVMPKEY            = 0xD1;   // NV Memory Protection Key.
+constexpr uint8_t CMD_RDNVM              = 0xD2;   // NV Memory Status Read.
+constexpr uint8_t CMD_READ_ID4           = 0xD3;   // Read ID4.
+constexpr uint8_t CMD_PGAMMA             = 0xE0;   // Positive Gamma Correction.
+constexpr uint8_t CMD_NGAMMA             = 0xE1;   // Negative Gamma Correction.
+constexpr uint8_t CMD_DGAMCTRL1          = 0xE2;   // Digital Gamma Control 1.
+constexpr uint8_t CMD_DGAMCTRL2          = 0xE3;   // Digital Gamma Control 2.
+constexpr uint8_t CMD_INTERFACE          = 0xF6;   // Interface Control.
+
+// Extended register commands:
+constexpr uint8_t CMD_POWERA             = 0xCB;   // Power control A.
+constexpr uint8_t CMD_POWERB             = 0xCF;   // Power control B.
+constexpr uint8_t CMD_DTCA               = 0xE8;   // Driver timing control A.
+constexpr uint8_t CMD_DTCA_2             = 0xE9;   // Driver timing control A.
+constexpr uint8_t CMD_DTCB               = 0xEA;   // Driver timing control B.
+constexpr uint8_t CMD_POWER_SEQ          = 0xED;   // Power on sequence control.
+constexpr uint8_t CMD_3GAMMA_EN          = 0xF2;   // Enable 3G.
+constexpr uint8_t CMD_PRC                = 0xF7;   // Pump ratio control .
+// clang-format on
 
 // The ILI9341 is hard-coded at 320x240;
 constexpr int kDisplayWidth = 320;
 constexpr int kDisplayHeight = 240;
 constexpr int kDisplayNumPixels = kDisplayWidth * kDisplayHeight;
 
-constexpr std::byte kMode0 = MADCTL_MX | MADCTL_BGR;
-constexpr std::byte kMode1 = MADCTL_MV | MADCTL_BGR;
-constexpr std::byte kMode2 = MADCTL_MY | MADCTL_BGR;
-constexpr std::byte kMode3 = MADCTL_MX | MADCTL_MY | MADCTL_MV | MADCTL_BGR;
+// clang-format off
+constexpr std::byte MADCTL_MY  = std::byte{0b10000000}; // Row address order.
+constexpr std::byte MADCTL_MX  = std::byte{0b01000000}; // Column address order.
+constexpr std::byte MADCTL_MV  = std::byte{0b00100000}; // Row/column exchange.
+constexpr std::byte MADCTL_ML  = std::byte{0b00010000}; // Vertical refresh order.
+constexpr std::byte MADCTL_BGR = std::byte{0b00001000}; // BGR/RGB order.
+constexpr std::byte MADCTL_MH  = std::byte{0b00000100}; // Horizontal refresh order.
+
+constexpr std::byte kMode0 = MADCTL_BGR | MADCTL_MX;
+constexpr std::byte kMode1 = MADCTL_BGR | MADCTL_MV;
+constexpr std::byte kMode2 = MADCTL_BGR | MADCTL_MY;
+constexpr std::byte kMode3 = MADCTL_BGR | MADCTL_MX | MADCTL_MY | MADCTL_MV;
+constexpr std::byte kMode4 = MADCTL_BGR | MADCTL_MY | MADCTL_MV;
+constexpr std::byte kMADMode = kMode3;
+// clang-format on
 
 // Frame Control (Normal Mode)
 constexpr std::byte kFrameRate61 = std::byte{0x1F};
@@ -114,18 +203,16 @@ Status DisplayDriverILI9341::Init() {
                     std::byte{0x02},
                 }});
 
-  // ?
   WriteCommand(transaction,
-               {0xCF,
+               {CMD_POWERB,
                 std::array<std::byte, 3>{
                     std::byte{0x00},
                     std::byte{0xC1},
                     std::byte{0x30},
                 }});
 
-  // ?
   WriteCommand(transaction,
-               {0xED,
+               {CMD_POWER_SEQ,
                 std::array<std::byte, 4>{
                     std::byte{0x64},
                     std::byte{0x03},
@@ -133,18 +220,16 @@ Status DisplayDriverILI9341::Init() {
                     std::byte{0x81},
                 }});
 
-  // ?
   WriteCommand(transaction,
-               {0xE8,
+               {CMD_DTCA,
                 std::array<std::byte, 3>{
                     std::byte{0x85},
                     std::byte{0x00},
                     std::byte{0x78},
                 }});
 
-  // ?
   WriteCommand(transaction,
-               {0xCB,
+               {CMD_POWERA,
                 std::array<std::byte, 5>{
                     std::byte{0x39},
                     std::byte{0x2C},
@@ -153,42 +238,45 @@ Status DisplayDriverILI9341::Init() {
                     std::byte{0x02},
                 }});
 
-  // ?
-  WriteCommand(transaction, {0xF7, std::array<std::byte, 1>{std::byte{0x20}}});
-
-  // ?
   WriteCommand(transaction,
-               {0xEA,
+               {CMD_PRC, std::array<std::byte, 1>{std::byte{0x20}}});
+
+  WriteCommand(transaction,
+               {CMD_DTCB,
                 std::array<std::byte, 2>{
                     std::byte{0x00},
                     std::byte{0x00},
                 }});
 
   // Power control
-  WriteCommand(transaction, {0xC0, std::array<std::byte, 1>{std::byte{0x23}}});
+  WriteCommand(transaction,
+               {CMD_POWER1, std::array<std::byte, 1>{std::byte{0x23}}});
 
   // Power control
-  WriteCommand(transaction, {0xC1, std::array<std::byte, 1>{std::byte{0x10}}});
+  WriteCommand(transaction,
+               {CMD_POWER2, std::array<std::byte, 1>{std::byte{0x10}}});
 
   // VCM control
   WriteCommand(transaction,
-               {0xC5,
+               {CMD_VCOM1,
                 std::array<std::byte, 2>{
                     std::byte{0x3e},
                     std::byte{0x28},
                 }});
 
   // VCM control
-  WriteCommand(transaction, {0xC7, std::array<std::byte, 1>{std::byte{0x86}}});
+  WriteCommand(transaction,
+               {CMD_VCOM2, std::array<std::byte, 1>{std::byte{0x86}}});
 
-  WriteCommand(transaction, {ILI9341_MADCTL, std::array<std::byte, 1>{kMode3}});
+  // Memory Access Control.
+  WriteCommand(transaction, {CMD_MADCTL, std::array<std::byte, 1>{kMADMode}});
 
   WriteCommand(
       transaction,
-      {ILI9341_PIXEL_FORMAT_SET, std::array<std::byte, 1>{kPixelFormat16bits}});
+      {CMD_PIXEL_FORMAT, std::array<std::byte, 1>{kPixelFormat16bits}});
 
   WriteCommand(transaction,
-               {0xB1,
+               {CMD_FRMCTR1,
                 std::array<std::byte, 2>{
                     std::byte{0x00},  // division ratio
                     kFrameRate61,
@@ -196,22 +284,24 @@ Status DisplayDriverILI9341::Init() {
 
   // Display Function Control
   WriteCommand(transaction,
-               {0xB6,
+               {CMD_DFC,
                 std::array<std::byte, 3>{
                     std::byte{0x08},
                     std::byte{0x82},
                     std::byte{0x27},
                 }});
 
-  // Gamma Function Disable?
-  WriteCommand(transaction, {0xF2, std::array<std::byte, 1>{std::byte{0x00}}});
+  // Gamma function enable
+  WriteCommand(transaction,
+               {CMD_3GAMMA_EN, std::array<std::byte, 1>{std::byte{0x00}}});
 
   // Gamma Set
-  WriteCommand(transaction, {0x26, std::array<std::byte, 1>{std::byte{0x01}}});
+  WriteCommand(transaction,
+               {CMD_GAMMA, std::array<std::byte, 1>{std::byte{0x01}}});
 
   // Positive Gamma Correction
   WriteCommand(transaction,
-               {0xE0,
+               {CMD_PGAMMA,
                 std::array<std::byte, 15>{
                     std::byte{0x0F},
                     std::byte{0x31},
@@ -232,7 +322,7 @@ Status DisplayDriverILI9341::Init() {
 
   // Negative Gamma Correction
   WriteCommand(transaction,
-               {0xE1,
+               {CMD_NGAMMA,
                 std::array<std::byte, 15>{
                     std::byte{0x00},
                     std::byte{0x0E},
@@ -252,22 +342,22 @@ Status DisplayDriverILI9341::Init() {
                 }});
 
   // Exit Sleep
-  WriteCommand(transaction, {0x11, std::array<std::byte, 0>{}});
+  WriteCommand(transaction, {CMD_SLEEP_OUT, std::array<std::byte, 0>{}});
   pw::spin_delay::WaitMillis(100);
 
   // Display On
-  WriteCommand(transaction, {0x29, std::array<std::byte, 0>{}});
+  WriteCommand(transaction, {CMD_DISPLAY_ON, std::array<std::byte, 0>{}});
   pw::spin_delay::WaitMillis(100);
 
   // Normal display mode on
-  WriteCommand(transaction, {0x13, std::array<std::byte, 0>{}});
+  WriteCommand(transaction, {CMD_NORMAL_MODE_ON, std::array<std::byte, 0>{}});
 
   // Setup drawing full framebuffers
 
   // Landscape drawing Column Address Set
   constexpr uint16_t kMaxColumn = kDisplayWidth - 1;
   WriteCommand(transaction,
-               {0x2A,
+               {CMD_COLUMN_ADDR,
                 std::array<std::byte, 4>{
                     std::byte{0x0},
                     std::byte{0x0},
@@ -278,7 +368,7 @@ Status DisplayDriverILI9341::Init() {
   // Page Address Set
   constexpr uint16_t kMaxRow = kDisplayHeight - 1;
   WriteCommand(transaction,
-               {0x2B,
+               {CMD_PAGE_ADDR,
                 std::array<std::byte, 4>{
                     std::byte{0x0},
                     std::byte{0x0},
@@ -287,7 +377,7 @@ Status DisplayDriverILI9341::Init() {
                 }});
 
   pw::spin_delay::WaitMillis(10);
-  WriteCommand(transaction, {0x2C, std::array<std::byte, 0>{}});
+  WriteCommand(transaction, {CMD_GRAM, std::array<std::byte, 0>{}});
 
   SetMode(Mode::kData);
   pw::spin_delay::WaitMillis(100);
@@ -343,7 +433,7 @@ Status DisplayDriverILI9341::WriteRow(span<uint16_t> row_pixels,
     const uint16_t max_col_idx = std::max(
         kDisplayWidth - 1, col_idx + static_cast<int>(row_pixels.size()));
     WriteCommand(transaction,
-                 {ILI9341_CASET,
+                 {CMD_COLUMN_ADDR,
                   std::array<std::byte, 4>{
                       std::byte{HighByte(col_idx)},
                       std::byte{LowByte(col_idx)},
@@ -354,14 +444,14 @@ Status DisplayDriverILI9341::WriteRow(span<uint16_t> row_pixels,
     // Page Address Set
     uint16_t max_row_idx = row_idx;
     WriteCommand(transaction,
-                 {ILI9341_PASET,
+                 {CMD_PAGE_ADDR,
                   std::array<std::byte, 4>{
                       std::byte{HighByte(row_idx)},
                       std::byte{LowByte(row_idx)},
                       std::byte{HighByte(max_row_idx)},
                       std::byte{LowByte(max_row_idx)},
                   }});
-    PW_TRY(WriteCommand(transaction, {ILI9341_RAMWR, kEmptyByteArray}));
+    PW_TRY(WriteCommand(transaction, {CMD_GRAM, kEmptyByteArray}));
   }
 
   auto transaction = config_.spi_device_16_bit.StartTransaction(
