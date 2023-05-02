@@ -21,9 +21,9 @@
 #include "pw_framebuffer/framebuffer.h"
 #include "pw_spin_delay/delay.h"
 
-using pw::color::color_rgb565_t;
 using pw::digital_io::State;
 using pw::framebuffer::Framebuffer;
+using pw::framebuffer::PixelFormat;
 using pw::spi::ChipSelectBehavior;
 using pw::spi::Device;
 using std::array;
@@ -183,29 +183,29 @@ Status DisplayDriverST7789::Init() {
   return OkStatus();
 }
 
-Framebuffer DisplayDriverST7789::GetFramebuffer() {
-  return Framebuffer(config_.pool_data.fb_addr[0],
-                     config_.pool_data.size,
-                     config_.pool_data.row_bytes);
-}
-
-Status DisplayDriverST7789::ReleaseFramebuffer(
-    pw::framebuffer::Framebuffer frame_buffer) {
+void DisplayDriverST7789::WriteFramebuffer(Framebuffer frame_buffer,
+                                           WriteCallback write_callback) {
   PW_ASSERT(frame_buffer.pixel_format() == PixelFormat::RGB565);
   // Let controller know a write is coming.
+  Status s;
   {
     auto transaction = config_.spi_device_8_bit.StartTransaction(
         ChipSelectBehavior::kPerWriteRead);
-    PW_TRY(WriteCommand(transaction, {ST7789_RAMWR, kEmptyArray}));
+    s = WriteCommand(transaction, {ST7789_RAMWR, kEmptyArray});
+    if (!s.ok()) {
+      write_callback(std::move(frame_buffer), s);
+      return;
+    }
   }
 
   // Write the pixel data.
   auto transaction = config_.spi_device_16_bit.StartTransaction(
       ChipSelectBehavior::kPerWriteRead);
-  const uint16_t* fb_data = frame_buffer.data();
-  const int num_pixels = frame_buffer.GetWidth() * frame_buffer.GetHeight();
-  return transaction.Write(
+  const uint16_t* fb_data = static_cast<const uint16_t*>(frame_buffer.data());
+  const int num_pixels = frame_buffer.size().width * frame_buffer.size().height;
+  s = transaction.Write(
       ConstByteSpan(reinterpret_cast<const byte*>(fb_data), num_pixels));
+  write_callback(std::move(frame_buffer), s);
 }
 
 Status DisplayDriverST7789::WriteRow(span<uint16_t> row_pixels,

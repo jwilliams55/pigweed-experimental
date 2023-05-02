@@ -18,11 +18,12 @@
 #include <cstddef>
 
 #include "pw_digital_io/digital_io.h"
-#include "pw_framebuffer/rgb565.h"
+#include "pw_framebuffer/framebuffer.h"
 #include "pw_spin_delay/delay.h"
 
-using pw::color::color_rgb565_t;
 using pw::digital_io::State;
+using pw::framebuffer::Framebuffer;
+using pw::framebuffer::PixelFormat;
 using pw::spi::ChipSelectBehavior;
 using pw::spi::Device;
 using std::array;
@@ -303,24 +304,37 @@ Status DisplayDriverST7735::Init() {
   return OkStatus();
 }
 
-Status DisplayDriverST7735::Update(
-    pw::framebuffer::FramebufferRgb565* framebuffer) {
-  PW_ASSERT(framebuffer->is_valid());
-  PW_ASSERT(framebuffer->pixel_format() == PixelFormat::RGB565);
+void DisplayDriverST7735::WriteFramebuffer(Framebuffer framebuffer,
+                                           WriteCallback write_callback) {
+  PW_ASSERT(framebuffer.is_valid());
+  PW_ASSERT(framebuffer.pixel_format() == PixelFormat::RGB565);
+  Status s;
   // Let controller know a write is coming.
   {
     auto transaction = config_.spi_device_8_bit.StartTransaction(
         ChipSelectBehavior::kPerWriteRead);
-    PW_TRY(WriteCommand(transaction, {ST7735_RAMWR, kEmptyArray}));
+    s = WriteCommand(transaction, {ST7735_RAMWR, kEmptyArray});
+    if (!s.ok()) {
+      write_callback(std::move(framebuffer), s);
+      return;
+    }
   }
 
   // Write the pixel data.
   auto transaction = config_.spi_device_16_bit.StartTransaction(
       ChipSelectBehavior::kPerWriteRead);
-  const uint16_t* fb_data = framebuffer->data();
+  const uint16_t* fb_data = static_cast<const uint16_t*>(framebuffer.data());
   const size_t num_pixels = config_.screen_width * config_.screen_height;
-  return transaction.Write(
+  s = transaction.Write(
       ConstByteSpan(reinterpret_cast<const byte*>(fb_data), num_pixels));
+  write_callback(std::move(framebuffer), s);
+}
+
+Status DisplayDriverST7735::WriteRow(span<uint16_t> row_pixels,
+                                     uint16_t row_idx,
+                                     uint16_t col_idx) {
+  PW_ASSERT(false);
+  return Status::Unimplemented();
 }
 
 Status DisplayDriverST7735::Reset() {

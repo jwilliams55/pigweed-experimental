@@ -29,13 +29,15 @@ namespace pw::display {
 class Display {
  public:
   Display(pw::display_driver::DisplayDriver& display_driver,
-          pw::math::Size<uint16_t> size);
+          pw::math::Size<uint16_t> size,
+          pw::framebuffer_pool::FramebufferPool& framebuffer_pool);
   virtual ~Display();
 
   // Return a framebuffer to which the caller may draw. When drawing is complete
   // the framebuffer must be returned using ReleaseFramebuffer(). An invalid
   // framebuffer may be returned, so the caller should verify it is valid
-  // before use.
+  // before use. This function will block until a framebuffer is available for
+  // use. A valid framebuffer will always be returned.
   pw::framebuffer::Framebuffer GetFramebuffer();
 
   // Release the framebuffer back to the display. The display will
@@ -74,6 +76,7 @@ class Display {
 
   pw::display_driver::DisplayDriver& display_driver_;
   const pw::math::Size<uint16_t> size_;
+  pw::framebuffer_pool::FramebufferPool& framebuffer_pool_;
 };
 
 }  // namespace pw::display

@@ -34,6 +34,8 @@ extern unsigned long getRunTimeCounterValue(void);
 #define configUSE_TICK_HOOK                     0
 #define configUSE_TIMERS                        1
 #define configUSE_TRACE_FACILITY                1
+#define configUSE_COUNTING_SEMAPHORES           1
+
 
 #define configGENERATE_RUN_TIME_STATS           1
 #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS  configureTimerForRunTimeStats

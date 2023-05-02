@@ -18,6 +18,8 @@ using pw::framebuffer::Framebuffer;
 
 namespace pw::display_driver {
 
+pw::mipi::dsi::Device::WriteCallback s_write_callback;
+
 DisplayDriverMipiDsi::DisplayDriverMipiDsi(
     pw::mipi::dsi::Device& device, pw::math::Size<uint16_t> display_size)
     : device_(device), display_size_(display_size) {}
@@ -26,18 +28,21 @@ DisplayDriverMipiDsi::~DisplayDriverMipiDsi() = default;
 
 Status DisplayDriverMipiDsi::Init() { return OkStatus(); }
 
-Framebuffer DisplayDriverMipiDsi::GetFramebuffer() {
-  return device_.GetFramebuffer();
-}
-
-Status DisplayDriverMipiDsi::ReleaseFramebuffer(Framebuffer framebuffer) {
-  return device_.ReleaseFramebuffer(std::move(framebuffer));
+void DisplayDriverMipiDsi::WriteFramebuffer(Framebuffer framebuffer,
+                                            WriteCallback write_callback) {
+  // PW_ASSERT(!s_write_callback);
+  s_write_callback = std::move(write_callback);
+  device_.WriteFramebuffer(std::move(framebuffer),
+                           [](Framebuffer fb, Status status) {
+                             // PW_ASSERT(s_write_callback);
+                             s_write_callback(std::move(fb), status);
+                           });
 };
 
 Status DisplayDriverMipiDsi::WriteRow(span<uint16_t> row_pixels,
                                       uint16_t row_idx,
                                       uint16_t col_idx) {
-  // TODO(cmumford): Implement for debugging purposes.
+  // TODO(cmumford): Implement for development purposes if needed.
   return Status::Unimplemented();
 }
 

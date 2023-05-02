@@ -16,7 +16,6 @@
 #include <cstdint>
 
 #include "pw_math/size.h"
-#include "pw_result/result.h"
 
 namespace pw::framebuffer {
 

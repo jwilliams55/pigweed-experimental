@@ -50,7 +50,13 @@ class DisplayDriverST7735 : public DisplayDriver {
 
   // DisplayDriver implementation:
   Status Init() override;
-  Status Update(pw::framebuffer::FramebufferRgb565* framebuffer);
+  void WriteFramebuffer(pw::framebuffer::Framebuffer framebuffer,
+                        WriteCallback write_callback) override;
+  Status WriteRow(span<uint16_t> row_pixels,
+                  uint16_t row_idx,
+                  uint16_t col_idx) override;
+  uint16_t GetWidth() const override { return config_.screen_width; }
+  uint16_t GetHeight() const override { return config_.screen_height; }
 
  private:
   enum class Mode {

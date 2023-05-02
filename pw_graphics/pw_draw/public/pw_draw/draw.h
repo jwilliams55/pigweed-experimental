@@ -15,6 +15,8 @@
 
 #include <math.h>
 
+#include <string_view>
+
 #include "pw_color/color.h"
 #include "pw_draw/font_set.h"
 #include "pw_draw/sprite_sheet.h"

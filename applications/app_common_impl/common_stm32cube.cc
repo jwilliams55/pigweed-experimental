@@ -25,7 +25,8 @@ using pw::Status;
 using pw::digital_io::Stm32CubeDigitalOut;
 using pw::display::Display;
 using pw::display_driver::DisplayDriverILI9341;
-using pw::framebuffer::Framebuffer;
+using pw::framebuffer::PixelFormat;
+using pw::framebuffer_pool::FramebufferPool;
 using pw::spi::Device;
 using pw::spi::Initiator;
 using pw::spi::Stm32CubeChipSelector;
@@ -92,32 +93,40 @@ SpiValues s_spi_16_bit(kSpiConfig16Bit,
                        s_spi_chip_selector,
                        s_spi_initiator_mutex);
 uint16_t s_pixel_data[kNumPixels];
-constexpr pw::framebuffer::pool::PoolData s_fb_pool_data = {
-    .fb_addr =
-        {
-            s_pixel_data,
-            nullptr,
-            nullptr,
-        },
-    .num_fb = 1,
-    .size = {kFramebufferWidth, kFramebufferHeight},
+pw::framebuffer_pool::FramebufferPool s_fb_pool({
+    .fb_addr = {s_pixel_data},
+    .dimensions = {kFramebufferWidth, kFramebufferHeight},
     .row_bytes = kDisplayRowBytes,
-    .start = {0, 0},
-};
+    .pixel_format = PixelFormat::RGB565,
+});
 DisplayDriverILI9341 s_display_driver({
     .data_cmd_gpio = s_display_dc_pin,
     .reset_gpio = nullptr,
     .spi_device_8_bit = s_spi_8_bit.device,
     .spi_device_16_bit = s_spi_16_bit.device,
-    .pool_data = s_fb_pool_data,
 });
-Display s_display(s_display_driver, kDisplaySize);
+Display s_display(s_display_driver, kDisplaySize, s_fb_pool);
 
 SpiValues::SpiValues(pw::spi::Config config,
                      pw::spi::ChipSelector& selector,
                      pw::sync::VirtualMutex& initiator_mutex)
     : borrowable_initiator(initiator, initiator_mutex),
       device(borrowable_initiator, config, selector) {}
+
+void InitSPIPins() {
+  // SPI5 GPIO Configuration:
+  // PF7 SPI5_SCK
+  // PF8 SPI5_MISO
+  // PF9 SPI5_MOSI
+  GPIO_InitTypeDef spi_pin_config = {
+      .Pin = GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9,
+      .Mode = GPIO_MODE_AF_PP,
+      .Pull = GPIO_NOPULL,
+      .Speed = GPIO_SPEED_FREQ_VERY_HIGH,
+      .Alternate = GPIO_AF5_SPI5,
+  };
+  HAL_GPIO_Init(GPIOF, &spi_pin_config);
+}
 
 }  // namespace
 
@@ -137,18 +146,7 @@ Status Common::Init() {
   s_display_cs_pin.Enable();
   s_display_dc_pin.Enable();
 
-  // SPI5 GPIO Configuration:
-  // PF7 SPI5_SCK
-  // PF8 SPI5_MISO
-  // PF9 SPI5_MOSI
-  GPIO_InitTypeDef spi_pin_config = {
-      .Pin = GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9,
-      .Mode = GPIO_MODE_AF_PP,
-      .Pull = GPIO_NOPULL,
-      .Speed = GPIO_SPEED_FREQ_VERY_HIGH,
-      .Alternate = GPIO_AF5_SPI5,
-  };
-  HAL_GPIO_Init(GPIOF, &spi_pin_config);
+  InitSPIPins();
 
   return s_display_driver.Init();
 }

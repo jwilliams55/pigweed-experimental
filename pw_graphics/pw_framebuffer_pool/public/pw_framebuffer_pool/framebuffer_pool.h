@@ -17,20 +17,71 @@
 #include <array>
 #include <cstdint>
 
-#include "pw_color/color.h"
+#include "pw_framebuffer/framebuffer.h"
 #include "pw_math/size.h"
-#include "pw_math/vector2.h"
+#include "pw_status/status.h"
+#include "pw_sync/counting_semaphore.h"
 
-namespace pw::framebuffer::pool {
+namespace pw::framebuffer_pool {
 
-constexpr size_t kMaxFramebufferCount = 3;
+#if !defined(FRAMEBUFFER_COUNT)
+#error FRAMEBUFFER_COUNT not defined
+#endif
 
-struct PoolData {
-  std::array<pw::color::color_rgb565_t*, kMaxFramebufferCount> fb_addr;
-  size_t num_fb;  // <= fb_addr.size().
-  pw::math::Size<uint16_t> size;
-  uint16_t row_bytes;
-  pw::math::Vector2<uint16_t> start;
+// FramebufferPool manages a collection of (one or more) framebuffers.
+// It provides a mechanism to retrieve a buffer from the pool for use, and
+// for returning that buffer back to the pool.
+class FramebufferPool {
+ public:
+  using BufferArray = std::array<void*, FRAMEBUFFER_COUNT>;
+
+  // Constructor parameters.
+  struct Config {
+    BufferArray fb_addr;  // Address of each buffer in this pool.
+    pw::math::Size<uint16_t> dimensions;  // width/height of each buffer.
+    uint16_t row_bytes;                   // row bytes of each buffer.
+    pw::framebuffer::PixelFormat pixel_format;
+  };
+
+  FramebufferPool(const Config& config);
+  virtual ~FramebufferPool();
+
+  // Return the framebuffer addresses for initialization purposes only.
+  // Some drivers require these during initialization of their subsystems.
+  // Do not use this as a means to retrieve the address of a framebuffer.
+  // Always use GetFramebuffer if a new buffer is needed.
+  const BufferArray& GetBuffersForInit() const { return buffer_addresses_; }
+
+  // Return the row bytes for each framebuffer in this pool.
+  uint16_t row_bytes() const { return row_bytes_; }
+
+  // Return the dimensions (width/height) for each framebuffer in this pool.
+  pw::math::Size<uint16_t> dimensions() const { return buffer_dimensions_; }
+
+  // Return the pixel format for each framebuffer in this pool.
+  pw::framebuffer::PixelFormat pixel_format() const { return pixel_format_; }
+
+  // Return a framebuffer to the caller for use. This call WILL BLOCK until a
+  // framebuffer is returned for use. Framebuffers *must* be returned to this
+  // pool by a corresponding call to ReleaseFramebuffer. This function will only
+  // return a valid framebuffers.
+  //
+  // This call is thread-safe, but not interrupt safe.
+  virtual pw::framebuffer::Framebuffer GetFramebuffer();
+
+  // Return the framebuffer to the pool available for use by the next call to
+  // GetFramebuffer.
+  //
+  // This may be called on another thread or during an interrupt.
+  virtual Status ReleaseFramebuffer(pw::framebuffer::Framebuffer framebuffer);
+
+ private:
+  pw::sync::CountingSemaphore framebuffer_semaphore_;
+  BufferArray buffer_addresses_;                // Address of each pixel buffer.
+  pw::math::Size<uint16_t> buffer_dimensions_;  // width/height of all buffers
+  uint16_t row_bytes_;                          // All row bytes are the same.
+  pw::framebuffer::PixelFormat pixel_format_;   // Shared pixel format.
+  volatile size_t next_fb_idx_;
 };
 
-}  // namespace pw::framebuffer::pool
+}  // namespace pw::framebuffer_pool

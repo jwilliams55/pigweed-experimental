@@ -37,15 +37,14 @@ class DisplayDriverILI9341 : public DisplayDriver {
     // The SPI device to which the display controller is connected for 16-bit
     // data.
     pw::spi::Device& spi_device_16_bit;
-    const pw::framebuffer::pool::PoolData& pool_data;
   };
 
   DisplayDriverILI9341(const Config& config);
 
   // DisplayDriver implementation:
   Status Init() override;
-  pw::framebuffer::Framebuffer GetFramebuffer(void) override;
-  Status ReleaseFramebuffer(pw::framebuffer::Framebuffer framebuffer) override;
+  void WriteFramebuffer(pw::framebuffer::Framebuffer framebuffer,
+                        WriteCallback write_callback) override;
   Status WriteRow(span<uint16_t> row_pixels,
                   uint16_t row_idx,
                   uint16_t col_idx) override;

@@ -12,38 +12,38 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 #include "app_common/common.h"
+#include "pw_color/color.h"
 #include "pw_display_driver_imgui/display_driver.h"
 #include "pw_display_imgui/display.h"
+#include "pw_framebuffer_pool/framebuffer_pool.h"
 #include "pw_status/try.h"
 
 using pw::Status;
 using pw::color::color_rgb565_t;
+using pw::framebuffer_pool::FramebufferPool;
 
 namespace {
 
 constexpr uint16_t kDisplayScaleFactor = 1;
-constexpr uint16_t kFramebufferWidth = DISPLAY_WIDTH / kDisplayScaleFactor;
-constexpr uint16_t kFramebufferHeight = DISPLAY_HEIGHT / kDisplayScaleFactor;
-constexpr size_t kNumPixels = kFramebufferWidth * kFramebufferHeight;
-constexpr uint16_t kFramebufferRowBytes = sizeof(uint16_t) * kFramebufferWidth;
+constexpr pw::math::Size<uint16_t> kFramebufferDimensions = {
+    .width = DISPLAY_WIDTH / kDisplayScaleFactor,
+    .height = DISPLAY_HEIGHT / kDisplayScaleFactor,
+};
+constexpr size_t kNumPixels =
+    kFramebufferDimensions.width * kFramebufferDimensions.height;
+constexpr uint16_t kFramebufferRowBytes =
+    sizeof(color_rgb565_t) * kFramebufferDimensions.width;
 constexpr pw::math::Size<uint16_t> kDisplaySize = {DISPLAY_WIDTH,
                                                    DISPLAY_HEIGHT};
 
 color_rgb565_t s_pixel_data[kNumPixels];
-constexpr pw::framebuffer::pool::PoolData s_fb_pool_data = {
-    .fb_addr =
-        {
-            s_pixel_data,
-            nullptr,
-            nullptr,
-        },
-    .num_fb = 1,
-    .size = {kFramebufferWidth, kFramebufferHeight},
+FramebufferPool s_fb_pool({
+    .fb_addr = {s_pixel_data},
+    .dimensions = kFramebufferDimensions,
     .row_bytes = kFramebufferRowBytes,
-    .start = {0, 0},
-};
-pw::display_driver::DisplayDriverImgUI s_display_driver(s_fb_pool_data);
-pw::display::DisplayImgUI s_display(s_display_driver, kDisplaySize);
+});
+pw::display_driver::DisplayDriverImgUI s_display_driver;
+pw::display::DisplayImgUI s_display(s_display_driver, kDisplaySize, s_fb_pool);
 
 }  // namespace
 

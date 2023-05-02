@@ -17,6 +17,7 @@
 #include <cstdint>
 
 #include "pw_framebuffer/framebuffer.h"
+#include "pw_function/function.h"
 #include "pw_span/span.h"
 #include "pw_status/status.h"
 
@@ -28,19 +29,18 @@ namespace pw::display_driver {
 // controls pixel values and other physical display properties.
 class DisplayDriver {
  public:
+  // Called on the completion of a write operation.
+  using WriteCallback = Callback<void(framebuffer::Framebuffer, Status)>;
+
   virtual ~DisplayDriver() = default;
 
   // Initialize the display controller.
   virtual Status Init() = 0;
 
-  // Return a framebuffer to which the caller may draw. When drawing is complete
-  // the framebuffer must be returned using ReleaseFramebuffer().
-  virtual pw::framebuffer::Framebuffer GetFramebuffer() = 0;
-
   // Send all pixels in the supplied |framebuffer| to the display controller
   // for display.
-  virtual Status ReleaseFramebuffer(
-      pw::framebuffer::Framebuffer framebuffer) = 0;
+  virtual void WriteFramebuffer(pw::framebuffer::Framebuffer framebuffer,
+                                WriteCallback write_callback) = 0;
 
   // Send a row of pixels to the display. The number of pixels must be <=
   // display width.

@@ -36,7 +36,6 @@ class DisplayDriverST7789 : public DisplayDriver {
     // The SPI device to which the display controller is connected for 16-bit
     // data.
     pw::spi::Device& spi_device_16_bit;
-    const pw::framebuffer::pool::PoolData& pool_data;
     uint16_t screen_width = 320;
     uint16_t screen_height = 240;
   };
@@ -45,8 +44,8 @@ class DisplayDriverST7789 : public DisplayDriver {
 
   // DisplayDriver implementation:
   Status Init() override;
-  Framebuffer GetFramebuffer(void) override;
-  Status ReleaseFramebuffer(Framebuffer framebuffer) override;
+  void WriteFramebuffer(pw::framebuffer::Framebuffer framebuffer,
+                        WriteCallback write_callback) override;
   Status WriteRow(span<uint16_t> row_pixels,
                   uint16_t row_idx,
                   uint16_t col_idx) override;

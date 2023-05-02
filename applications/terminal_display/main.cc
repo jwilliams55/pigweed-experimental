@@ -516,8 +516,7 @@ void MainTask(void* pvParameters) {
 
     uint32_t start = pw::spin_delay::Millis();
     framebuffer = display.GetFramebuffer();
-    if (!framebuffer.is_valid())
-      continue;
+    PW_ASSERT(framebuffer.is_valid());
     pw::draw::Fill(framebuffer, kBlack);
     DrawFrame(framebuffer, fps_view);
     uint32_t end = pw::spin_delay::Millis();

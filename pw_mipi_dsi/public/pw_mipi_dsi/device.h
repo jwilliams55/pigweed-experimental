@@ -15,6 +15,7 @@
 #pragma once
 
 #include "pw_framebuffer/framebuffer.h"
+#include "pw_function/function.h"
 #include "pw_status/status.h"
 
 namespace pw::mipi::dsi {
@@ -24,18 +25,14 @@ namespace pw::mipi::dsi {
 // (1) https://www.mipi.org/specifications/dsi
 class Device {
  public:
-  constexpr static size_t kMaxFramebufferCount = 3;
+  // Called on the completion of a write operation.
+  using WriteCallback = Callback<void(pw::framebuffer::Framebuffer, Status)>;
 
   virtual ~Device() = default;
 
-  // Retrieve a framebuffer for rendering. An invalid framebuffer will be
-  // returned if there are no available framebuffers which can happen if
-  // all framebuffers are in the process of being sent to the display.
-  virtual pw::framebuffer::Framebuffer GetFramebuffer(void) = 0;
-
   // Begin the process of transporting the |framebuffer| to the display.
-  virtual Status ReleaseFramebuffer(
-      pw::framebuffer::Framebuffer framebuffer) = 0;
+  virtual void WriteFramebuffer(pw::framebuffer::Framebuffer framebuffer,
+                                WriteCallback write_callback) = 0;
 
  protected:
   Device() = default;

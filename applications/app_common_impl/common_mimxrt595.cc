@@ -16,6 +16,7 @@
 #include "fsl_iopctl.h"
 #include "pin_mux.h"
 #include "pw_display_driver_mipi/display_driver.h"
+#include "pw_framebuffer_pool_mcuxpresso/framebuffer_pool.h"
 #include "pw_mipi_dsi_mcuxpresso/device.h"
 #include "pw_status/try.h"
 
@@ -23,6 +24,8 @@ using pw::Status;
 using pw::color::color_rgb565_t;
 using pw::display::Display;
 using pw::display_driver::DisplayDriverMipiDsi;
+using pw::framebuffer::PixelFormat;
+using pw::framebuffer_pool::FramebufferPoolMCUXpresso;
 using pw::mipi::dsi::MCUXpressoDevice;
 
 namespace {
@@ -33,35 +36,28 @@ static_assert(DISPLAY_HEIGHT > 0);
 // Framebuffer addresses in on-board PSRAM.
 constexpr uint32_t kBuffer0Addr = 0x28000000U;
 constexpr uint32_t kBuffer1Addr = 0x28200000U;
-constexpr video_pixel_format_t kPixelFormat = kVIDEO_PixelFormatRGB565;
-
-constexpr uint16_t kFramebufferWidth =
-    FRAMEBUFFER_WIDTH >= 0 ? FRAMEBUFFER_WIDTH : DISPLAY_WIDTH;
-constexpr uint16_t kFramebufferHeight = DISPLAY_HEIGHT;
+constexpr video_pixel_format_t kVideoPixelFormat = kVIDEO_PixelFormatRGB565;
+constexpr pw::math::Size<uint16_t> kFramebufferDimensions = {
+    .width = FRAMEBUFFER_WIDTH >= 0 ? FRAMEBUFFER_WIDTH : DISPLAY_WIDTH,
+    .height = DISPLAY_HEIGHT,
+};
 constexpr uint16_t kBufferStrideBytes =
-    kFramebufferWidth * pw::mipi::dsi::kBytesPerPixel;
+    kFramebufferDimensions.width * pw::mipi::dsi::kBytesPerPixel;
 constexpr pw::math::Size<uint16_t> kDisplaySize = {DISPLAY_WIDTH,
                                                    DISPLAY_HEIGHT};
+const FramebufferPoolMCUXpresso::BufferArray s_framebuffer_addrs = {
+    reinterpret_cast<void*>(kBuffer0Addr),
+    reinterpret_cast<void*>(kBuffer1Addr)};
 
-const pw::framebuffer::pool::PoolData s_fb_pool_data = {
-    .fb_addr =
-        {
-            reinterpret_cast<pw::color::color_rgb565_t*>(kBuffer0Addr),
-            reinterpret_cast<pw::color::color_rgb565_t*>(kBuffer1Addr),
-            nullptr,
-        },
-    .num_fb = 2,
-    .size = {kFramebufferWidth, kFramebufferHeight},
+FramebufferPoolMCUXpresso s_fb_pool({
+    .fb_addr = s_framebuffer_addrs,
+    .dimensions = kFramebufferDimensions,
     .row_bytes = kBufferStrideBytes,
-    .start = {FRAMEBUFFER_START_X, FRAMEBUFFER_START_Y},
-};
-
-MCUXpressoDevice s_mipi_device(s_fb_pool_data,
-                               {.width = DISPLAY_WIDTH,
-                                .height = DISPLAY_HEIGHT},
-                               kPixelFormat);
+    .pixel_format = PixelFormat::RGB565,
+});
+MCUXpressoDevice s_mipi_device(s_fb_pool, kDisplaySize, kVideoPixelFormat);
 DisplayDriverMipiDsi s_display_driver(s_mipi_device, kDisplaySize);
-Display s_display(s_display_driver, kDisplaySize);
+Display s_display(s_display_driver, kDisplaySize, s_fb_pool);
 
 void InitMipiPins(void) {
   constexpr uint32_t kPwmModeFunc =
@@ -109,6 +105,7 @@ Status Common::Init() {
 
   BOARD_BootClockRUN();
 
+  PW_TRY(s_fb_pool.Init(&s_mipi_device));
   PW_TRY(s_mipi_device.Init());
   return s_display_driver.Init();
 }

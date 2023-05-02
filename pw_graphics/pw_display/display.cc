@@ -15,18 +15,24 @@
 
 #include <utility>
 
+#include "pw_assert/assert.h"
+#include "pw_color/color.h"
 #include "pw_framebuffer/framebuffer.h"
 #include "pw_framebuffer_pool/framebuffer_pool.h"
 #include "pw_status/try.h"
 
 using pw::color::color_rgb565_t;
 using pw::framebuffer::Framebuffer;
+using pw::framebuffer::PixelFormat;
 
 namespace pw::display {
 
 Display::Display(pw::display_driver::DisplayDriver& display_driver,
-                 pw::math::Size<uint16_t> size)
-    : display_driver_(display_driver), size_(size) {}
+                 pw::math::Size<uint16_t> size,
+                 pw::framebuffer_pool::FramebufferPool& framebuffer_pool)
+    : display_driver_(display_driver),
+      size_(size),
+      framebuffer_pool_(framebuffer_pool) {}
 
 Display::~Display() = default;
 
@@ -83,10 +89,15 @@ Status Display::UpdateNearestNeighbor(const Framebuffer& framebuffer) {
 #endif  // DISPLAY_RESIZE
 
 Framebuffer Display::GetFramebuffer() {
-  return display_driver_.GetFramebuffer();
+  return framebuffer_pool_.GetFramebuffer();
 }
 
 Status Display::ReleaseFramebuffer(Framebuffer framebuffer) {
+  pw::framebuffer_pool::FramebufferPool& fb_pool = framebuffer_pool_;
+  auto write_cb = [&fb_pool](pw::framebuffer::Framebuffer fb, Status status) {
+    PW_ASSERT_OK(status);
+    fb_pool.ReleaseFramebuffer(std::move(fb));
+  };
   if (!framebuffer.is_valid())
     return Status::InvalidArgument();
   if (framebuffer.size() != size_) {
@@ -97,7 +108,8 @@ Status Display::ReleaseFramebuffer(Framebuffer framebuffer) {
     // expected to return an error if it cannot.
   }
 
-  return display_driver_.ReleaseFramebuffer(std::move(framebuffer));
+  display_driver_.WriteFramebuffer(std::move(framebuffer), write_cb);
+  return OkStatus();
 }
 
 }  // namespace pw::display

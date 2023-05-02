@@ -43,8 +43,13 @@ _target_config = {
   pw_assert_BACKEND = dir_pw_assert_basic
   pw_boot_BACKEND = "$dir_pw_boot_cortex_m:armv7m"
 
-  # TODO(cmumford): Review backend - adding to allow compile.
-  pw_sync_MUTEX_BACKEND = "$dir_pw_sync_baremetal:mutex"
+  pw_chrono_SYSTEM_CLOCK_BACKEND = "$dir_pw_chrono_freertos:system_clock"
+  pw_interrupt_CONTEXT_BACKEND = "$dir_pw_interrupt_cortex_m:context_armv7m"
+  pw_sync_MUTEX_BACKEND = "$dir_pw_sync_freertos:mutex"
+  pw_sync_INTERRUPT_SPIN_LOCK_BACKEND =
+      "$dir_pw_sync_freertos:interrupt_spin_lock"
+  pw_sync_COUNTING_SEMAPHORE_BACKEND =
+      "$dir_pw_sync_freertos:counting_semaphore"
 
   ### pw_cpu_exception not yet used
   # pw_cpu_exception_ENTRY_BACKEND =
@@ -52,8 +57,6 @@ _target_config = {
   # pw_cpu_exception_HANDLER_BACKEND = "$dir_pw_cpu_exception:basic_handler"
   # pw_cpu_exception_SUPPORT_BACKEND =
   #     "$dir_pw_cpu_exception_cortex_m:support_armv7m"
-  pw_sync_INTERRUPT_SPIN_LOCK_BACKEND =
-      "$dir_pw_sync_baremetal:interrupt_spin_lock"
   pw_log_BACKEND = dir_pw_log_basic
   pw_sys_io_BACKEND = dir_pw_sys_io_stm32cube
   pw_sys_io_stm32cube_CONFIG = "$dir_pigweed_experimental/targets/stm32f429i_disc1_stm32cube:module_config_overrides"

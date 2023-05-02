@@ -20,7 +20,6 @@
 #include "pw_framebuffer/framebuffer.h"
 #include "pw_spin_delay/delay.h"
 
-using pw::color::color_rgb565_t;
 using pw::digital_io::State;
 using pw::framebuffer::Framebuffer;
 using pw::framebuffer::PixelFormat;
@@ -385,14 +384,9 @@ Status DisplayDriverILI9341::Init() {
   return OkStatus();
 }
 
-Framebuffer DisplayDriverILI9341::GetFramebuffer() {
-  return Framebuffer(config_.pool_data.fb_addr[0],
-                     PixelFormat::RGB565,
-                     config_.pool_data.size,
-                     config_.pool_data.row_bytes);
-}
-
-Status DisplayDriverILI9341::ReleaseFramebuffer(Framebuffer frame_buffer) {
+void DisplayDriverILI9341::WriteFramebuffer(Framebuffer frame_buffer,
+                                            WriteCallback write_callback) {
+  PW_ASSERT(frame_buffer.is_valid());
   PW_ASSERT(frame_buffer.pixel_format() == PixelFormat::RGB565);
   auto transaction = config_.spi_device_16_bit.StartTransaction(
       ChipSelectBehavior::kPerTransaction);
@@ -419,7 +413,7 @@ Status DisplayDriverILI9341::ReleaseFramebuffer(Framebuffer frame_buffer) {
   s = transaction.Write(ConstByteSpan(
       reinterpret_cast<const std::byte*>(fb_data), kDisplayNumPixels));
 #endif
-  return s;
+  write_callback(std::move(frame_buffer), s);
 }
 
 Status DisplayDriverILI9341::WriteRow(span<uint16_t> row_pixels,

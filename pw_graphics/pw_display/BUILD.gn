@@ -37,7 +37,9 @@ pw_source_set("pw_display") {
     ":build_config",
   ]
   public = [ "public/pw_display/display.h" ]
+  deps = [ "$dir_pw_color" ]
   public_deps = [
+    "$dir_pw_assert",
     "$dir_pw_display_driver:display_driver",
     "$dir_pw_framebuffer",
     "$dir_pw_framebuffer_pool",
@@ -48,7 +50,10 @@ pw_source_set("pw_display") {
 }
 
 pw_test("display_test") {
-  deps = [ ":pw_display" ]
+  deps = [
+    ":pw_display",
+    "$dir_pw_color",
+  ]
   sources = [ "display_test.cc" ]
 }
 

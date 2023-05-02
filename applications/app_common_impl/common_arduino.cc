@@ -86,18 +86,12 @@ SpiValues s_spi_16_bit(kSpiConfig16Bit,
                        s_spi_chip_selector,
                        s_spi_initiator_mutex);
 uint16_t s_pixel_data[kNumPixels];
-constexpr pw::framebuffer::pool::PoolData s_fb_pool_data = {
-    .fb_addr =
-        {
-            s_pixel_data,
-            nullptr,
-            nullptr,
-        },
-    .num_fb = 1,
+pw::framebuffer_pool::FramebufferPool s_fb_pool({
+    .fb_addr = {s_pixel_data},
     .size = {kFramebufferWidth, kFramebufferHeight},
     .row_bytes = kDisplayRowBytes,
     .start = {0, 0},
-};
+});
 DisplayDriver s_display_driver({
   .data_cmd_gpio = s_display_dc_pin,
 #if DISPLAY_RESET_GPIO != -1
@@ -106,9 +100,9 @@ DisplayDriver s_display_driver({
   .reset_gpio = nullptr,
 #endif
   .spi_device_8_bit = s_spi_8_bit.device,
-  .spi_device_16_bit = s_spi_16_bit.device, .pool_data = s_fb_pool_data,
+  .spi_device_16_bit = s_spi_16_bit.device,
 });
-Display s_display(s_display_driver, kDisplaySize);
+Display s_display(s_display_driver, kDisplaySize, s_fb_pool);
 
 SpiValues::SpiValues(pw::spi::Config config,
                      pw::spi::ChipSelector& selector,

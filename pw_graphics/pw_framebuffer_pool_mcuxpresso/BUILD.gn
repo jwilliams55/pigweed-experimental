@@ -1,4 +1,4 @@
-# Copyright 2022 The Pigweed Authors
+# Copyright 2023 The Pigweed Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,32 +15,17 @@
 import("//build_overrides/pigweed.gni")
 
 import("$dir_pw_build/target_types.gni")
-import("$dir_pw_docgen/docs.gni")
-import("$dir_pw_unit_test/test.gni")
 
-config("public_include_path") {
+config("default_config") {
   include_dirs = [ "public" ]
-  visibility = [ ":*" ]
 }
 
-group("pw_display_driver") {
-  deps = [ ":display_driver" ]
-}
-
-pw_source_set("display_driver") {
-  public_configs = [ ":public_include_path" ]
-  public = [ "public/pw_display_driver/display_driver.h" ]
+pw_source_set("pw_framebuffer_pool_mcuxpresso") {
+  public_configs = [ ":default_config" ]
+  public = [ "public/pw_framebuffer_pool_mcuxpresso/framebuffer_pool.h" ]
   public_deps = [
-    "$dir_pw_framebuffer",
-    "$dir_pw_function",
-    "$dir_pw_span",
-    "$dir_pw_status",
+    "$dir_pw_framebuffer_pool",
+    "$dir_pw_mipi_dsi_mcuxpresso",
   ]
-}
-
-pw_test("display_driver_test") {
-}
-
-pw_doc_group("docs") {
-  sources = [ "docs.rst" ]
+  sources = [ "framebuffer_pool.cc" ]
 }

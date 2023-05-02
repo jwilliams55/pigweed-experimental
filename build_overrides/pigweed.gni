@@ -92,6 +92,9 @@ declare_args() {
   dir_pw_framebuffer_pool =
       get_path_info("$dir_pigweed_experimental/pw_graphics/pw_framebuffer_pool",
                     "abspath")
+  dir_pw_framebuffer_pool_mcuxpresso = get_path_info(
+          "$dir_pigweed_experimental/pw_graphics/pw_framebuffer_pool_mcuxpresso",
+          "abspath")
   dir_pw_mipi_dsi =
       get_path_info("$dir_pigweed_experimental/pw_mipi_dsi", "abspath")
   dir_pw_mipi_dsi_mcuxpresso =

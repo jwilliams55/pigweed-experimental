@@ -24,10 +24,10 @@
 #include "fsl_mipi_dsi_smartdma.h"
 #include "fsl_power.h"
 #include "pin_mux.h"
+#include "pw_assert/assert.h"
 
-using pw::color::color_rgb565_t;
 using pw::framebuffer::Framebuffer;
-using pw::framebuffer::PixelFormat;
+using pw::framebuffer_pool::FramebufferPool;
 
 namespace pw::mipi::dsi {
 
@@ -40,6 +40,9 @@ constexpr int kVideoLayer = 0;
 // This class is currently a singleton because the some callbacks and IRQ
 // handlers do not have a user-data param.
 MCUXpressoDevice* s_device;
+
+pw::mipi::dsi::Device::WriteCallback s_write_callback;
+Framebuffer s_write_framebuffer;
 
 extern "C" {
 void GPIO_INTA_DriverIRQHandler(void) {
@@ -57,11 +60,10 @@ void SDMA_DriverIRQHandler(void) { SMARTDMA_HandleIRQ(); }
 
 }  // namespace
 
-MCUXpressoDevice::MCUXpressoDevice(
-    const pw::framebuffer::pool::PoolData& fb_pool,
-    const pw::math::Size<uint16_t>& panel_size,
-    video_pixel_format_t pixel_format)
-    : fb_pool_(fb_pool),
+MCUXpressoDevice::MCUXpressoDevice(const FramebufferPool& framebuffer_pool,
+                                   const pw::math::Size<uint16_t>& panel_size,
+                                   video_pixel_format_t pixel_format)
+    : framebuffer_pool_(framebuffer_pool),
       fbdev_(kVideoLayer),
       dsi_device_({
           .virtualChannel = 0,
@@ -120,14 +122,16 @@ MCUXpressoDevice::MCUXpressoDevice(
 MCUXpressoDevice::~MCUXpressoDevice() = default;
 
 Status MCUXpressoDevice::Init() {
-  if (fb_pool_.num_fb == 0)
+  const FramebufferPool::BufferArray& buffers =
+      framebuffer_pool_.GetBuffersForInit();
+  if (buffers.empty())
     return Status::InvalidArgument();
 
   Status s = PrepareDisplayController();
   if (!s.ok())
     return s;
 
-  s = fbdev_.Init(&dc_, fb_pool_);
+  s = fbdev_.Init(&dc_, framebuffer_pool_);
   if (!s.ok())
     return s;
 
@@ -136,26 +140,33 @@ Status MCUXpressoDevice::Init() {
   if (!buffer) {
     return Status::Internal();
   }
-  std::memset(buffer, 0, fb_pool_.row_bytes * fb_pool_.size.height);
-  s = fbdev_.WriteFramebuffer(buffer);
-  if (!s.ok())
-    return s;
+  std::memset(
+      buffer,
+      0,
+      framebuffer_pool_.row_bytes() * framebuffer_pool_.dimensions().height);
+  fbdev_.WriteFramebuffer(buffer, [](void*, Status) {});
 
   return fbdev_.Enable();
 }
 
 Framebuffer MCUXpressoDevice::GetFramebuffer() {
-  return Framebuffer(static_cast<color_rgb565_t*>(fbdev_.GetFramebuffer()),
-                     PixelFormat::RGB565,
-                     fb_pool_.size,
-                     fb_pool_.row_bytes);
+  return Framebuffer(fbdev_.GetFramebuffer(),
+                     framebuffer_pool_.pixel_format(),
+                     framebuffer_pool_.dimensions(),
+                     framebuffer_pool_.row_bytes());
 }
 
-Status MCUXpressoDevice::ReleaseFramebuffer(Framebuffer framebuffer) {
-  if (!framebuffer.is_valid())
-    return Status::InvalidArgument();
-  void* data = framebuffer.data();
-  return fbdev_.WriteFramebuffer(data);
+void MCUXpressoDevice::WriteFramebuffer(Framebuffer framebuffer,
+                                        WriteCallback write_callback) {
+  PW_ASSERT(framebuffer.is_valid());
+  PW_ASSERT(!s_write_callback);
+  s_write_callback = std::move(write_callback);
+  s_write_framebuffer = std::move(framebuffer);
+  fbdev_.WriteFramebuffer(s_write_framebuffer.data(),
+                          [](void* buffer, Status s) {
+                            PW_ASSERT(s_write_callback);
+                            s_write_callback(std::move(s_write_framebuffer), s);
+                          });
 }
 
 Status MCUXpressoDevice::PrepareDisplayController(void) {
@@ -374,7 +385,6 @@ void MCUXpressoDevice::PullPanelPowerPin(bool pullUp) {
   }
 }
 
-// static
 void MCUXpressoDevice::DisplayTEPinHandler() {
   DC_FB_DSI_CMD_TE_IRQHandler(&dc_);
 }

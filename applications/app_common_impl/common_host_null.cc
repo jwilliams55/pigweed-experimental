@@ -17,6 +17,7 @@
 #include "pw_status/try.h"
 
 using pw::Status;
+using pw::framebuffer_pool::FramebufferPool;
 
 namespace {
 
@@ -24,7 +25,12 @@ constexpr pw::math::Size<uint16_t> kDisplaySize = {DISPLAY_WIDTH,
                                                    DISPLAY_HEIGHT};
 
 pw::display_driver::DisplayDriverNULL s_display_driver;
-pw::display::Display s_display(s_display_driver, kDisplaySize);
+pw::framebuffer_pool::FramebufferPool s_fb_pool({
+    .fb_addr = {nullptr},
+    .dimensions = {0, 0},
+    .row_bytes = 0,
+});
+pw::display::Display s_display(s_display_driver, kDisplaySize, s_fb_pool);
 
 }  // namespace
 

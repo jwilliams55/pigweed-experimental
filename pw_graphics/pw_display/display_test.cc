@@ -18,11 +18,13 @@
 #include <utility>
 
 #include "gtest/gtest.h"
+#include "pw_color/color.h"
 
 using pw::color::color_rgb565_t;
 using pw::display_driver::DisplayDriver;
 using pw::framebuffer::Framebuffer;
 using pw::framebuffer::PixelFormat;
+using pw::framebuffer_pool::FramebufferPool;
 using Size = pw::math::Size<uint16_t>;
 
 namespace pw::display {
@@ -57,14 +59,8 @@ class TestDisplayDriver : public DisplayDriver {
 
   Status Init() override { return OkStatus(); }
 
-  Framebuffer GetFramebuffer() override {
-    return Framebuffer(framebuffer_.data(),
-                       PixelFormat::RGB565,
-                       framebuffer_.size(),
-                       framebuffer_.row_bytes());
-  }
-
-  Status ReleaseFramebuffer(Framebuffer framebuffer) override {
+  void WriteFramebuffer(Framebuffer framebuffer,
+                        WriteCallback write_callback) override {
     if (next_call_param_idx_ < kMaxSavedParams) {
       call_params_[next_call_param_idx_].call_func =
           CallFunc::ReleaseFramebuffer;
@@ -72,7 +68,7 @@ class TestDisplayDriver : public DisplayDriver {
           framebuffer.data();
       next_call_param_idx_++;
     }
-    return OkStatus();
+    write_callback(std::move(framebuffer), OkStatus());
   }
 
   Status WriteRow(span<uint16_t> pixel_data,
@@ -123,10 +119,16 @@ TEST(Display, ReleaseNoResize) {
   constexpr uint16_t kFramebufferRowBytes =
       sizeof(color_rgb565_t) * kFramebufferSize.width;
   color_rgb565_t pixel_data[kNumPixels];
+  FramebufferPool fb_pool({
+      .fb_addr = {pixel_data},
+      .dimensions = kFramebufferSize,
+      .row_bytes = kFramebufferRowBytes,
+      .pixel_format = PixelFormat::RGB565,
+  });
 
   TestDisplayDriver test_driver(Framebuffer(
       pixel_data, PixelFormat::RGB565, kFramebufferSize, kFramebufferRowBytes));
-  Display display(test_driver, kDisplaySize);
+  Display display(test_driver, kDisplaySize, fb_pool);
   Framebuffer fb = display.GetFramebuffer();
   EXPECT_TRUE(fb.is_valid());
   EXPECT_EQ(kFramebufferSize, fb.size());
@@ -148,10 +150,16 @@ TEST(Display, ReleaseSmallResize) {
   constexpr uint16_t kFramebufferRowBytes =
       sizeof(color_rgb565_t) * kFramebufferSize.width;
   color_rgb565_t pixel_data[kNumPixels];
+  FramebufferPool fb_pool({
+      .fb_addr = pixel_data,
+      .size = kFramebufferSize,
+      .row_bytes = kFramebufferRowBytes,
+      .pixel_format = PixelFormat::RGB565,
+  });
 
   TestDisplayDriver test_driver(
       Framebuffer(pixel_data, kFramebufferSize, kFramebufferRowBytes));
-  Display display(test_driver, kDisplaySize);
+  Display display(test_driver, kDisplaySize, fb_pool);
   Framebuffer fb = display.GetFramebuffer();
   EXPECT_TRUE(fb.is_valid());
   EXPECT_EQ(kFramebufferSize, fb.size());
@@ -193,6 +201,12 @@ TEST(Display, ReleaseWideResize) {
   constexpr uint16_t kFramebufferRowBytes =
       sizeof(color_rgb565_t) * kFramebufferSize.width;
   color_rgb565_t pixel_data[kNumPixels];
+  FramebufferPool fb_pool({
+      .fb_addr = pixel_data,
+      .size = kFramebufferSize,
+      .row_bytes = kFramebufferRowBytes,
+      .pixel_format = PixelFormat::RGB565,
+  });
 
   TestDisplayDriver test_driver(
       Framebuffer(pixel_data, kFramebufferSize, kFramebufferRowBytes));

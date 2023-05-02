@@ -67,6 +67,7 @@ pw_source_set("stm32cube") {
     "$dir_pw_digital_io_stm32cube",
     "$dir_pw_display",
     "$dir_pw_display_driver_ili9341",
+    "$dir_pw_framebuffer_pool",
     "$dir_pw_spi_stm32cube",
     "$dir_pw_sync:borrow",
     "$dir_pw_sync:mutex",
@@ -108,7 +109,7 @@ if (pw_third_party_mcuxpresso_SDK != "") {
       "$dir_pigweed_experimental/applications/app_common:app_common.facade",
       "$dir_pw_display",
       "$dir_pw_display_driver_mipi_dsi",
-      "$dir_pw_framebuffer_pool",
+      "$dir_pw_framebuffer_pool_mcuxpresso",
       "$dir_pw_mipi_dsi_mcuxpresso",
       "$pw_third_party_mcuxpresso_SDK",
     ]
@@ -124,6 +125,7 @@ _pico_common_deps = [
   "$dir_pigweed_experimental/applications/app_common:app_common.facade",
   "$dir_pw_digital_io_pico",
   "$dir_pw_display",
+  "$dir_pw_framebuffer_pool",
   "$dir_pw_log",
   "$dir_pw_spi_pico",
   "$dir_pw_sync:borrow",
@@ -172,6 +174,7 @@ pw_source_set("host_imgui") {
     "$dir_pigweed_experimental/applications/app_common:app_common.facade",
     "$dir_pw_display_driver_imgui",
     "$dir_pw_display_imgui",
+    "$dir_pw_framebuffer_pool",
   ]
   sources = [ "common_host_imgui.cc" ]
 }

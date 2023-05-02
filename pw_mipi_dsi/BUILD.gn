@@ -27,6 +27,7 @@ pw_source_set("pw_mipi_dsi") {
   public = [ "public/pw_mipi_dsi/device.h" ]
   public_deps = [
     "$dir_pw_framebuffer",
+    "$dir_pw_function",
     "$dir_pw_status",
   ]
 }

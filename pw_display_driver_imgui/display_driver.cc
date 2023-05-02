@@ -164,9 +164,7 @@ void glfw_error_callback(int error, const char* description) {
 
 }  // namespace
 
-DisplayDriverImgUI::DisplayDriverImgUI(
-    const pw::framebuffer::pool::PoolData& pool_data)
-    : pool_data_(pool_data) {}
+DisplayDriverImgUI::DisplayDriverImgUI() = default;
 
 Status DisplayDriverImgUI::Init() {
   // Setup window
@@ -394,16 +392,9 @@ void DisplayDriverImgUI::Render() {
   }
 }
 
-Framebuffer DisplayDriverImgUI::GetFramebuffer() {
-  return Framebuffer(pool_data_.fb_addr[0],
-                     PixelFormat::RGB565,
-                     pool_data_.size,
-                     pool_data_.row_bytes);
-}
-
-Status DisplayDriverImgUI::ReleaseFramebuffer(Framebuffer framebuffer) {
-  if (!framebuffer.is_valid())
-    return Status::InvalidArgument();
+void DisplayDriverImgUI::WriteFramebuffer(Framebuffer framebuffer,
+                                          WriteCallback write_callback) {
+  PW_ASSERT(framebuffer.is_valid());
   PW_ASSERT(framebuffer.pixel_format() == PixelFormat::RGB565);
   RecreateLcdTexture();
 
@@ -418,7 +409,7 @@ Status DisplayDriverImgUI::ReleaseFramebuffer(Framebuffer framebuffer) {
   }
 
   Render();
-  return OkStatus();
+  write_callback(std::move(framebuffer), OkStatus());
 }
 
 Status DisplayDriverImgUI::WriteRow(span<uint16_t> row_pixels,

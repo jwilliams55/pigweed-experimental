@@ -18,17 +18,29 @@
 #include "pw_assert/assert.h"
 #include "pw_status/try.h"
 
+using pw::framebuffer_pool::FramebufferPool;
+
 namespace pw::mipi::dsi {
+
+namespace {
+FramebufferDevice::WriteCallback s_write_callback;
+void* s_current_write_buffer;
+}  // namespace
 
 FramebufferDevice::FramebufferDevice(uint8_t layer)
     : dc_(nullptr), layer_(layer), enabled_(false) {
   VIDEO_MEMPOOL_InitEmpty(&video_mempool_);
 }
 
-Status FramebufferDevice::Init(
-    const dc_fb_t* dc, const pw::framebuffer::pool::PoolData& pool_data) {
+Status FramebufferDevice::Init(const dc_fb_t* dc,
+                               const FramebufferPool& framebuffer_pool) {
   PW_TRY(InitDisplayController(dc));
-  return InitVideoMemPool(pool_data);
+  PW_TRY(InitVideoMemPool(framebuffer_pool));
+  // Only allow one framebuffer to be checked out at a time. This could be
+  // increased to the pool size if the completion callback mechanism is
+  // improved to allow more than one write at a time.
+  framebuffer_semaphore_.release(1);
+  return OkStatus();
 }
 
 Status FramebufferDevice::InitDisplayController(const dc_fb_t* dc) {
@@ -58,13 +70,15 @@ Status FramebufferDevice::InitDisplayController(const dc_fb_t* dc) {
 }
 
 Status FramebufferDevice::InitVideoMemPool(
-    const pw::framebuffer::pool::PoolData& pool_data) {
+    const FramebufferPool& framebuffer_pool) {
   if (enabled_) {
     return Status::FailedPrecondition();
   }
 
-  for (uint8_t i = 0; i < pool_data.num_fb; i++) {
-    VIDEO_MEMPOOL_Put(&video_mempool_, pool_data.fb_addr[i]);
+  const FramebufferPool::BufferArray& buffers =
+      framebuffer_pool.GetBuffersForInit();
+  for (size_t i = 0; i < buffers.size(); i++) {
+    VIDEO_MEMPOOL_Put(&video_mempool_, buffers[i]);
   }
 
   return OkStatus();
@@ -106,17 +120,33 @@ Status FramebufferDevice::Disable() {
   return MCUXpressoToPigweedStatus(status);
 }
 
-Status FramebufferDevice::WriteFramebuffer(void* frameBuffer) {
-  return MCUXpressoToPigweedStatus(
+void FramebufferDevice::WriteFramebuffer(void* frameBuffer,
+                                         WriteCallback write_callback) {
+  PW_ASSERT(!s_write_callback);
+  s_write_callback = std::move(write_callback);
+  s_current_write_buffer = frameBuffer;
+  Status s = MCUXpressoToPigweedStatus(
       dc_->ops->setFrameBuffer(dc_, layer_, frameBuffer));
+  if (!s.ok())
+    WriteComplete(s_current_write_buffer, s);
 }
 
 void* FramebufferDevice::GetFramebuffer() {
+  framebuffer_semaphore_.acquire();
   return VIDEO_MEMPOOL_Get(&video_mempool_);
+}
+
+void FramebufferDevice::WriteComplete(void* buffer, Status s) {
+  PW_ASSERT(buffer == s_current_write_buffer);
+  PW_ASSERT(s_write_callback);
+  framebuffer_semaphore_.release();
+  s_current_write_buffer = nullptr;
+  s_write_callback(buffer, s);
 }
 
 void FramebufferDevice::BufferSwitchOff(void* buffer) {
   VIDEO_MEMPOOL_Put(&video_mempool_, buffer);
+  WriteComplete(buffer, OkStatus());
 }
 
 // static

@@ -21,15 +21,15 @@ namespace pw::display_driver {
 
 class DisplayDriverImgUI : public DisplayDriver {
  public:
-  DisplayDriverImgUI(const pw::framebuffer::pool::PoolData& pool_data);
+  DisplayDriverImgUI();
 
   bool NewTouchEvent();
   pw::math::Vector3<int> GetTouchPoint();
 
   // pw::display_driver::DisplayDriver implementation:
   Status Init() override;
-  pw::framebuffer::Framebuffer GetFramebuffer() override;
-  Status ReleaseFramebuffer(pw::framebuffer::Framebuffer framebuffer) override;
+  void WriteFramebuffer(pw::framebuffer::Framebuffer framebuffer,
+                        WriteCallback write_callback) override;
   Status WriteRow(span<uint16_t> row_pixels,
                   uint16_t row_idx,
                   uint16_t col_idx) override;
@@ -39,8 +39,6 @@ class DisplayDriverImgUI : public DisplayDriver {
  private:
   void RecreateLcdTexture();
   void Render();
-
-  const pw::framebuffer::pool::PoolData& pool_data_;
 };
 
 }  // namespace pw::display_driver

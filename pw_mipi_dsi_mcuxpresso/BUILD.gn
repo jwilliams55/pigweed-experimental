@@ -37,15 +37,17 @@ pw_source_set("pw_mipi_dsi_mcuxpresso") {
     "public/pw_mipi_dsi_mcuxpresso/framebuffer_device.h",
   ]
   public_deps = [
+    "$dir_pw_color",
     "$dir_pw_framebuffer",
     "$dir_pw_framebuffer_pool",
     "$dir_pw_mipi_dsi",
     "$dir_pw_status",
+    "$dir_pw_sync:counting_semaphore",
+    "$pw_third_party_mcuxpresso_SDK",
   ]
   deps = [
     "$dir_pw_assert",
     "$dir_pw_log",
-    "$pw_third_party_mcuxpresso_SDK",
   ]
   sources = [
     "common.cc",

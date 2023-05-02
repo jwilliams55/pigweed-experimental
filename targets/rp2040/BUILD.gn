@@ -72,9 +72,14 @@ generate_toolchain("rp2040") {
     pw_log_BACKEND = dir_pw_log_basic
     pw_sys_io_BACKEND = dir_pw_sys_io_pico
 
+    pw_chrono_SYSTEM_CLOCK_BACKEND = "$dir_pw_chrono_freertos:system_clock"
+    pw_interrupt_CONTEXT_BACKEND = "$dir_pw_interrupt_cortex_m:context_armv7m"
     pw_sync_INTERRUPT_SPIN_LOCK_BACKEND =
-        "$dir_pw_sync_baremetal:interrupt_spin_lock"
+        "$dir_pw_sync_freertos:interrupt_spin_lock"
     pw_sync_MUTEX_BACKEND = "$dir_pw_sync_baremetal:mutex"
+    pw_sync_COUNTING_SEMAPHORE_BACKEND =
+        "$dir_pw_sync_freertos:counting_semaphore"
+
     pw_rpc_CONFIG = "$dir_pw_rpc:disable_global_mutex"
 
     pw_third_party_freertos_CONFIG =

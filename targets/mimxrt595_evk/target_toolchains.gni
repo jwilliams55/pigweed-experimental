@@ -32,11 +32,17 @@ _target_config = {
       get_path_info("mimxrt595_executable.gni", "abspath")
 
   # Facade backends
+  pw_chrono_SYSTEM_CLOCK_BACKEND = "$dir_pw_chrono_freertos:system_clock"
+  pw_interrupt_CONTEXT_BACKEND = "$dir_pw_interrupt_cortex_m:context_armv7m"
+  pw_sync_INTERRUPT_SPIN_LOCK_BACKEND =
+      "$dir_pw_sync_freertos:interrupt_spin_lock"
+  pw_sync_COUNTING_SEMAPHORE_BACKEND =
+      "$dir_pw_sync_freertos:counting_semaphore"
+
   pw_assert_BACKEND = dir_pw_assert_basic
   pw_boot_BACKEND = "$dir_pw_boot_cortex_m"
   pw_sync_INTERRUPT_SPIN_LOCK_BACKEND =
       "$dir_pw_sync_baremetal:interrupt_spin_lock"
-  pw_sync_MUTEX_BACKEND = "$dir_pw_sync_baremetal:mutex"
   pw_rpc_CONFIG = "$dir_pw_rpc:disable_global_mutex"
   pw_log_BACKEND = dir_pw_log_basic
   pw_sys_io_BACKEND = "$dir_pw_sys_io_mcuxpresso"
@@ -51,6 +57,7 @@ _target_config = {
   pw_app_common_FRAMEBUFFER_START_X = 4
   pw_app_common_FRAMEBUFFER_START_Y = 0
   pw_display_DISPLAY_RESIZE = 1
+  pw_framebuffer_pool_FRAMEBUFFER_COUNT = 2
 
   pw_board_led_BACKEND = "$dir_pw_board_led_mimxrt595_evk"
   pw_spin_delay_BACKEND = "$dir_pw_spin_delay_mcuxpresso"

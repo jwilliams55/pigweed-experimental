@@ -24,7 +24,8 @@ namespace pw::display {
 class DisplayImgUI : public Display {
  public:
   DisplayImgUI(pw::display_driver::DisplayDriverImgUI& display_driver,
-               pw::math::Size<uint16_t> size);
+               pw::math::Size<uint16_t> size,
+               pw::framebuffer_pool::FramebufferPool& framebuffer_pool);
   ~DisplayImgUI();
 
   bool TouchscreenAvailable() const override { return true; }

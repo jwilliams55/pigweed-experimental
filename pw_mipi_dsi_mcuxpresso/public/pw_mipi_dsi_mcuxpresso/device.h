@@ -18,6 +18,7 @@
 #include "fsl_mipi_dsi.h"
 #include "fsl_mipi_dsi_smartdma.h"
 #include "fsl_rm67162.h"
+#include "pw_color/color.h"
 #include "pw_framebuffer_pool/framebuffer_pool.h"
 #include "pw_math/size.h"
 #include "pw_mipi_dsi/device.h"
@@ -37,16 +38,21 @@ constexpr uint32_t kMaxDSITxArraySize =
 // MIPI DSI Device implementation for the MCUXpresso platform.
 class MCUXpressoDevice : public Device {
  public:
-  MCUXpressoDevice(const pw::framebuffer::pool::PoolData& fb_pool,
-                   const pw::math::Size<uint16_t>& panel_size,
-                   video_pixel_format_t pixel_format);
+  MCUXpressoDevice(
+      const pw::framebuffer_pool::FramebufferPool& framebuffer_pool,
+      const pw::math::Size<uint16_t>& panel_size,
+      video_pixel_format_t pixel_format);
   virtual ~MCUXpressoDevice();
 
   Status Init();
 
+  // Retrieve a framebuffer for use. Will block until a framebuffer is
+  // available.
+  pw::framebuffer::Framebuffer GetFramebuffer();
+
   // pw::mipi::dsi::Device implementation:
-  pw::framebuffer::Framebuffer GetFramebuffer() override;
-  Status ReleaseFramebuffer(pw::framebuffer::Framebuffer framebuffer) override;
+  void WriteFramebuffer(pw::framebuffer::Framebuffer framebuffer,
+                        WriteCallback write_callback) override;
 
  public:
   static status_t DSI_Transfer(dsi_transfer_t* xfer);
@@ -84,7 +90,7 @@ class MCUXpressoDevice : public Device {
   void InitSmartDMA();
 #endif
 
-  const pw::framebuffer::pool::PoolData& fb_pool_;
+  const pw::framebuffer_pool::FramebufferPool& framebuffer_pool_;
   FramebufferDevice fbdev_;
   dsi_smartdma_handle_t dsi_smartdma_driver_handle_ = {};
   DSIMemWriteContext dsi_mem_write_ctx_ = {};

@@ -22,17 +22,44 @@
 #include "pw_color/colors_pico8.h"
 #include "pw_framebuffer/writer.h"
 #include "pw_log/log.h"
+#include "pw_math/size.h"
 
 using pw::color::color_rgb565_t;
 
 namespace pw::framebuffer {
 namespace {
 
+static_assert(!std::is_copy_constructible_v<Framebuffer>,
+              "Framebuffer must not be copy constructable");
+static_assert(std::is_move_constructible_v<Framebuffer>,
+              "Framebuffer needs to be moveable");
+static_assert(!std::is_trivially_move_constructible_v<Framebuffer>,
+              "Framebuffer move may not be trivial");
+
+TEST(Framebuffer, Default) {
+  Framebuffer fb;
+
+  EXPECT_EQ(false, fb.is_valid());
+  EXPECT_EQ(0, fb.size().width);
+  EXPECT_EQ(0, fb.size().height);
+  EXPECT_EQ(0, fb.row_bytes());
+  EXPECT_EQ(PixelFormat::None, fb.pixel_format());
+  EXPECT_EQ(nullptr, fb.data());
+}
+
 TEST(Framebuffer, Init) {
-  color_rgb565_t data[32 * 32];
-  Framebuffer fb(data, PixelFormat::RGB565, {32, 32}, 32 * sizeof(data[0]));
-  EXPECT_EQ(fb.size().width, 32);
-  EXPECT_EQ(fb.size().height, 32);
+  constexpr pw::math::Size<uint16_t> kDimensions = {32, 40};
+  constexpr uint16_t kRowBytes = kDimensions.width * sizeof(color_rgb565_t);
+
+  color_rgb565_t data[kDimensions.width * kDimensions.height];
+  Framebuffer fb(data, PixelFormat::RGB565, kDimensions, kRowBytes);
+
+  EXPECT_EQ(true, fb.is_valid());
+  EXPECT_EQ(32, fb.size().width);
+  EXPECT_EQ(40, fb.size().height);
+  EXPECT_EQ(kRowBytes, fb.row_bytes());
+  EXPECT_EQ(PixelFormat::RGB565, fb.pixel_format());
+  EXPECT_EQ(data, fb.data());
 }
 
 }  // namespace

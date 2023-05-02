@@ -17,8 +17,10 @@ namespace pw::display {
 
 DisplayImgUI::DisplayImgUI(
     pw::display_driver::DisplayDriverImgUI& display_driver,
-    pw::math::Size<uint16_t> size)
-    : Display(display_driver, size), display_driver_(display_driver) {}
+    pw::math::Size<uint16_t> size,
+    pw::framebuffer_pool::FramebufferPool& framebuffer_pool)
+    : Display(display_driver, size, framebuffer_pool),
+      display_driver_(display_driver) {}
 
 DisplayImgUI::~DisplayImgUI() = default;
 

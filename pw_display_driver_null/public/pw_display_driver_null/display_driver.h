@@ -13,6 +13,8 @@
 // the License.
 #pragma once
 
+#include <utility>
+
 #include "pw_display_driver/display_driver.h"
 
 namespace pw::display_driver {
@@ -25,11 +27,9 @@ class DisplayDriverNULL : public DisplayDriver {
 
   // pw::display_driver::DisplayDriver implementation:
   pw::Status Init() override { return pw::OkStatus(); }
-  pw::framebuffer::Framebuffer GetFramebuffer(void) override {
-    return pw::framebuffer::Framebuffer();
-  }
-  Status ReleaseFramebuffer(pw::framebuffer::Framebuffer) override {
-    return OkStatus();
+  void WriteFramebuffer(pw::framebuffer::Framebuffer framebuffer,
+                        WriteCallback write_callback) override {
+    write_callback(std::move(framebuffer), OkStatus());
   }
   Status WriteRow(span<uint16_t>, uint16_t, uint16_t) override {
     return pw::OkStatus();
