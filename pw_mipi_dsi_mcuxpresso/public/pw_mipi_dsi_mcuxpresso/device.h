@@ -46,11 +46,8 @@ class MCUXpressoDevice : public Device {
 
   Status Init();
 
-  // Retrieve a framebuffer for use. Will block until a framebuffer is
-  // available.
-  pw::framebuffer::Framebuffer GetFramebuffer();
-
   // pw::mipi::dsi::Device implementation:
+  pw::framebuffer::Framebuffer GetFramebuffer() override;
   void WriteFramebuffer(pw::framebuffer::Framebuffer framebuffer,
                         WriteCallback write_callback) override;
 

@@ -15,7 +15,7 @@
 #pragma once
 
 #include "pw_framebuffer_pool/framebuffer_pool.h"
-#include "pw_mipi_dsi_mcuxpresso/device.h"
+#include "pw_mipi_dsi/device.h"
 #include "pw_status/status.h"
 
 namespace pw::framebuffer_pool {
@@ -28,14 +28,14 @@ class FramebufferPoolMCUXpresso : public FramebufferPool {
   FramebufferPoolMCUXpresso(const Config& config);
 
   // Initialize the instance. Must be called before using other methods.
-  pw::Status Init(pw::mipi::dsi::MCUXpressoDevice* device);
+  pw::Status Init(pw::mipi::dsi::Device* device);
 
   // pw::framebuffer_pool::FramebufferPool implementation:
   pw::framebuffer::Framebuffer GetFramebuffer() override;
   Status ReleaseFramebuffer(pw::framebuffer::Framebuffer framebuffer) override;
 
  private:
-  pw::mipi::dsi::MCUXpressoDevice* device_;
+  pw::mipi::dsi::Device* device_;
 };
 
 }  // namespace pw::framebuffer_pool

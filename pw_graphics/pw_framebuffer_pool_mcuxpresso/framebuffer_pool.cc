@@ -21,8 +21,7 @@ namespace pw::framebuffer_pool {
 FramebufferPoolMCUXpresso::FramebufferPoolMCUXpresso(const Config& config)
     : FramebufferPool(config), device_(nullptr) {}
 
-pw::Status FramebufferPoolMCUXpresso::Init(
-    pw::mipi::dsi::MCUXpressoDevice* device) {
+pw::Status FramebufferPoolMCUXpresso::Init(pw::mipi::dsi::Device* device) {
   PW_ASSERT(device_ == nullptr);
   device_ = device;
   return OkStatus();

@@ -30,6 +30,10 @@ class Device {
 
   virtual ~Device() = default;
 
+  // Retrieve a framebuffer for use. Will block until a framebuffer is
+  // available.
+  virtual pw::framebuffer::Framebuffer GetFramebuffer() = 0;
+
   // Begin the process of transporting the |framebuffer| to the display.
   virtual void WriteFramebuffer(pw::framebuffer::Framebuffer framebuffer,
                                 WriteCallback write_callback) = 0;

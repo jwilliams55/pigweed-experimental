@@ -25,7 +25,7 @@ pw_source_set("pw_framebuffer_pool_mcuxpresso") {
   public = [ "public/pw_framebuffer_pool_mcuxpresso/framebuffer_pool.h" ]
   public_deps = [
     "$dir_pw_framebuffer_pool",
-    "$dir_pw_mipi_dsi_mcuxpresso",
+    "$dir_pw_mipi_dsi",
   ]
   sources = [ "framebuffer_pool.cc" ]
 }
