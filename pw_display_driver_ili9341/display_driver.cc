@@ -136,12 +136,8 @@ constexpr std::byte MADCTL_ML  = std::byte{0b00010000}; // Vertical refresh orde
 constexpr std::byte MADCTL_BGR = std::byte{0b00001000}; // BGR/RGB order.
 constexpr std::byte MADCTL_MH  = std::byte{0b00000100}; // Horizontal refresh order.
 
-constexpr std::byte kMode0 = MADCTL_BGR | MADCTL_MX;
-constexpr std::byte kMode1 = MADCTL_BGR | MADCTL_MV;
-constexpr std::byte kMode2 = MADCTL_BGR | MADCTL_MY;
-constexpr std::byte kMode3 = MADCTL_BGR | MADCTL_MX | MADCTL_MY | MADCTL_MV;
-constexpr std::byte kMode4 = MADCTL_BGR | MADCTL_MY | MADCTL_MV;
-constexpr std::byte kMADMode = kMode4;
+// Take value specified in target.
+constexpr std::byte kMADMode = std::byte{ILI9341_MADCTL};
 
 constexpr uint8_t kDTC_PTG_MASK          = 0b00001100;
 constexpr uint8_t kDTC_PTG_NORMAL_SCAN   = 0b00000000;

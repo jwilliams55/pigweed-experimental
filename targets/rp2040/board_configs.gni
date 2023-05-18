@@ -30,6 +30,7 @@ board_config_ili9341 = {
   pw_app_common_SPI_MISO_GPIO = "-1"
   pw_app_common_SPI_MOSI_GPIO = "19"
   pw_app_common_SPI_CLOCK_GPIO = "18"
+  pw_display_driver_ili9341_MADCTL = "0xA8"  # BGR + rotate 90 (MY|MV).
 }
 
 board_config_st7735 = {

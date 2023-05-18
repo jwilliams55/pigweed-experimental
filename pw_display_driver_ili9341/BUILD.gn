@@ -17,12 +17,23 @@ import("//build_overrides/pigweed.gni")
 import("$dir_pw_build/target_types.gni")
 import("$dir_pw_third_party/stm32cube/stm32cube.gni")
 
+declare_args() {
+  # The ILI9341 MADCTL register value to set during initialization.
+  # The default is portrait adressing in BGR order.
+  pw_display_driver_ili9341_MADCTL = "0"
+}
+
 config("default_config") {
   include_dirs = [ "public" ]
 }
 
+config("private_config") {
+  cflags = [ "-DILI9341_MADCTL=" + pw_display_driver_ili9341_MADCTL ]
+}
+
 pw_source_set("pw_display_driver_ili9341") {
   public_configs = [ ":default_config" ]
+  configs = [ ":private_config" ]
   public = [ "public/pw_display_driver_ili9341/display_driver.h" ]
   deps = [
     "$dir_pw_log",

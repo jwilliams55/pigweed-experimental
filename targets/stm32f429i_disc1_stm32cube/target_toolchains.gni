@@ -108,6 +108,8 @@ _target_config = {
   pw_app_common_DISPLAY_DC_GPIO = "13"
   pw_app_common_DISPLAY_RESET_GPIO = "-1"
 
+  pw_display_driver_ili9341_MADCTL = "0xA8"  # BGR + rotate 90 (MY|MV).
+
   pw_spin_delay_BACKEND = dir_pw_spin_delay_stm32cube
 
   # Configure backend for pw_touchscreen
