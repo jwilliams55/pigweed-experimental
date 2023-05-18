@@ -143,4 +143,6 @@ declare_args() {
       get_path_info(
           "$dir_pigweed_experimental/pw_graphics/pw_touchscreen_teensy_xpt2046",
           "abspath")
+  dir_pw_pixel_pusher =
+      get_path_info("$dir_pigweed_experimental/pw_pixel_pusher", "abspath")
 }

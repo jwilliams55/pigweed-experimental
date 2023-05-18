@@ -18,12 +18,19 @@
 #include "pw_digital_io/digital_io.h"
 #include "pw_display_driver/display_driver.h"
 #include "pw_framebuffer_pool/framebuffer_pool.h"
+#include "pw_pixel_pusher/pixel_pusher.h"
 #include "pw_spi/device.h"
 
 namespace pw::display_driver {
 
 class DisplayDriverILI9341 : public DisplayDriver {
  public:
+  enum class InterfaceType {
+    SPI,        // Use SPI instead of RGB interface.
+    WithDE,     // With data enable.
+    WithoutDE,  // Without data enable.
+  };
+
   // DisplayDriverILI9341 configuration parameters.
   struct Config {
     // The GPIO line to use when specifying data/command mode for the display
@@ -37,6 +44,10 @@ class DisplayDriverILI9341 : public DisplayDriver {
     // The SPI device to which the display controller is connected for 16-bit
     // data.
     pw::spi::Device& spi_device_16_bit;
+    InterfaceType interface = InterfaceType::SPI;
+    bool swap_row_col = false;
+    // The pixel pusher.
+    pw::pixel_pusher::PixelPusher* pixel_pusher = nullptr;
   };
 
   DisplayDriverILI9341(const Config& config);
@@ -73,6 +84,7 @@ class DisplayDriverILI9341 : public DisplayDriver {
                       const Command& command);
 
   Config config_;
+  size_t next_fb_idx_ = 0;
 };
 
 }  // namespace pw::display_driver

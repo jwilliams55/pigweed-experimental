@@ -141,8 +141,28 @@ constexpr std::byte kMode1 = MADCTL_BGR | MADCTL_MV;
 constexpr std::byte kMode2 = MADCTL_BGR | MADCTL_MY;
 constexpr std::byte kMode3 = MADCTL_BGR | MADCTL_MX | MADCTL_MY | MADCTL_MV;
 constexpr std::byte kMode4 = MADCTL_BGR | MADCTL_MY | MADCTL_MV;
-constexpr std::byte kMADMode = kMode3;
+constexpr std::byte kMADMode = kMode4;
+
+constexpr uint8_t kDTC_PTG_MASK          = 0b00001100;
+constexpr uint8_t kDTC_PTG_NORMAL_SCAN   = 0b00000000;
+constexpr uint8_t kDTC_PTG_PROHIBITED1   = 0b00000100;
+constexpr uint8_t kDTC_PTG_INTERVAL_SCAN = 0b00001000;
+constexpr uint8_t kDTC_PTG_PROHIBITED2   = 0b00001100;
+
+// Mask values for CMD_RGB_INTERFACE:
+constexpr uint8_t kIFMODE_MASK_EPL    = 0b00000001;
+constexpr uint8_t kIFMODE_MASK_DPL    = 0b00000010;
+constexpr uint8_t kIFMODE_MASK_HSPL   = 0b00000100;
+constexpr uint8_t kIFMODE_MASK_VSPL   = 0b00001000;
+constexpr uint8_t kIFMODE_MASK_UNUSED = 0b00010000;
+constexpr uint8_t kIFMODE_MASK_RCM    = 0b01100000;
+constexpr uint8_t kIFMODE_MASK_BYPASS = 0b10000000;
 // clang-format on
+
+// Bypass=memory, RGB IF="VSYNC, HSYNC, DOTCLK, DE, D", DPL=falling.
+constexpr uint8_t kRGBWithDE = 0xC2;
+// Bypass=memory, RGB IF="VSYNC, HSYNC, DOTCLK, D", DPL=falling.
+constexpr uint8_t kRGBWithoutDE = 0xE2;
 
 // Frame Control (Normal Mode)
 constexpr std::byte kFrameRate61 = std::byte{0x1F};
@@ -247,9 +267,24 @@ Status DisplayDriverILI9341::Init() {
                     std::byte{0x00},
                 }});
 
-  // Power control
   WriteCommand(transaction,
-               {CMD_POWER1, std::array<std::byte, 1>{std::byte{0x23}}});
+               {CMD_FRMCTR1,
+                std::array<std::byte, 2>{
+                    std::byte{0x00},  // division ratio = fosc.
+                    kFrameRate70,
+                }});
+
+  // Display Function Control
+  WriteCommand(transaction,
+               {CMD_DFC,
+                std::array<std::byte, 2>{
+                    std::byte{0x0A},
+                    std::byte{0xA2},
+                }});
+
+  // Power control. GVDD = 0x10 = 3.65V.
+  WriteCommand(transaction,
+               {CMD_POWER1, std::array<std::byte, 1>{std::byte{0x10}}});
 
   // Power control
   WriteCommand(transaction,
@@ -274,25 +309,77 @@ Status DisplayDriverILI9341::Init() {
       transaction,
       {CMD_PIXEL_FORMAT, std::array<std::byte, 1>{kPixelFormat16bits}});
 
+  // Gamma Function Disable?
   WriteCommand(transaction,
-               {CMD_FRMCTR1,
-                std::array<std::byte, 2>{
-                    std::byte{0x00},  // division ratio
-                    kFrameRate61,
-                }});
+               {CMD_3GAMMA_EN, std::array<std::byte, 1>{std::byte{0x00}}});
+
+  switch (config_.interface) {
+    case InterfaceType::SPI:
+      break;
+    case InterfaceType::WithDE:
+      WriteCommand(
+          transaction,
+          {CMD_RGB_INTERFACE, std::array<std::byte, 1>{std::byte{kRGBWithDE}}});
+      break;
+    case InterfaceType::WithoutDE:
+      WriteCommand(transaction,
+                   {CMD_RGB_INTERFACE,
+                    std::array<std::byte, 1>{std::byte{kRGBWithoutDE}}});
+      break;
+  }
 
   // Display Function Control
   WriteCommand(transaction,
                {CMD_DFC,
-                std::array<std::byte, 3>{
-                    std::byte{0x08},
-                    std::byte{0x82},
+                std::array<std::byte, 4>{
+                    std::byte{0x0A},
+                    std::byte{0xA7},
                     std::byte{0x27},
+                    std::byte{0x04},
                 }});
 
-  // Gamma function enable
+  // Max pixel coordinates in portrait mode.
+  constexpr uint16_t kMinX = 0;
+  constexpr uint16_t kMaxX = 240 - 1;
+  constexpr uint16_t kMinY = 0;
+  constexpr uint16_t kMaxY = 320 - 1;
+
+  // Landscape drawing Column Address Set
+  const uint16_t kMinColumn = config_.swap_row_col ? kMinX : kMinY;
+  const uint16_t kMaxColumn = config_.swap_row_col ? kMaxX : kMaxY;
   WriteCommand(transaction,
-               {CMD_3GAMMA_EN, std::array<std::byte, 1>{std::byte{0x00}}});
+               {CMD_COLUMN_ADDR,
+                std::array<std::byte, 4>{
+                    std::byte{HighByte(kMinColumn)},
+                    std::byte{LowByte(kMinColumn)},
+                    std::byte{HighByte(kMaxColumn)},
+                    std::byte{LowByte(kMaxColumn)},
+                }});
+
+  // Page Address Set
+  const uint16_t kMinRow = config_.swap_row_col ? kMinY : kMinX;
+  const uint16_t kMaxRow = config_.swap_row_col ? kMaxY : kMaxX;
+  WriteCommand(transaction,
+               {CMD_PAGE_ADDR,
+                std::array<std::byte, 4>{
+                    std::byte{HighByte(kMinRow)},
+                    std::byte{LowByte(kMinRow)},
+                    std::byte{HighByte(kMaxRow)},
+                    std::byte{LowByte(kMaxRow)},
+                }});
+
+  if (config_.interface != InterfaceType::SPI) {
+    WriteCommand(transaction,
+                 {CMD_INTERFACE,
+                  std::array<std::byte, 3>{
+                      std::byte{0x00},
+                      std::byte{0x01},
+                      std::byte{0x06},
+                  }});
+  }
+
+  WriteCommand(transaction, {CMD_GRAM, kEmptyByteArray});
+  pw::spin_delay::WaitMillis(200);
 
   // Gamma Set
   WriteCommand(transaction,
@@ -340,46 +427,14 @@ Status DisplayDriverILI9341::Init() {
                     std::byte{0x0F},
                 }});
 
-  // Exit Sleep
-  WriteCommand(transaction, {CMD_SLEEP_OUT, std::array<std::byte, 0>{}});
-  pw::spin_delay::WaitMillis(100);
+  WriteCommand(transaction, {CMD_SLEEP_OUT, kEmptyByteArray});
+  pw::spin_delay::WaitMillis(200);
 
-  // Display On
-  WriteCommand(transaction, {CMD_DISPLAY_ON, std::array<std::byte, 0>{}});
-  pw::spin_delay::WaitMillis(100);
+  WriteCommand(transaction, {CMD_DISPLAY_ON, kEmptyByteArray});
 
-  // Normal display mode on
-  WriteCommand(transaction, {CMD_NORMAL_MODE_ON, std::array<std::byte, 0>{}});
+  WriteCommand(transaction, {CMD_NORMAL_MODE_ON, kEmptyByteArray});
 
-  // Setup drawing full framebuffers
-
-  // Landscape drawing Column Address Set
-  constexpr uint16_t kMaxColumn = kDisplayWidth - 1;
-  WriteCommand(transaction,
-               {CMD_COLUMN_ADDR,
-                std::array<std::byte, 4>{
-                    std::byte{0x0},
-                    std::byte{0x0},
-                    std::byte{kMaxColumn >> 8},    // high byte of short.
-                    std::byte{kMaxColumn & 0xff},  // low byte of short.
-                }});
-
-  // Page Address Set
-  constexpr uint16_t kMaxRow = kDisplayHeight - 1;
-  WriteCommand(transaction,
-               {CMD_PAGE_ADDR,
-                std::array<std::byte, 4>{
-                    std::byte{0x0},
-                    std::byte{0x0},
-                    std::byte{kMaxRow >> 8},    // high byte of short.
-                    std::byte{kMaxRow & 0xff},  // low byte of short.
-                }});
-
-  pw::spin_delay::WaitMillis(10);
-  WriteCommand(transaction, {CMD_GRAM, std::array<std::byte, 0>{}});
-
-  SetMode(Mode::kData);
-  pw::spin_delay::WaitMillis(100);
+  WriteCommand(transaction, {CMD_GRAM, kEmptyByteArray});
 
   return OkStatus();
 }
@@ -388,6 +443,11 @@ void DisplayDriverILI9341::WriteFramebuffer(Framebuffer frame_buffer,
                                             WriteCallback write_callback) {
   PW_ASSERT(frame_buffer.is_valid());
   PW_ASSERT(frame_buffer.pixel_format() == PixelFormat::RGB565);
+  if (config_.pixel_pusher) {
+    config_.pixel_pusher->WriteFramebuffer(std::move(frame_buffer),
+                                           std::move(write_callback));
+    return;
+  }
   auto transaction = config_.spi_device_16_bit.StartTransaction(
       ChipSelectBehavior::kPerTransaction);
   const uint16_t* fb_data = static_cast<const uint16_t*>(frame_buffer.data());

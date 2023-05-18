@@ -1,4 +1,4 @@
-# Copyright 2022 The Pigweed Authors
+# Copyright 2023 The Pigweed Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -15,26 +15,24 @@
 import("//build_overrides/pigweed.gni")
 
 import("$dir_pw_build/target_types.gni")
-import("$dir_pw_third_party/stm32cube/stm32cube.gni")
 
-config("default_config") {
+config("public_include_path") {
   include_dirs = [ "public" ]
+  visibility = [ ":*" ]
 }
 
-pw_source_set("pw_display_driver_ili9341") {
-  public_configs = [ ":default_config" ]
-  public = [ "public/pw_display_driver_ili9341/display_driver.h" ]
-  deps = [
-    "$dir_pw_log",
-    "$dir_pw_spin_delay",
-  ]
+group("pw_pixel_pusher") {
+  deps = [ ":pixel_pusher" ]
+}
+
+pw_source_set("pixel_pusher") {
+  public_configs = [ ":public_include_path" ]
+  public = [ "public/pw_pixel_pusher/pixel_pusher.h" ]
   public_deps = [
-    "$dir_pw_digital_io",
-    "$dir_pw_display_driver:display_driver",
+    "$dir_pw_bytes",
+    "$dir_pw_framebuffer",
     "$dir_pw_framebuffer_pool",
-    "$dir_pw_pixel_pusher:pixel_pusher",
-    "$dir_pw_spi:device",
+    "$dir_pw_span",
+    "$dir_pw_status",
   ]
-  sources = [ "display_driver.cc" ]
-  remove_configs = [ "$dir_pw_build:strict_warnings" ]
 }
