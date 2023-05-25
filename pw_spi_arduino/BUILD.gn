@@ -25,7 +25,7 @@ if (pw_arduino_build_CORE_PATH != "") {
   _library_args = [
     "--library-path",
     rebase_path(
-        "$pw_arduino_build_CORE_PATH/teensy/hardware/teensy/avr/libraries"),
+        "$pw_arduino_build_CORE_PATH/teensy/hardware/${pw_arduino_build_PACKAGE_NAME}/libraries"),
     "--library-names",
 
     # Arduino Core Libaries. The c/c++ files for these should only be included

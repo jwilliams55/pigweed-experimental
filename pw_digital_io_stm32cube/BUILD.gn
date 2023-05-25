@@ -22,7 +22,7 @@ config("public_includes") {
 
 pw_source_set("pw_digital_io_stm32cube") {
   public_configs = [ ":public_includes" ]
-  public = [ "public/ps_digital_io_stm32cube/digital_io.h" ]
+  public = [ "public/pw_digital_io_stm32cube/digital_io.h" ]
   deps = [ "$dir_pw_assert" ]
   public_deps = [
     "$dir_pw_digital_io",

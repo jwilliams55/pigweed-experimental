@@ -36,6 +36,7 @@ config("default_config") {
     ]
     include_dirs = [
       "$dir_pw_third_party_glfw/include",
+      "/usr/include/x86_64-linux-gnu",
       "/usr/include",
     ]
     lib_dirs = [

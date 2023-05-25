@@ -35,4 +35,8 @@ pw_source_set("pw_display_driver_imgui") {
   ]
   sources = [ "display_driver.cc" ]
   remove_configs = [ "$dir_pw_build:strict_warnings" ]
+
+  if (host_os == "linux") {
+    remove_configs += [ "$dir_pw_toolchain/host_clang:linux_sysroot" ]
+  }
 }

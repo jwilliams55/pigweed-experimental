@@ -59,8 +59,11 @@ group("arduino") {
 
     if (pw_arduino_build_CORE_NAME == "teensy") {
       deps += [
+        # TODO(tonymd): pw_framebuffer_pool depends on
+        # "pw_sync/counting_semaphore.h". Teensy does not have a implementation
+        # for that yet.
         # See //pw_lcd_display_teensy_ili9341/README.md for instructions.
-        "//applications/terminal_display:all(//targets/arduino:arduino_debug)",
+        # "//applications/terminal_display:all(//targets/arduino:arduino_debug)",
       ]
     }
   }

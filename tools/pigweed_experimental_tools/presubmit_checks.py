@@ -20,6 +20,7 @@ import os
 from pathlib import Path
 import re
 import sys
+from typing import Callable
 
 try:
     import pw_cli.log
@@ -75,26 +76,66 @@ def default_build(ctx: PresubmitContext):
     build.ninja(ctx)
 
 
-def pico_build(ctx: PresubmitContext):
-    build.install_package(ctx, 'pico_sdk')
-    build.gn_gen(
-        ctx,
-        PICO_SRC_DIR='"{}"'.format(str(ctx.package_root / 'pico_sdk')),
-    )
-    build.ninja(ctx)
+def _package_root_arg(name: str) -> Callable[[PresubmitContext], str]:
+    def _format(ctx: PresubmitContext) -> str:
+        return '"{}"'.format(ctx.package_root / name)
+
+    return _format
 
 
-def stm32cube_f4_build(ctx: PresubmitContext):
-    build.install_package(ctx, 'freertos')
-    build.install_package(ctx, 'stm32cube_f4')
-    build.gn_gen(
-        ctx,
-        dir_pw_third_party_freertos='"{}"'.format(ctx.package_root /
-                                                  'freertos'),
-        dir_pw_third_party_stm32cube_f4='"{}"'.format(ctx.package_root /
-                                                      'stm32cube_f4'),
-    )
-    build.ninja(ctx)
+teensy_build = build.GnGenNinja(
+    name='teensy_build',
+    packages=('teensy', ),
+    gn_args=dict(
+        pw_arduino_build_CORE_PATH=lambda ctx: '"{}"'.format(
+            str(ctx.package_root)),
+        pw_arduino_build_CORE_NAME='"teensy"',
+        pw_arduino_build_PACKAGE_NAME='"avr/1.58.1"',
+        pw_arduino_build_BOARD='"teensy41"',
+        pw_arduino_build_MENU_OPTIONS=(
+            '["menu.usb.serial", "menu.keys.en-us", "menu.opt.o2std"]'),
+    ),
+)
+
+pico_build = build.GnGenNinja(
+    name='pico_build',
+    packages=('pico_sdk', ),
+    gn_args=dict(
+        PICO_SRC_DIR=_package_root_arg('pico_sdk'),
+        dir_pw_third_party_freertos='"//third_party/freertos/Source"',
+    ),
+)
+
+stm32cube_f4_build = build.GnGenNinja(
+    name='stm32cube_f4_build',
+    packages=('stm32cube_f4', ),
+    gn_args=dict(
+        dir_pw_third_party_stm32cube_f4=_package_root_arg('stm32cube_f4'),
+        dir_pw_third_party_freertos='"//third_party/freertos/Source"',
+    ),
+)
+
+# pylint: disable=line-too-long
+mimxrt595_evk_build = build.GnGenNinja(
+    name='mimxrt595_evk_build',
+    gn_args=dict(
+        dir_pw_third_party_freertos='"//third_party/freertos/Source"',
+        pw_MIMXRT595_EVK_SDK=_package_root_arg("SDK_2_12_1_EVK-MIMXRT595"),
+        pw_target_mimxrt595_evk_MANIFEST=_package_root_arg(
+            "SDK_2_12_1_EVK-MIMXRT595/EVK-MIMXRT595_manifest_v3_10.xml"),
+        pw_third_party_mcuxpresso_SDK="//targets/mimxrt595_evk:mimxrt595_sdk",
+    ),
+)
+# pylint: enable=line-too-long
+
+pw_graphics_host = build.GnGenNinja(
+    name='pw_graphics_host',
+    packages=('imgui', 'glfw'),
+    gn_args=dict(
+        dir_pw_third_party_glfw=_package_root_arg('glfw'),
+        dir_pw_third_party_imgui=_package_root_arg('imgui'),
+    ),
+)
 
 
 def check_for_git_changes(_: PresubmitContext):
@@ -122,6 +163,9 @@ PATH_EXCLUSIONS = (
 OTHER_CHECKS = (
     build.gn_gen_check,
     inclusive_language.presubmit_check.with_filter(exclude=PATH_EXCLUSIONS),
+    pw_graphics_host,
+    mimxrt595_evk_build,
+    teensy_build,
 )
 
 QUICK = (
@@ -149,7 +193,7 @@ FULL = (
     stm32cube_f4_build,
 )
 
-CI_CQ = (default_build, pico_build)
+CI_CQ = (default_build, pico_build, stm32cube_f4_build)
 
 PROGRAMS = pw_presubmit.Programs(
     # keep-sorted: start

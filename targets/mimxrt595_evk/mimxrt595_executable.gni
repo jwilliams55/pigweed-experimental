@@ -19,22 +19,16 @@ import("$dir_pw_malloc/backend.gni")
 
 # Executable wrapper that includes some baremetal startup code.
 template("mimxrt595_executable") {
-  group(target_name) {
-    deps = [
-      ":${target_name}__binary",
-      ":${target_name}__elf",
-    ]
-  }
-
   # .elf binary created by the standard toolchain.
-  _base_target_name = target_name
-  executable("${target_name}__elf") {
-    output_name = "${_base_target_name}"
+  _bin_name = "${target_name}.bin"
+  _elf_name = "${target_name}.elf"
+
+  executable(_elf_name) {
     forward_variables_from(invoker, "*")
     if (!defined(deps)) {
       deps = []
     }
-    deps += [ "$dir_pigweed_experimental/targets/mimxrt595_evk:boot" ]
+    deps += [ "//targets/mimxrt595_evk:boot" ]
     if (pw_malloc_BACKEND != "") {
       if (!defined(configs)) {
         configs = []
@@ -44,21 +38,25 @@ template("mimxrt595_executable") {
   }
 
   # .bin binary created by extracting from the toolchain output.
-  pw_exec("${target_name}__binary") {
+  pw_exec(_bin_name) {
     if (defined(invoker.output_dir)) {
       _output_dir = invoker.output_dir
     } else {
       _output_dir = target_out_dir
     }
 
-    outputs = [ "${_output_dir}/${_base_target_name}.bin" ]
-    deps = [ ":${_base_target_name}__elf" ]
+    outputs = [ "${_output_dir}/${_bin_name}" ]
+    deps = [ ":${_elf_name}" ]
 
     program = "arm-none-eabi-objcopy"
     args = [
       "-Obinary",
-      "<TARGET_FILE(:${_base_target_name}__elf)>",
+      "<TARGET_FILE(:${_elf_name})>",
       rebase_path(outputs[0], root_build_dir),
     ]
+  }
+
+  group(target_name) {
+    deps = [ ":${_bin_name}" ]
   }
 }

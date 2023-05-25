@@ -30,4 +30,9 @@ pw_source_set("pw_display_imgui") {
     "$dir_pw_status",
   ]
   sources = [ "display.cc" ]
+
+  remove_configs = []
+  if (host_os == "linux") {
+    remove_configs += [ "$dir_pw_toolchain/host_clang:linux_sysroot" ]
+  }
 }

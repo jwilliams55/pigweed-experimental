@@ -21,12 +21,9 @@ import("$dir_pw_unit_test/test.gni")
 group("all") {
   deps = [ ":string_demo" ]
 
-  # Build tokenizer_database for elf binaries only
-  # TODO(b/256272529): Figure out why this needs to be disabled on
-  #                    mimxrt595_evk.
+  # Build tokenizer_database for elf and Linux binaries only
   if (host_os == "linux" ||
-      (get_label_info(current_toolchain, "name") != "host_debug" &&
-       pw_build_EXECUTABLE_TARGET_TYPE != "mimxrt595_executable")) {
+      get_label_info(current_toolchain, "name") != "host_debug") {
     deps += [ ":tokenizer_database" ]
   }
 }

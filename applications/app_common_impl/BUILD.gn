@@ -177,6 +177,10 @@ pw_source_set("host_imgui") {
     "$dir_pw_framebuffer_pool",
   ]
   sources = [ "common_host_imgui.cc" ]
+  remove_configs = []
+  if (host_os == "linux") {
+    remove_configs += [ "$dir_pw_toolchain/host_clang:linux_sysroot" ]
+  }
 }
 
 pw_source_set("host_null") {
