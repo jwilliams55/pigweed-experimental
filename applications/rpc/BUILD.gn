@@ -17,7 +17,6 @@ import("//build_overrides/pigweed.gni")
 import("$dir_pw_build/target_types.gni")
 import("$dir_pw_protobuf_compiler/proto.gni")
 import("$dir_pw_third_party/nanopb/nanopb.gni")
-import("$dir_pw_tokenizer/database.gni")
 
 config("default_config") {
   include_dirs = [ "public" ]
@@ -25,12 +24,6 @@ config("default_config") {
 
 group("all") {
   deps = [ ":rpc" ]
-
-  # Build tokenizer_database for elf and Linux binaries only
-  if (host_os == "linux" ||
-      get_label_info(current_toolchain, "name") != "host_debug") {
-    deps += [ ":tokenizer_database" ]
-  }
 }
 
 pw_executable("rpc") {
@@ -54,11 +47,6 @@ pw_executable("rpc") {
     # This is an example service that just responds with that it was sent.
     "$dir_pw_rpc/nanopb:echo_service",
   ]
-}
-
-pw_tokenizer_database("tokenizer_database") {
-  database = "tokenizer_database.csv"
-  targets = [ ":rpc" ]
 }
 
 ################################################################################

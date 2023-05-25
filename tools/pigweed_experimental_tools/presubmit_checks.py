@@ -115,7 +115,15 @@ stm32cube_f4_build = build.GnGenNinja(
     ),
 )
 
-# pylint: disable=line-too-long
+stm32cube_f7_build = build.GnGenNinja(
+    name='stm32cube_f7_build',
+    packages=('stm32cube_f7', ),
+    gn_args=dict(
+        dir_pw_third_party_stm32cube_f7=_package_root_arg('stm32cube_f7'),
+        dir_pw_third_party_freertos='"//third_party/freertos/Source"',
+    ),
+)
+
 mimxrt595_evk_build = build.GnGenNinja(
     name='mimxrt595_evk_build',
     gn_args=dict(
@@ -126,7 +134,6 @@ mimxrt595_evk_build = build.GnGenNinja(
         pw_third_party_mcuxpresso_SDK="//targets/mimxrt595_evk:mimxrt595_sdk",
     ),
 )
-# pylint: enable=line-too-long
 
 pw_graphics_host = build.GnGenNinja(
     name='pw_graphics_host',
@@ -166,6 +173,7 @@ OTHER_CHECKS = (
     pw_graphics_host,
     mimxrt595_evk_build,
     teensy_build,
+    stm32cube_f7_build,
 )
 
 QUICK = (

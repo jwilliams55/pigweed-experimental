@@ -15,17 +15,10 @@
 import("//build_overrides/pigweed.gni")
 
 import("$dir_pw_build/target_types.gni")
-import("$dir_pw_tokenizer/database.gni")
 import("$dir_pw_unit_test/test.gni")
 
 group("all") {
   deps = [ ":string_demo" ]
-
-  # Build tokenizer_database for elf and Linux binaries only
-  if (host_os == "linux" ||
-      get_label_info(current_toolchain, "name") != "host_debug") {
-    deps += [ ":tokenizer_database" ]
-  }
 }
 
 pw_executable("string_demo") {
@@ -44,11 +37,6 @@ pw_source_set("system_status") {
   public = [ "system_status.h" ]
   public_deps = [ "$dir_pw_string" ]
   sources = [ "system_status.cc" ]
-}
-
-pw_tokenizer_database("tokenizer_database") {
-  database = "tokenizer_database.csv"
-  targets = [ ":string_demo" ]
 }
 
 pw_test("system_status_test") {
