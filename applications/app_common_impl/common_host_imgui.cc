@@ -20,6 +20,7 @@
 
 using pw::Status;
 using pw::color::color_rgb565_t;
+using pw::framebuffer::PixelFormat;
 using pw::framebuffer_pool::FramebufferPool;
 
 namespace {
@@ -41,6 +42,7 @@ FramebufferPool s_fb_pool({
     .fb_addr = {s_pixel_data},
     .dimensions = kFramebufferDimensions,
     .row_bytes = kFramebufferRowBytes,
+    .pixel_format = PixelFormat::RGB565,
 });
 pw::display_driver::DisplayDriverImgUI s_display_driver;
 pw::display::DisplayImgUI s_display(s_display_driver, kDisplaySize, s_fb_pool);
