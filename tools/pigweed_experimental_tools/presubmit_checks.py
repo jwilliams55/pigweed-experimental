@@ -40,8 +40,8 @@ from pw_presubmit import (
     install_hook,
     keep_sorted,
     python_checks,
-    PresubmitContext,
 )
+from pw_presubmit.presubmit_context import PresubmitContext, PresubmitFailure
 
 _LOG = logging.getLogger(__name__)
 
@@ -154,7 +154,7 @@ def check_for_git_changes(_: PresubmitContext):
     if changes:
         _LOG.warning(
             'Commit or stash pending changes before running the presubmit.')
-        raise pw_presubmit.PresubmitFailure
+        raise PresubmitFailure
 
 
 # Avoid running some checks on certain paths.
