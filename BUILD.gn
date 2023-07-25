@@ -30,6 +30,7 @@ group("default") {
     ":applications",
     ":arduino",
     ":host",
+    ":host_opt",
     ":mimxrt595_evk",
     ":pico",
     ":pw_experimental_python.lint",
@@ -49,6 +50,13 @@ group("host") {
 
     # See //applications/pw_lcd_display_host_imgui/README.md for instructions.
     "//applications/terminal_display:all(//targets/host:host_debug)",
+  ]
+}
+
+# Group targets which need to do an optimized host build (e.g. for benchmarking).
+group("host_opt") {
+  deps = [
+    "$dir_pw_async_bench:size_benchmarks(//targets/host:host_size_optimized)",
   ]
 }
 

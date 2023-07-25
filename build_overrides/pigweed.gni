@@ -26,6 +26,8 @@ declare_args() {
   dir_app_common =
       get_path_info("$dir_pigweed_experimental/applications/app_common",
                     "abspath")
+  dir_pw_async_bench =
+      get_path_info("$dir_pigweed_experimental/pw_async_bench", "abspath")
   dir_pw_board_led =
       get_path_info("$dir_pigweed_experimental/pw_board_led", "abspath")
   dir_pw_board_led_arduino =

@@ -19,6 +19,9 @@ toolchain_overrides = {
   # Configure backend for assert facade.
   pw_assert_BACKEND = dir_pw_assert_basic
 
+  pw_async_EXPERIMENTAL_MODULE_VISIBILITY = [ "$dir_pw_async_bench:*" ]
+  pw_async_TASK_BACKEND = "$dir_pw_async_basic:task"
+
   # Configure the pw_log facade for Base64 tokenized logging.
   # pw_log_BACKEND = dir_pw_log_tokenized
   # pw_tokenizer_GLOBAL_HANDLER_WITH_PAYLOAD_BACKEND =

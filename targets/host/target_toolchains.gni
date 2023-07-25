@@ -100,6 +100,25 @@ target_toolchain_host = {
     }
   }
 
+  # Toolchain for size-optimized builds.
+  clang_size_optimized = {
+    name = "host_size_optimized"
+    if (host_os == "win") {
+      _toolchain_base = pw_target_toolchain_host.gcc_size_optimized
+    } else {
+      _toolchain_base = pw_target_toolchain_host.clang_size_optimized
+    }
+    forward_variables_from(_toolchain_base, "*", _excluded_members)
+    defaults = {
+      forward_variables_from(_toolchain_base.defaults, "*", _excluded_defaults)
+      forward_variables_from(toolchain_overrides, "*")
+
+      # Force tests to use basic log backend to avoid generating and loading its
+      # own tokenized database.
+      pw_log_BACKEND = dir_pw_log_basic
+    }
+  }
+
   clang_debug_tests_cpp20 = {
     name = "host_debug_tests_cpp20"
     _toolchain_base = clang_debug_tests
@@ -117,4 +136,5 @@ toolchains_list = [
   target_toolchain_host.clang_debug_cpp20,
   target_toolchain_host.clang_debug_tests,
   target_toolchain_host.clang_debug_tests_cpp20,
+  target_toolchain_host.clang_size_optimized,
 ]
