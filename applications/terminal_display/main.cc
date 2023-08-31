@@ -83,7 +83,7 @@ void vApplicationGetIdleTaskMemory(StaticTask_t** ppxIdleTaskTCBBuffer,
   *ppxIdleTaskStackBuffer = freertos_idle_stack.data();
   *pulIdleTaskStackSize = freertos_idle_stack.size();
 }
-}  // extern "C"
+}       // extern "C"
 #endif  // defined(DEFINE_FREERTOS_MEMORY_FUNCTIONS)
 
 namespace {
