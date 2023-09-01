@@ -112,8 +112,9 @@ SpiValues s_spi_16_bit(kSpiConfig16Bit,
                        s_spi_chip_selector,
                        s_spi_initiator_mutex);
 uint16_t s_pixel_data[kNumPixels];
+const pw::Vector<void*, 1> s_pixel_buffers{s_pixel_data};
 pw::framebuffer_pool::FramebufferPool s_fb_pool({
-    .fb_addr = {s_pixel_data},
+    .fb_addr = s_pixel_buffers,
     .dimensions = {kFramebufferWidth, kFramebufferHeight},
     .row_bytes = kFramebufferRowBytes,
 });

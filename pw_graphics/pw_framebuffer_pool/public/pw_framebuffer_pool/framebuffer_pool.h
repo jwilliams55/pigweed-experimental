@@ -17,6 +17,7 @@
 #include <array>
 #include <cstdint>
 
+#include "pw_containers/vector.h"
 #include "pw_framebuffer/framebuffer.h"
 #include "pw_math/size.h"
 #include "pw_status/status.h"
@@ -24,20 +25,16 @@
 
 namespace pw::framebuffer_pool {
 
-#if !defined(FRAMEBUFFER_COUNT)
-#error FRAMEBUFFER_COUNT not defined
-#endif
-
 // FramebufferPool manages a collection of (one or more) framebuffers.
 // It provides a mechanism to retrieve a buffer from the pool for use, and
 // for returning that buffer back to the pool.
 class FramebufferPool {
  public:
-  using BufferArray = std::array<void*, FRAMEBUFFER_COUNT>;
+  using BufferArray = pw::Vector<void*>;
 
   // Constructor parameters.
   struct Config {
-    BufferArray fb_addr;  // Address of each buffer in this pool.
+    const BufferArray& fb_addr;  // Address of each buffer in this pool.
     pw::math::Size<uint16_t> dimensions;  // width/height of each buffer.
     uint16_t row_bytes;                   // row bytes of each buffer.
     pw::framebuffer::PixelFormat pixel_format;
@@ -77,7 +74,7 @@ class FramebufferPool {
 
  private:
   pw::sync::CountingSemaphore framebuffer_semaphore_;
-  BufferArray buffer_addresses_;                // Address of each pixel buffer.
+  const BufferArray& buffer_addresses_;         // Address of each pixel buffer.
   pw::math::Size<uint16_t> buffer_dimensions_;  // width/height of all buffers
   uint16_t row_bytes_;                          // All row bytes are the same.
   pw::framebuffer::PixelFormat pixel_format_;   // Shared pixel format.

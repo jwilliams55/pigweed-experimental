@@ -25,8 +25,9 @@ constexpr pw::math::Size<uint16_t> kDisplaySize = {DISPLAY_WIDTH,
                                                    DISPLAY_HEIGHT};
 
 pw::display_driver::DisplayDriverNULL s_display_driver;
+const pw::Vector<void*, 0> s_pixel_buffers;
 pw::framebuffer_pool::FramebufferPool s_fb_pool({
-    .fb_addr = {nullptr},
+    .fb_addr = s_pixel_buffers,
     .dimensions = {0, 0},
     .row_bytes = 0,
 });

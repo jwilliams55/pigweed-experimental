@@ -16,13 +16,8 @@ import("//build_overrides/pigweed.gni")
 
 import("$dir_pw_build/target_types.gni")
 
-declare_args() {
-  pw_framebuffer_pool_FRAMEBUFFER_COUNT = "1"
-}
-
 config("default_config") {
   include_dirs = [ "public" ]
-  cflags = [ "-DFRAMEBUFFER_COUNT=" + pw_framebuffer_pool_FRAMEBUFFER_COUNT ]
 }
 
 pw_source_set("pw_framebuffer_pool") {
@@ -33,6 +28,7 @@ pw_source_set("pw_framebuffer_pool") {
     "$dir_pw_color",
   ]
   public_deps = [
+    "$dir_pw_containers",
     "$dir_pw_framebuffer",
     "$dir_pw_math",
     "$dir_pw_status",

@@ -38,8 +38,9 @@ constexpr pw::math::Size<uint16_t> kDisplaySize = {DISPLAY_WIDTH,
                                                    DISPLAY_HEIGHT};
 
 color_rgb565_t s_pixel_data[kNumPixels];
+const pw::Vector<void*, 1> s_pixel_buffers{s_pixel_data};
 FramebufferPool s_fb_pool({
-    .fb_addr = {s_pixel_data},
+    .fb_addr = s_pixel_buffers,
     .dimensions = kFramebufferDimensions,
     .row_bytes = kFramebufferRowBytes,
     .pixel_format = PixelFormat::RGB565,

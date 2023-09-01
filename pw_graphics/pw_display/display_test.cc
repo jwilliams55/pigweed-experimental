@@ -119,8 +119,9 @@ TEST(Display, ReleaseNoResize) {
   constexpr uint16_t kFramebufferRowBytes =
       sizeof(color_rgb565_t) * kFramebufferSize.width;
   color_rgb565_t pixel_data[kNumPixels];
+  pw::Vector<void*, 1> pixel_buffers{pixel_data};
   FramebufferPool fb_pool({
-      .fb_addr = {pixel_data},
+      .fb_addr = pixel_buffers,
       .dimensions = kFramebufferSize,
       .row_bytes = kFramebufferRowBytes,
       .pixel_format = PixelFormat::RGB565,

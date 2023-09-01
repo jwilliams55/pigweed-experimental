@@ -45,7 +45,7 @@ constexpr uint16_t kBufferStrideBytes =
     kFramebufferDimensions.width * pw::mipi::dsi::kBytesPerPixel;
 constexpr pw::math::Size<uint16_t> kDisplaySize = {DISPLAY_WIDTH,
                                                    DISPLAY_HEIGHT};
-const FramebufferPoolMCUXpresso::BufferArray s_framebuffer_addrs = {
+const pw::Vector<void*, 2> s_framebuffer_addrs = {
     reinterpret_cast<void*>(kBuffer0Addr),
     reinterpret_cast<void*>(kBuffer1Addr)};
 

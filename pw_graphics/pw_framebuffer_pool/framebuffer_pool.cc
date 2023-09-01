@@ -14,8 +14,6 @@
 
 #include "pw_framebuffer_pool/framebuffer_pool.h"
 
-static_assert(FRAMEBUFFER_COUNT > 0, "Must have at least one framebuffer");
-
 using pw::framebuffer::Framebuffer;
 
 namespace pw::framebuffer_pool {
