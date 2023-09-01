@@ -45,6 +45,7 @@ using pw::Status;
 using pw::digital_io::PicoDigitalOut;
 using pw::display::Display;
 using pw::framebuffer::Framebuffer;
+using pw::framebuffer::PixelFormat;
 using pw::framebuffer_pool::FramebufferPool;
 using pw::spi::Device;
 using pw::spi::Initiator;
@@ -117,6 +118,7 @@ pw::framebuffer_pool::FramebufferPool s_fb_pool({
     .fb_addr = s_pixel_buffers,
     .dimensions = {kFramebufferWidth, kFramebufferHeight},
     .row_bytes = kFramebufferRowBytes,
+    .pixel_format = PixelFormat::RGB565,
 });
 DisplayDriver s_display_driver({
   .data_cmd_gpio = s_display_dc_pin,

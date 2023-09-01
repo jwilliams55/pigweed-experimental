@@ -105,12 +105,17 @@ Working displays:
 - [ILI9341](https://www.adafruit.com/?q=ili9341&sort=BestMatch)
 - [Pico Display Pack 2.0 (ST7789)](https://shop.pimoroni.com/products/pico-display-pack-2-0)
 
+**First time setup:**
+```
+pw package install pico_sdk
+```
+
 **Compile:**
 
 ```sh
-gn gen out --export-compile-commands --args="
-  PICO_SRC_DIR=\"$PW_PROJECT_ROOT/environment/packages/pico_sdk\"
-"
+gn gen out --export-compile-commands --args='
+  PICO_SRC_DIR="//environment/packages/pico_sdk"
+'
 ninja -C out
 ```
 
@@ -118,11 +123,23 @@ ninja -C out
 
 - Using a uf2 file:
 
+  1. Reboot pico into BOOTSEL mode by holding the bootsel button on startup.
+  2. Copy `./out/rp2040/obj/applications/terminal_display/terminal_demo.uf2` to your Pi Pico.
+
+- Using `picotool`:
+
+  1. Reboot pico into BOOTSEL mode by holding the bootsel button on startup. Or try forcing a reboot with `picotool`:
+
   ```sh
-  ./out/host_debug/obj/targets/rp2040/bin/elf2uf2 ./out/rp2040/obj/applications/terminal_display/bin/terminal_demo.elf ./out/rp2040/obj/applications/terminal_display/bin/terminal_demo.uf2
+  picotool reboot -f -u
   ```
 
-  Copy `./out/rp2040/obj/applications/terminal_display/bin/terminal_demo.uf2` to your Pi Pico.
+  2. Flash the elf or uf2 file and reboot.
+
+  ```sh
+  picotool load ./out/rp2040/obj/applications/terminal_display/bin/terminal_demo.elf
+  picotool reboot
+  ```
 
 - Using a Pico Probe and openocd:
 
@@ -162,6 +179,18 @@ ninja -C out
   ```sh
   ~/apps/openocd/bin/openocd -f ~/apps/openocd/share/openocd/scripts/interface/picoprobe.cfg -f ~/apps/openocd/share/openocd/scripts/target/rp2040.cfg -c 'program out/rp2040/obj/applications/terminal_display/bin/terminal_demo.elf verify reset exit'
   ```
+
+  **Launching gdb***
+
+  ```sh
+  ~/apps/openocd/bin/openocd -f ~/apps/openocd/share/openocd/scripts/interface/picoprobe.cfg -f ~/apps/openocd/share/openocd/scripts/target/rp2040.cfg
+  ```
+
+  ```sh
+  gdb-multiarch -ex "target remote :3333" -ex "set print pretty on" out/rp2040/obj/applications/terminal_display/bin/terminal_demo.elf
+  ```
+
+  `arm-none-eabi-gdb` can be used in place of `gdb-multiarch` above.
 
 #### **[MIMXRT595-EVK](https://www.nxp.com/design/development-boards/i-mx-evaluation-and-development-boards/i-mx-rt595-evaluation-kit:MIMXRT595-EVK) Connected to an external MIPI display**
 
