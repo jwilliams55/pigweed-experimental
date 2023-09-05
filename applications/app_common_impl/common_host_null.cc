@@ -17,6 +17,7 @@
 #include "pw_status/try.h"
 
 using pw::Status;
+using pw::framebuffer::PixelFormat;
 using pw::framebuffer_pool::FramebufferPool;
 
 namespace {
@@ -30,6 +31,7 @@ pw::framebuffer_pool::FramebufferPool s_fb_pool({
     .fb_addr = s_pixel_buffers,
     .dimensions = {0, 0},
     .row_bytes = 0,
+    .pixel_format = PixelFormat::None,
 });
 pw::display::Display s_display(s_display_driver, kDisplaySize, s_fb_pool);
 
