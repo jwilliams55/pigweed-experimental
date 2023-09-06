@@ -102,7 +102,9 @@ Status Display::ReleaseFramebuffer(Framebuffer framebuffer) {
     return Status::InvalidArgument();
   if (framebuffer.size() != size_) {
 #if DISPLAY_RESIZE
-    return UpdateNearestNeighbor(framebuffer);
+    Status result = UpdateNearestNeighbor(framebuffer);
+    write_cb(std::move(framebuffer), result);
+    return result;
 #endif
     // Rely on display driver's ability to support size mismatch. It is
     // expected to return an error if it cannot.

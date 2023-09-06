@@ -533,9 +533,10 @@ void MainTask(void* pvParameters) {
     if (pw::spin_delay::Millis() > frame_start_millis + 1000) {
       frames_per_second = frames;
       frames = 0;
-      PW_LOG_INFO("Time: %lu - FPS: %d",
-                  static_cast<unsigned long>(pw::spin_delay::Millis()),
-                  frames_per_second);
+      PW_LOG_INFO("FPS:%d, Draw:%dms, Flush:%dms",
+                  frames_per_second,
+                  CalcAverageUint32Value(draw_times),
+                  CalcAverageUint32Value(flush_times));
       int len = std::swprintf(fps_buffer.data(),
                               fps_buffer.size(),
                               L"FPS:%d, Draw:%dms, Flush:%dms",
