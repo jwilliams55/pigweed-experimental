@@ -33,6 +33,9 @@ declare_args() {
   # Display backlight pin (ex "4", or "-1" if unused)
   pw_app_common_BACKLIGHT_GPIO = "-1"
 
+  # Display tear effect output GPIO pin (ex "2", or "-1" if unused)
+  pw_app_common_DISPLAY_TE_GPIO = "-1"
+
   # Display reset GPIO pin (ex "2", or "-1" if unused)
   pw_app_common_DISPLAY_RESET_GPIO = "-1"
 

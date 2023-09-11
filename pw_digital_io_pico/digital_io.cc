@@ -20,9 +20,31 @@
 
 namespace pw::digital_io {
 
-PicoDigitalOut::PicoDigitalOut(uint32_t pin) : pin_(pin) {}
+PicoDigitalIn::PicoDigitalIn(uint32_t pin) : pin_(pin) {}
+
+// pw::digital_io::DigitalIn implementation:
+Status PicoDigitalIn::DoEnable(bool enable) {
+  if (!enable) {
+    // Added later: https://github.com/raspberrypi/pico-sdk/issues/792
+    // which first appeared in Pico SDK 1.3.0.
+    // Cannot find a way to check Pico SDK version at compile time.
+    // gpio_deinit(pin_);
+    return Status::Unavailable();
+  }
+
+  gpio_init(pin_);
+  gpio_set_dir(pin_, GPIO_IN);
+  return OkStatus();
+}
+
+Result<State> PicoDigitalIn::DoGetState() {
+  const pw::Result<State> result(State(gpio_get(pin_)));
+  return result;
+}
 
 // pw::digital_io::DigitalOut implementation:
+PicoDigitalOut::PicoDigitalOut(uint32_t pin) : pin_(pin) {}
+
 Status PicoDigitalOut::DoEnable(bool enable) {
   if (!enable) {
     // Added later: https://github.com/raspberrypi/pico-sdk/issues/792

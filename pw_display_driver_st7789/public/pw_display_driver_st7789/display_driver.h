@@ -30,6 +30,7 @@ class DisplayDriverST7789 : public DisplayDriver {
     pw::digital_io::DigitalOut& data_cmd_gpio;
     // GPIO line to reset the display controller.
     pw::digital_io::DigitalOut* reset_gpio;
+    pw::digital_io::DigitalIn* tear_effect_gpio;
     // The SPI device to which the display controller is connected for 8-bit
     // data.
     pw::spi::Device& spi_device_8_bit;

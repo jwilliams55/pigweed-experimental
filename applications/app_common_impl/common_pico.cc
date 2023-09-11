@@ -42,6 +42,7 @@ using DisplayDriver = pw::display_driver::DisplayDriverST7789;
 #endif
 
 using pw::Status;
+using pw::digital_io::PicoDigitalIn;
 using pw::digital_io::PicoDigitalOut;
 using pw::display::Display;
 using pw::framebuffer::Framebuffer;
@@ -100,6 +101,9 @@ PicoDigitalOut s_display_dc_pin(DISPLAY_DC_GPIO);
 #if DISPLAY_RESET_GPIO != -1
 PicoDigitalOut s_display_reset_pin(DISPLAY_RESET_GPIO);
 #endif
+#if DISPLAY_TE_GPIO != -1
+PicoDigitalIn s_display_tear_effect_pin(DISPLAY_TE_GPIO);
+#endif
 PicoDigitalOut s_display_cs_pin(DISPLAY_CS_GPIO);
 PicoChipSelector s_spi_chip_selector(s_display_cs_pin);
 PicoInitiator s_spi_initiator(SPI_PORT);
@@ -126,6 +130,11 @@ DisplayDriver s_display_driver({
   .reset_gpio = &s_display_reset_pin,
 #else
   .reset_gpio = nullptr,
+#endif
+#if DISPLAY_TE_GPIO != -1
+  .tear_effect_gpio = &s_display_tear_effect_pin,
+#else
+  .tear_effect_gpio = nullptr,
 #endif
   .spi_device_8_bit = s_spi_8_bit.device,
   .spi_device_16_bit = s_spi_16_bit.device,
@@ -165,6 +174,10 @@ Status Common::Init() {
   s_display_dc_pin.Enable();
 #if DISPLAY_RESET_GPIO != -1
   s_display_reset_pin.Enable();
+#endif
+
+#if DISPLAY_TE_GPIO != -1
+  s_display_tear_effect_pin.Enable();
 #endif
 
 #if BACKLIGHT_GPIO != -1

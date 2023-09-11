@@ -24,6 +24,7 @@ config("common_flags") {
     "-DDISPLAY_WIDTH=" + pw_app_common_DISPLAY_WIDTH,
     "-DDISPLAY_HEIGHT=" + pw_app_common_DISPLAY_HEIGHT,
     "-DDISPLAY_RESET_GPIO=" + pw_app_common_DISPLAY_RESET_GPIO,
+    "-DDISPLAY_TE_GPIO=" + pw_app_common_DISPLAY_TE_GPIO,
     "-DBACKLIGHT_GPIO=" + pw_app_common_BACKLIGHT_GPIO,
     "-DFRAMEBUFFER_WIDTH=" + pw_app_common_FRAMEBUFFER_WIDTH,
     "-DFRAMEBUFFER_START_X=" + pw_app_common_FRAMEBUFFER_START_X,

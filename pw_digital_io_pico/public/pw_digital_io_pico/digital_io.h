@@ -32,4 +32,16 @@ class PicoDigitalOut : public DigitalOut {
   uint32_t pin_;
 };
 
+class PicoDigitalIn : public DigitalIn {
+ public:
+  PicoDigitalIn(uint32_t pin);
+
+  // pw::digital_io::DigitalIn implementation:
+  Status DoEnable(bool enable) override;
+  Result<State> DoGetState() override;
+
+ private:
+  uint32_t pin_;
+};
+
 }  // namespace pw::digital_io
