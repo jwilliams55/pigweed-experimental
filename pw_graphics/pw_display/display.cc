@@ -92,6 +92,7 @@ Framebuffer Display::GetFramebuffer() {
   return framebuffer_pool_.GetFramebuffer();
 }
 
+// This may be async
 Status Display::ReleaseFramebuffer(Framebuffer framebuffer) {
   pw::framebuffer_pool::FramebufferPool& fb_pool = framebuffer_pool_;
   auto write_cb = [&fb_pool](pw::framebuffer::Framebuffer fb, Status status) {
@@ -102,9 +103,14 @@ Status Display::ReleaseFramebuffer(Framebuffer framebuffer) {
     return Status::InvalidArgument();
   if (framebuffer.size() != size_) {
 #if DISPLAY_RESIZE
-    Status result = UpdateNearestNeighbor(framebuffer);
-    write_cb(std::move(framebuffer), result);
-    return result;
+    if (display_driver_.SupportsResize()) {
+      display_driver_.WriteFramebuffer(std::move(framebuffer), write_cb);
+      return OkStatus();
+    } else {
+      Status result = UpdateNearestNeighbor(framebuffer);
+      write_cb(std::move(framebuffer), result);
+      return result;
+    }
 #endif
     // Rely on display driver's ability to support size mismatch. It is
     // expected to return an error if it cannot.

@@ -186,6 +186,14 @@ Status DisplayDriverST7789::Init() {
 void DisplayDriverST7789::WriteFramebuffer(Framebuffer frame_buffer,
                                            WriteCallback write_callback) {
   PW_ASSERT(frame_buffer.pixel_format() == PixelFormat::RGB565);
+  if (config_.pixel_pusher) {
+    // Write the pixel data.
+    config_.pixel_pusher->WriteFramebuffer(std::move(frame_buffer),
+                                           std::move(write_callback));
+    return;
+  }
+
+  // Write the frame_buffer using pw_spi.
   // Let controller know a write is coming.
   Status s;
   {
@@ -258,6 +266,11 @@ Status DisplayDriverST7789::Reset() {
   s = config_.reset_gpio->SetStateActive();
   pw::spin_delay::WaitMillis(100);
   return s;
+}
+
+bool DisplayDriverST7789::SupportsResize() const {
+  return config_.pixel_pusher != nullptr &&
+         config_.pixel_pusher->SupportsResize();
 }
 
 }  // namespace pw::display_driver

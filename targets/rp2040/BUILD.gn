@@ -60,7 +60,7 @@ generate_toolchain("rp2040") {
     # Merge in the app_common_BACKEND and various application settings
     # which are defined in board_configs.gni.
 
-    forward_variables_from(board_config_st7789, "*")
+    forward_variables_from(board_config_kudzu, "*")
 
     # forward_variables_from(board_config_st7735, "*")
     # forward_variables_from(board_config_ili9341, "*")
@@ -78,6 +78,7 @@ generate_toolchain("rp2040") {
     pw_interrupt_CONTEXT_BACKEND = "$dir_pw_interrupt_cortex_m:context_armv7m"
     pw_sync_INTERRUPT_SPIN_LOCK_BACKEND =
         "$dir_pw_sync_freertos:interrupt_spin_lock"
+    pw_sync_BINARY_SEMAPHORE_BACKEND = "$dir_pw_sync_freertos:binary_semaphore"
     pw_sync_MUTEX_BACKEND = "$dir_pw_sync_baremetal:mutex"
     pw_sync_COUNTING_SEMAPHORE_BACKEND =
         "$dir_pw_sync_freertos:counting_semaphore"

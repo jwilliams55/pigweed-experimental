@@ -1,4 +1,4 @@
-# Copyright 2022 The Pigweed Authors
+# Copyright 2023 The Pigweed Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
+import("//build_overrides/pi_pico.gni")
 import("//build_overrides/pigweed.gni")
 
 import("$dir_pw_build/target_types.gni")
@@ -20,19 +21,21 @@ config("default_config") {
   include_dirs = [ "public" ]
 }
 
-pw_source_set("pw_display_driver_st7789") {
+pw_source_set("pw_pixel_pusher_rp2040_pio") {
   public_configs = [ ":default_config" ]
-  public = [ "public/pw_display_driver_st7789/display_driver.h" ]
   deps = [
+    "$dir_pw_function",
     "$dir_pw_log",
-    "$dir_pw_spin_delay",
   ]
   public_deps = [
+    "$PICO_ROOT/src/rp2_common/hardware_dma",
+    "$PICO_ROOT/src/rp2_common/hardware_pio",
+    "$PICO_ROOT/src/rp2_common/hardware_spi",
     "$dir_pw_digital_io",
-    "$dir_pw_display_driver:display_driver",
+    "$dir_pw_framebuffer_pool",
     "$dir_pw_pixel_pusher:pixel_pusher",
-    "$dir_pw_spi:device",
+    "$dir_pw_sync:binary_semaphore",
   ]
-  sources = [ "display_driver.cc" ]
+  sources = [ "pixel_pusher.cc" ]
   remove_configs = [ "$dir_pw_build:strict_warnings" ]
 }

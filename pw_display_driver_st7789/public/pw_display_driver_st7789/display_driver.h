@@ -17,6 +17,7 @@
 
 #include "pw_digital_io/digital_io.h"
 #include "pw_display_driver/display_driver.h"
+#include "pw_pixel_pusher/pixel_pusher.h"
 #include "pw_spi/device.h"
 
 namespace pw::display_driver {
@@ -28,6 +29,7 @@ class DisplayDriverST7789 : public DisplayDriver {
     // The GPIO line to use when specifying data/command mode for the display
     // controller.
     pw::digital_io::DigitalOut& data_cmd_gpio;
+    pw::digital_io::DigitalOut& spi_cs_gpio;
     // GPIO line to reset the display controller.
     pw::digital_io::DigitalOut* reset_gpio;
     pw::digital_io::DigitalIn* tear_effect_gpio;
@@ -39,6 +41,8 @@ class DisplayDriverST7789 : public DisplayDriver {
     pw::spi::Device& spi_device_16_bit;
     uint16_t screen_width = 320;
     uint16_t screen_height = 240;
+    // The pixel pusher.
+    pw::pixel_pusher::PixelPusher* pixel_pusher = nullptr;
   };
 
   DisplayDriverST7789(const Config& config);
@@ -52,6 +56,7 @@ class DisplayDriverST7789 : public DisplayDriver {
                   uint16_t col_idx) override;
   uint16_t GetWidth() const override { return config_.screen_width; }
   uint16_t GetHeight() const override { return config_.screen_height; }
+  bool SupportsResize() const override;
 
  private:
   enum class Mode {

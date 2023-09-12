@@ -26,11 +26,14 @@ class PixelPusher {
 
   virtual ~PixelPusher() = default;
 
+  // PixelPusher implementation:
   virtual Status Init(
       const pw::framebuffer_pool::FramebufferPool& framebuffer_pool) = 0;
 
   virtual void WriteFramebuffer(framebuffer::Framebuffer framebuffer,
                                 WriteCallback complete_callback) = 0;
+
+  virtual bool SupportsResize() const { return false; }
 };
 
 }  // namespace pw::pixel_pusher

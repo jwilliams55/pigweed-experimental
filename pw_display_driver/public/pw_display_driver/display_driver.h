@@ -51,6 +51,9 @@ class DisplayDriver {
   virtual uint16_t GetWidth() const = 0;
 
   virtual uint16_t GetHeight() const = 0;
+
+  // Display driver supports resizing during write.
+  virtual bool SupportsResize() const { return false; }
 };
 
 }  // namespace pw::display_driver

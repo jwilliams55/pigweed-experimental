@@ -63,3 +63,18 @@ board_config_st7789 = {
   pw_app_common_SPI_MOSI_GPIO = "19"
   pw_app_common_SPI_CLOCK_GPIO = "18"
 }
+
+board_config_kudzu = {
+  app_common_BACKEND =
+      "$dir_pigweed_experimental/applications/app_common_impl:pico_st7789_pio"
+  pw_app_common_DISPLAY_WIDTH = "320"
+  pw_app_common_DISPLAY_HEIGHT = "240"
+  pw_app_common_BACKLIGHT_GPIO = "20"
+  pw_app_common_DISPLAY_TE_GPIO = "21"
+  pw_app_common_DISPLAY_CS_GPIO = "17"
+  pw_app_common_DISPLAY_DC_GPIO = "16"
+  pw_app_common_DISPLAY_RESET_GPIO = "-1"
+  pw_app_common_SPI_MISO_GPIO = "-1"
+  pw_app_common_SPI_MOSI_GPIO = "19"
+  pw_app_common_SPI_CLOCK_GPIO = "18"
+}

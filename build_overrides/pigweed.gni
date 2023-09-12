@@ -147,4 +147,7 @@ declare_args() {
           "abspath")
   dir_pw_pixel_pusher =
       get_path_info("$dir_pigweed_experimental/pw_pixel_pusher", "abspath")
+  dir_pw_pixel_pusher_rp2040_pio =
+      get_path_info("$dir_pigweed_experimental/pw_pixel_pusher_rp2040_pio",
+                    "abspath")
 }

@@ -20,9 +20,11 @@
 
 #include "hardware/gpio.h"
 #include "hardware/pwm.h"
+#include "hardware/vreg.h"
 #include "pico/stdlib.h"
 #include "pw_digital_io_pico/digital_io.h"
 #include "pw_log/log.h"
+#include "pw_pixel_pusher_rp2040_pio/pixel_pusher.h"
 #include "pw_spi_pico/chip_selector.h"
 #include "pw_spi_pico/initiator.h"
 #include "pw_sync/borrow.h"
@@ -37,6 +39,9 @@ using DisplayDriver = pw::display_driver::DisplayDriverST7735;
 #elif defined(DISPLAY_TYPE_ST7789)
 #include "pw_display_driver_st7789/display_driver.h"
 using DisplayDriver = pw::display_driver::DisplayDriverST7789;
+#elif defined(DISPLAY_TYPE_ST7789_PIO)
+#include "pw_display_driver_st7789/display_driver.h"
+using DisplayDriver = pw::display_driver::DisplayDriverST7789;
 #else
 #error "Undefined display type"
 #endif
@@ -48,6 +53,7 @@ using pw::display::Display;
 using pw::framebuffer::Framebuffer;
 using pw::framebuffer::PixelFormat;
 using pw::framebuffer_pool::FramebufferPool;
+using pw::pixel_pusher::PixelPusherRp2040Pio;
 using pw::spi::Device;
 using pw::spi::Initiator;
 using pw::spi::PicoChipSelector;
@@ -73,7 +79,7 @@ struct SpiValues {
 static_assert(DISPLAY_WIDTH > 0);
 static_assert(DISPLAY_HEIGHT > 0);
 
-constexpr uint16_t kDisplayScaleFactor = 1;
+constexpr uint16_t kDisplayScaleFactor = 2;
 constexpr uint16_t kFramebufferWidth =
     FRAMEBUFFER_WIDTH >= 0 ? FRAMEBUFFER_WIDTH / kDisplayScaleFactor
                            : DISPLAY_WIDTH / kDisplayScaleFactor;
@@ -116,8 +122,18 @@ SpiValues s_spi_8_bit(kSpiConfig8Bit,
 SpiValues s_spi_16_bit(kSpiConfig16Bit,
                        s_spi_chip_selector,
                        s_spi_initiator_mutex);
-uint16_t s_pixel_data[kNumPixels];
-const pw::Vector<void*, 1> s_pixel_buffers{s_pixel_data};
+
+#if USE_PIO
+PixelPusherRp2040Pio s_pixel_pusher(DISPLAY_DC_GPIO,
+                                    DISPLAY_CS_GPIO,
+                                    SPI_MOSI_GPIO,
+                                    SPI_CLOCK_GPIO,
+                                    DISPLAY_TE_GPIO,
+                                    pio0);
+#endif
+uint16_t s_pixel_data1[kNumPixels];
+uint16_t s_pixel_data2[kNumPixels];
+const pw::Vector<void*, 2> s_pixel_buffers{s_pixel_data1, s_pixel_data2};
 pw::framebuffer_pool::FramebufferPool s_fb_pool({
     .fb_addr = s_pixel_buffers,
     .dimensions = {kFramebufferWidth, kFramebufferHeight},
@@ -125,7 +141,7 @@ pw::framebuffer_pool::FramebufferPool s_fb_pool({
     .pixel_format = PixelFormat::RGB565,
 });
 DisplayDriver s_display_driver({
-  .data_cmd_gpio = s_display_dc_pin,
+  .data_cmd_gpio = s_display_dc_pin, .spi_cs_gpio = s_display_cs_pin,
 #if DISPLAY_RESET_GPIO != -1
   .reset_gpio = &s_display_reset_pin,
 #else
@@ -138,6 +154,9 @@ DisplayDriver s_display_driver({
 #endif
   .spi_device_8_bit = s_spi_8_bit.device,
   .spi_device_16_bit = s_spi_16_bit.device,
+#if USE_PIO
+  .pixel_pusher = &s_pixel_pusher,
+#endif
 });
 Display s_display(s_display_driver, kDisplaySize, s_fb_pool);
 
@@ -163,6 +182,13 @@ SpiValues::SpiValues(pw::spi::Config config,
 
 // static
 Status Common::Init() {
+#if OVERCLOCK_250
+  // Overvolt for a stable 250MHz on some RP2040s
+  vreg_set_voltage(VREG_VOLTAGE_1_20);
+  sleep_ms(10);
+  set_sys_clock_khz(250000, false);
+#endif
+
   // Initialize all of the present standard stdio types that are linked into the
   // binary.
   stdio_init_all();
@@ -193,7 +219,15 @@ Status Common::Init() {
   gpio_set_function(SPI_CLOCK_GPIO, GPIO_FUNC_SPI);
   gpio_set_function(SPI_MOSI_GPIO, GPIO_FUNC_SPI);
 
+#if USE_PIO
+  // Init the display before the pixel pusher.
+  s_display_driver.Init();
+  auto result = s_pixel_pusher.Init(s_fb_pool);
+  s_pixel_pusher.SetPixelDouble(true);
+  return result;
+#else
   return s_display_driver.Init();
+#endif
 }
 
 // static
