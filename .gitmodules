@@ -26,3 +26,6 @@
 	path = infra/config
 	url = https://pigweed.googlesource.com/infra/config
 	branch = main
+[submodule "third_party/32blit/32blit-sdk"]
+	path = third_party/32blit/32blit-sdk
+	url = https://github.com/32blit/32blit-sdk

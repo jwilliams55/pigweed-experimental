@@ -1,0 +1,60 @@
+import("//build_overrides/pigweed.gni")
+
+import("$dir_pw_build/target_types.gni")
+
+declare_args() {
+  THIRTYTWO_BLIT_SDK = "//third_party/32blit/32blit-sdk"
+}
+
+config("32blit_config") {
+  include_dirs = [
+    "$THIRTYTWO_BLIT_SDK/32blit",
+    "$THIRTYTWO_BLIT_SDK/3rd-party",
+    "include",
+  ]
+}
+
+pw_source_set("32blit") {
+  public_configs = [ ":32blit_config" ]
+  sources = [
+    "$THIRTYTWO_BLIT_SDK/32blit/audio/audio.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/audio/mp3-stream.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/engine/api.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/engine/engine.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/engine/file.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/engine/input.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/engine/multiplayer.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/engine/output.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/engine/particle.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/engine/profiler.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/engine/running_average.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/engine/save.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/engine/timer.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/engine/tweening.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/engine/version.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/graphics/blend.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/graphics/color.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/graphics/filter.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/graphics/font.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/graphics/jpeg.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/graphics/mask.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/graphics/mode7.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/graphics/primitive.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/graphics/sprite.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/graphics/surface.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/graphics/text.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/graphics/tilemap.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/math/geometry.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/math/interpolation.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/types/map.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/types/mat3.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/types/mat4.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/types/vec2.cpp",
+    "$THIRTYTWO_BLIT_SDK/32blit/types/vec3.cpp",
+  ]
+  public = [
+    "$THIRTYTWO_BLIT_SDK/32blit/32blit.hpp",
+    "include/version_defs.hpp",
+  ]
+  remove_configs = [ "$dir_pw_build:strict_warnings" ]
+}
