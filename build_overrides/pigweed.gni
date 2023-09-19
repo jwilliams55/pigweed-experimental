@@ -120,8 +120,8 @@ declare_args() {
   dir_pw_spin_delay_mcuxpresso =
       get_path_info("$dir_pigweed_experimental/pw_spin_delay_mcuxpresso",
                     "abspath")
-  dir_pw_spin_delay_pico =
-      get_path_info("$dir_pigweed_experimental/pw_spin_delay_pico", "abspath")
+  dir_pw_spin_delay_rp2040 =
+      get_path_info("$dir_pigweed_experimental/pw_spin_delay_rp2040", "abspath")
   dir_pw_spin_delay_stm32f429i_disc1 =
       get_path_info("$dir_pigweed_experimental/pw_spin_delay_stm32f429i_disc1",
                     "abspath")
