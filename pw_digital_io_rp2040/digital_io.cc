@@ -12,7 +12,7 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-#include "pw_digital_io_pico/digital_io.h"
+#include "pw_digital_io_rp2040/digital_io.h"
 
 #include "hardware/gpio.h"
 #include "pico/stdlib.h"

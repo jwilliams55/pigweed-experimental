@@ -55,8 +55,8 @@ declare_args() {
   dir_pw_digital_io_arduino =
       get_path_info("$dir_pigweed_experimental/pw_digital_io_arduino",
                     "abspath")
-  dir_pw_digital_io_pico =
-      get_path_info("$dir_pigweed_experimental/pw_digital_io_pico", "abspath")
+  dir_pw_digital_io_rp2040 =
+      get_path_info("$dir_pigweed_experimental/pw_digital_io_rp2040", "abspath")
   dir_pw_digital_io_stm32cube =
       get_path_info("$dir_pigweed_experimental/pw_digital_io_stm32cube",
                     "abspath")

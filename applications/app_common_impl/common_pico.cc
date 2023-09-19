@@ -22,7 +22,7 @@
 #include "hardware/pwm.h"
 #include "hardware/vreg.h"
 #include "pico/stdlib.h"
-#include "pw_digital_io_pico/digital_io.h"
+#include "pw_digital_io_rp2040/digital_io.h"
 #include "pw_ft6236/device.h"
 #include "pw_i2c_rp2040/initiator.h"
 #include "pw_log/log.h"

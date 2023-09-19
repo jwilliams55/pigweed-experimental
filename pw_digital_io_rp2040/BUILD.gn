@@ -20,9 +20,9 @@ config("public_includes") {
   include_dirs = [ "public" ]
 }
 
-pw_source_set("pw_digital_io_pico") {
+pw_source_set("pw_digital_io_rp2040") {
   public_configs = [ ":public_includes" ]
-  public = [ "public/pw_digital_io_pico/digital_io.h" ]
+  public = [ "public/pw_digital_io_rp2040/digital_io.h" ]
   deps = [
     "$PICO_ROOT/src/common/pico_base",
     "$PICO_ROOT/src/common/pico_stdlib",
