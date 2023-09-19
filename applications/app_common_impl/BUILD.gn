@@ -136,6 +136,7 @@ _pico_common_deps = [
   "$dir_pw_digital_io_pico",
   "$dir_pw_display",
   "$dir_pw_framebuffer_pool",
+  "$dir_pw_i2c_rp2040",
   "$dir_pw_log",
   "$dir_pw_spi_pico",
   "$dir_pw_sync:borrow",

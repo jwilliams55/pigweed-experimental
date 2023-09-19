@@ -104,6 +104,8 @@ declare_args() {
                     "abspath")
   dir_pw_spi_arduino =
       get_path_info("$dir_pigweed_experimental/pw_spi_arduino", "abspath")
+  dir_pw_i2c_rp2040 =
+      get_path_info("$dir_pigweed_experimental/pw_i2c_rp2040", "abspath")
   dir_pw_spi_pico =
       get_path_info("$dir_pigweed_experimental/pw_spi_pico", "abspath")
   dir_pw_spi_stm32cube =

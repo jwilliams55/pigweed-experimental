@@ -23,10 +23,12 @@
 #include "hardware/vreg.h"
 #include "pico/stdlib.h"
 #include "pw_digital_io_pico/digital_io.h"
+#include "pw_i2c_rp2040/initiator.h"
 #include "pw_log/log.h"
 #include "pw_pixel_pusher_rp2040_pio/pixel_pusher.h"
 #include "pw_spi_pico/chip_selector.h"
 #include "pw_spi_pico/initiator.h"
+#include "pw_status/status.h"
 #include "pw_sync/borrow.h"
 #include "pw_sync/mutex.h"
 
@@ -178,6 +180,15 @@ SpiValues::SpiValues(pw::spi::Config config,
       borrowable_initiator(initiator, initiator_mutex),
       device(borrowable_initiator, config, selector) {}
 
+constexpr pw::i2c::PicoInitiator::Config ki2cConfig{
+    .i2c_block = 0,
+    .baud_rate_bps = 400'000,
+    .sda_pin = 4,
+    .scl_pin = 5,
+};
+
+pw::i2c::PicoInitiator i2c_bus(ki2cConfig);
+
 }  // namespace
 
 // static
@@ -205,6 +216,8 @@ Status Common::Init() {
 #if DISPLAY_TE_GPIO != -1
   s_display_tear_effect_pin.Enable();
 #endif
+
+  i2c_bus.Enable();
 
 #if BACKLIGHT_GPIO != -1
   SetBacklight(0xffff);  // Full brightness.

@@ -82,6 +82,10 @@ generate_toolchain("rp2040") {
     pw_sync_MUTEX_BACKEND = "$dir_pw_sync_baremetal:mutex"
     pw_sync_COUNTING_SEMAPHORE_BACKEND =
         "$dir_pw_sync_freertos:counting_semaphore"
+    pw_sync_THREAD_NOTIFICATION_BACKEND =
+        "$dir_pw_sync_freertos:thread_notification"
+    pw_sync_TIMED_THREAD_NOTIFICATION_BACKEND =
+        "$dir_pw_sync_freertos:timed_thread_notification"
 
     pw_rpc_CONFIG = "$dir_pw_rpc:disable_global_mutex"
 
