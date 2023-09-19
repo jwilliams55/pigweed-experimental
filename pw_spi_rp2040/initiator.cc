@@ -12,7 +12,7 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-#include "pw_spi_pico/initiator.h"
+#include "pw_spi_rp2040/initiator.h"
 
 #include <algorithm>
 

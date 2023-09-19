@@ -20,11 +20,11 @@ config("default_config") {
   include_dirs = [ "public" ]
 }
 
-pw_source_set("pw_spi_pico") {
+pw_source_set("pw_spi_rp2040") {
   public_configs = [ ":default_config" ]
   public = [
-    "public/pw_spi_pico/chip_selector.h",
-    "public/pw_spi_pico/initiator.h",
+    "public/pw_spi_rp2040/chip_selector.h",
+    "public/pw_spi_rp2040/initiator.h",
   ]
   public_deps = [
     "$PICO_ROOT/src/rp2_common/hardware_spi",
