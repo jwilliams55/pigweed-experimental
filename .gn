@@ -40,4 +40,8 @@ default_args = {
 
   # Default gn build virtualenv target.
   pw_build_PYTHON_BUILD_VENV = "//:pw_experimental_build_venv"
+
+  # Use Python packages from CIPD.
+  pw_build_PYTHON_PIP_INSTALL_FIND_LINKS =
+      [ "//environment/cipd/packages/python311/pip_cache" ]
 }

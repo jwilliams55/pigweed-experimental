@@ -22,4 +22,4 @@ declare_args() {
 import("$dir_pigweed/modules.gni")
 
 # Experimental modules.
-import("$dir_pigweed_experimental/build_overrides/modules.gni")
+import("$dir_pigweed_experimental/modules.gni")

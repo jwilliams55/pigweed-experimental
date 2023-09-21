@@ -7,11 +7,13 @@ declare_args() {
 }
 
 config("32blit_config") {
+  cflags = [ "-Wno-shadow" ]
   include_dirs = [
     "$THIRTYTWO_BLIT_SDK/32blit",
     "$THIRTYTWO_BLIT_SDK/3rd-party",
     "include",
   ]
+  visibility = [ ":32blit" ]
 }
 
 pw_source_set("32blit") {
