@@ -41,7 +41,8 @@
     "pw_presubmit": {
       "format": {
         "exclude": [
-          "\\bthird_party/"
+          "\\bthird_party/",
+          "^patches\\.json$"
         ]
       }
     }
