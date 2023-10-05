@@ -50,8 +50,8 @@ using DisplayDriver = pw::display_driver::DisplayDriverST7789;
 #endif
 
 using pw::Status;
-using pw::digital_io::PicoDigitalIn;
-using pw::digital_io::PicoDigitalOut;
+using pw::digital_io::Rp2040DigitalIn;
+using pw::digital_io::Rp2040DigitalInOut;
 using pw::display::Display;
 using pw::framebuffer::Framebuffer;
 using pw::framebuffer::PixelFormat;
@@ -106,14 +106,14 @@ constexpr pw::spi::Config kSpiConfig16Bit{
     .bit_order = pw::spi::BitOrder::kMsbFirst,
 };
 
-PicoDigitalOut s_display_dc_pin(DISPLAY_DC_GPIO);
+Rp2040DigitalInOut s_display_dc_pin(DISPLAY_DC_GPIO);
 #if DISPLAY_RESET_GPIO != -1
-PicoDigitalOut s_display_reset_pin(DISPLAY_RESET_GPIO);
+Rp2040DigitalInOut s_display_reset_pin(DISPLAY_RESET_GPIO);
 #endif
 #if DISPLAY_TE_GPIO != -1
-PicoDigitalIn s_display_tear_effect_pin(DISPLAY_TE_GPIO);
+Rp2040DigitalIn s_display_tear_effect_pin(DISPLAY_TE_GPIO);
 #endif
-PicoDigitalOut s_display_cs_pin(DISPLAY_CS_GPIO);
+Rp2040DigitalInOut s_display_cs_pin(DISPLAY_CS_GPIO);
 PicoChipSelector s_spi_chip_selector(s_display_cs_pin);
 PicoInitiator s_spi_initiator(SPI_PORT);
 VirtualMutex s_spi_initiator_mutex;
