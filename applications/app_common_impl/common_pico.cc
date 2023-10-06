@@ -144,9 +144,10 @@ pw::framebuffer_pool::FramebufferPool s_fb_pool({
     .pixel_format = PixelFormat::RGB565,
 });
 DisplayDriver s_display_driver({
-  .data_cmd_gpio = s_display_dc_pin, .spi_cs_gpio = s_display_cs_pin,
+  .data_cmd_gpio = s_display_dc_pin.as<pw::digital_io::DigitalOut>(),
+  .spi_cs_gpio = s_display_cs_pin.as<pw::digital_io::DigitalOut>(),
 #if DISPLAY_RESET_GPIO != -1
-  .reset_gpio = &s_display_reset_pin,
+  .reset_gpio = &s_display_reset_pin.as<pw::digital_io::DigitalOut>(),
 #else
   .reset_gpio = nullptr,
 #endif
