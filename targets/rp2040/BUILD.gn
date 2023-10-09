@@ -109,9 +109,6 @@ generate_toolchain("rp2040") {
     # Configure backend for pw_spin_delay
     pw_spin_delay_BACKEND = "$dir_pw_spin_delay_rp2040"
 
-    # Configure backend for pw_touchscreen
-    pw_touchscreen_BACKEND = "$dir_pw_touchscreen_null"
-
     current_cpu = "arm"
     current_os = ""
   }

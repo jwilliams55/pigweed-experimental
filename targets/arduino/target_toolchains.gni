@@ -54,13 +54,6 @@ target_toolchain_arduino = {
 
       # Configure backend for pw_spin_delay
       pw_spin_delay_BACKEND = "$dir_pw_spin_delay_arduino"
-
-      # Configure backend for pw_touchscreen
-      pw_touchscreen_BACKEND = "$dir_pw_touchscreen_null"
-
-      # These backends are for Teensy core builds.
-      # pw_touchscreen_BACKEND = "$dir_pw_touchscreen_teensy_xpt2046"
-      # pw_touchscreen_BACKEND = "$dir_pw_touchscreen_teensy_stmpe610"
     }
   }
 

@@ -63,8 +63,6 @@ target_toolchain_host = {
             "$dir_pigweed_experimental/applications/app_common_impl:host_imgui"
       }
 
-      pw_touchscreen_BACKEND = "$dir_pw_touchscreen_null"
-
       pw_board_led_BACKEND = dir_pw_board_led_host
       pw_spin_delay_BACKEND = dir_pw_spin_delay_host
     }

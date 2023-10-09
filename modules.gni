@@ -76,13 +76,6 @@ declare_args() {
       get_path_info("pw_spin_delay_stm32f769i_disc0", "abspath")
   dir_pw_sys_io_baremetal_stm32f769 =
       get_path_info("pw_sys_io_baremetal_stm32f769", "abspath")
-  dir_pw_touchscreen = get_path_info("pw_graphics/pw_touchscreen", "abspath")
-  dir_pw_touchscreen_null =
-      get_path_info("pw_graphics/pw_touchscreen_null", "abspath")
-  dir_pw_touchscreen_teensy_stmpe610 =
-      get_path_info("pw_graphics/pw_touchscreen_teensy_stmpe610", "abspath")
-  dir_pw_touchscreen_teensy_xpt2046 =
-      get_path_info("pw_graphics/pw_touchscreen_teensy_xpt2046", "abspath")
   dir_pw_pixel_pusher = get_path_info("pw_pixel_pusher", "abspath")
   dir_pw_pixel_pusher_rp2040_pio =
       get_path_info("pw_pixel_pusher_rp2040_pio", "abspath")

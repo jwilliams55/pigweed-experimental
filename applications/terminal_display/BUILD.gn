@@ -52,7 +52,6 @@ pw_executable("terminal_demo") {
     "$dir_pw_spin_delay",
     "$dir_pw_string",
     "$dir_pw_sys_io",
-    "$dir_pw_touchscreen",
   ]
   remove_configs = [ "$dir_pw_build:strict_warnings" ]
 

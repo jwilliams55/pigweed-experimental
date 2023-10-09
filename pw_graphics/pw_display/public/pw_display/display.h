@@ -58,15 +58,6 @@ class Display {
   // Return the height (in pixels) of the associated display.
   uint16_t GetHeight() const { return size_.height; }
 
-  // Does the associated screen have a touch screen?
-  virtual bool TouchscreenAvailable() const { return false; }
-
-  // Is there a new touch event available?
-  virtual bool NewTouchEvent() { return false; }
-
-  // Return the new touch point.
-  virtual pw::math::Vector3<int> GetTouchPoint() { return {0, 0, 0}; }
-
  private:
 #if DISPLAY_RESIZE
   // Update screen while scaling the framebuffer using nearest

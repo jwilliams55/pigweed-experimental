@@ -24,10 +24,8 @@ DisplayImgUI::DisplayImgUI(
 
 DisplayImgUI::~DisplayImgUI() = default;
 
-bool DisplayImgUI::NewTouchEvent() { return display_driver_.NewTouchEvent(); }
-
-pw::math::Vector3<int> DisplayImgUI::GetTouchPoint() {
-  return display_driver_.GetTouchPoint();
+pw::display_driver::DisplayDriverImgUI& DisplayImgUI::GetDisplayDriver() {
+  return display_driver_;
 }
 
 }  // namespace pw::display

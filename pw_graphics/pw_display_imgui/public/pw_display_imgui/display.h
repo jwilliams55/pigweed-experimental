@@ -28,9 +28,7 @@ class DisplayImgUI : public Display {
                pw::framebuffer_pool::FramebufferPool& framebuffer_pool);
   ~DisplayImgUI();
 
-  bool TouchscreenAvailable() const override { return true; }
-  bool NewTouchEvent() override;
-  pw::math::Vector3<int> GetTouchPoint() override;
+  pw::display_driver::DisplayDriverImgUI& GetDisplayDriver();
 
  private:
   pw::display_driver::DisplayDriverImgUI& display_driver_;

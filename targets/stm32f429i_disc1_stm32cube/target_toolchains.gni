@@ -113,9 +113,6 @@ _target_config = {
 
   pw_spin_delay_BACKEND = dir_pw_spin_delay_stm32cube
 
-  # Configure backend for pw_touchscreen
-  pw_touchscreen_BACKEND = "$dir_pw_touchscreen_null"
-
   dir_pw_third_party_stm32cube = dir_pw_third_party_stm32cube_f4
   pw_third_party_stm32cube_PRODUCT = "STM32F429xx"
   pw_third_party_stm32cube_CONFIG = "$dir_pigweed_experimental/targets/stm32f429i_disc1_stm32cube:stm32f4xx_hal_config"
