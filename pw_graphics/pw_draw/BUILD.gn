@@ -32,10 +32,10 @@ pw_source_set("pw_draw") {
     "public/pw_draw/text_area.h",
   ]
   sources = [
-    "public/pw_draw/draw.cc",
-    "public/pw_draw/font6x8.cc",
-    "public/pw_draw/sprite_sheet.cc",
-    "public/pw_draw/text_area.cc",
+    "draw.cc",
+    "font6x8.cc",
+    "sprite_sheet.cc",
+    "text_area.cc",
   ]
   public_deps = [
     "$dir_pw_color",

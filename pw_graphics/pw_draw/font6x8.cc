@@ -12,7 +12,7 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-#include "font_set.h"
+#include "pw_draw/font_set.h"
 
 static const uint8_t font6x8_data[] = {
     // 32 Space

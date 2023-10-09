@@ -15,16 +15,23 @@
 """PNG to rgb565 cc file converter."""
 
 import argparse
+import importlib.resources
 import logging
 import math
 from pathlib import Path
 
 from PIL import Image  # type: ignore
-from jinja2 import Environment, FileSystemLoader, make_logging_undefined
+from jinja2 import Environment, DictLoader, make_logging_undefined
+
+jinja_templates = {
+    f.name: f.read_text()
+    for f in importlib.resources.files('pw_graphics.templates').iterdir()
+    if f.name.endswith('.jinja')
+}
 
 jinja_env = Environment(
-    # Load templates automatically from pw_console/templates
-    loader=FileSystemLoader(Path(__file__).parent / 'templates'),
+    # Load templates automatically from pw_graphics/templates
+    loader=DictLoader(jinja_templates),
     # Raise errors if variables are undefined in templates
     undefined=make_logging_undefined(logger=logging.getLogger(__package__), ),
     # Trim whitespace in templates
