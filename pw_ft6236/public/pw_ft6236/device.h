@@ -42,6 +42,10 @@ class Device {
   Status SetThreshhold(uint8_t threshhold);
   bool ReadData();
 
+  int TouchCount();
+  Touch Touch1();
+  Touch Touch2();
+
  private:
   pw::i2c::Initiator& initiator_;
   pw::i2c::RegisterDevice device_;

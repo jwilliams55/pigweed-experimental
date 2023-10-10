@@ -18,6 +18,9 @@
 #include <cstddef>
 #include <cstdint>
 
+#define PW_LOG_MODULE_NAME "pw_ft6236"
+#define PW_LOG_LEVEL PW_LOG_LEVEL_DEBUG
+
 #include "pw_bytes/bit.h"
 #include "pw_i2c/address.h"
 #include "pw_i2c/register_device.h"
@@ -121,6 +124,12 @@ void Device::LogTouchInfo() {
                  touches_[i].area);
   }
 }
+
+int Device::TouchCount() { return touch_count_; }
+
+pw::ft6236::Touch Device::Touch1() { return touches_[0]; }
+
+pw::ft6236::Touch Device::Touch2() { return touches_[1]; }
 
 bool Device::ReadData() {
   // Read 16 registers starting from 0x00.
