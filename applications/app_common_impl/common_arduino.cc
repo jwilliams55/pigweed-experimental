@@ -94,14 +94,14 @@ pw::framebuffer_pool::FramebufferPool s_fb_pool({
     .start = {0, 0},
 });
 DisplayDriver s_display_driver({
-  .data_cmd_gpio = s_display_dc_pin,
+    .data_cmd_gpio = s_display_dc_pin,
 #if DISPLAY_RESET_GPIO != -1
-  .reset_gpio = &s_display_reset_pin,
+    .reset_gpio = &s_display_reset_pin,
 #else
-  .reset_gpio = nullptr,
+    .reset_gpio = nullptr,
 #endif
-  .spi_device_8_bit = s_spi_8_bit.device,
-  .spi_device_16_bit = s_spi_16_bit.device,
+    .spi_device_8_bit = s_spi_8_bit.device,
+    .spi_device_16_bit = s_spi_16_bit.device,
 });
 Display s_display(s_display_driver, kDisplaySize, s_fb_pool);
 

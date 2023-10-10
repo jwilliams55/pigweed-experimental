@@ -320,20 +320,20 @@ status_t MCUXpressoDevice::DSI_MemWrite(uint8_t virtualChannel,
 #if USE_DSI_SMARTDMA
   dsi_smartdma_write_mem_transfer_t xfer = {
 #if (DEMO_RM67162_BUFFER_FORMAT == PIXEL_FORMAT_RGB565)
-    .inputFormat = kDSI_SMARTDMA_InputPixelFormatRGB565,
-    .outputFormat = kDSI_SMARTDMA_OutputPixelFormatRGB565,
+      .inputFormat = kDSI_SMARTDMA_InputPixelFormatRGB565,
+      .outputFormat = kDSI_SMARTDMA_OutputPixelFormatRGB565,
 #elif (DEMO_RM67162_BUFFER_FORMAT == PIXEL_FORMAT_RGB888)
-    .inputFormat = kDSI_SMARTDMA_InputPixelFormatRGB888,
-    .outputFormat = kDSI_SMARTDMA_OutputPixelFormatRGB888,
+      .inputFormat = kDSI_SMARTDMA_InputPixelFormatRGB888,
+      .outputFormat = kDSI_SMARTDMA_OutputPixelFormatRGB888,
 #else
-    .inputFormat = kDSI_SMARTDMA_InputPixelFormatXRGB8888,
-    .outputFormat = kDSI_SMARTDMA_OutputPixelFormatRGB888,
+      .inputFormat = kDSI_SMARTDMA_InputPixelFormatXRGB8888,
+      .outputFormat = kDSI_SMARTDMA_OutputPixelFormatRGB888,
 #endif /* DEMO_RM67162_BUFFER_FORMAT */
-    .data = data,
-    .dataSize = length,
+      .data = data,
+      .dataSize = length,
 
-    .virtualChannel = virtualChannel,
-    .disablePixelByteSwap = false,
+      .virtualChannel = virtualChannel,
+      .disablePixelByteSwap = false,
   };
 
   return DSI_TransferWriteMemorySMARTDMA(

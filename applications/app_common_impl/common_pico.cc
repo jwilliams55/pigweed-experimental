@@ -144,22 +144,22 @@ pw::framebuffer_pool::FramebufferPool s_fb_pool({
     .pixel_format = PixelFormat::RGB565,
 });
 DisplayDriver s_display_driver({
-  .data_cmd_gpio = s_display_dc_pin.as<pw::digital_io::DigitalOut>(),
-  .spi_cs_gpio = s_display_cs_pin.as<pw::digital_io::DigitalOut>(),
+    .data_cmd_gpio = s_display_dc_pin.as<pw::digital_io::DigitalOut>(),
+    .spi_cs_gpio = s_display_cs_pin.as<pw::digital_io::DigitalOut>(),
 #if DISPLAY_RESET_GPIO != -1
-  .reset_gpio = &s_display_reset_pin.as<pw::digital_io::DigitalOut>(),
+    .reset_gpio = &s_display_reset_pin.as<pw::digital_io::DigitalOut>(),
 #else
-  .reset_gpio = nullptr,
+    .reset_gpio = nullptr,
 #endif
 #if DISPLAY_TE_GPIO != -1
-  .tear_effect_gpio = &s_display_tear_effect_pin,
+    .tear_effect_gpio = &s_display_tear_effect_pin,
 #else
-  .tear_effect_gpio = nullptr,
+    .tear_effect_gpio = nullptr,
 #endif
-  .spi_device_8_bit = s_spi_8_bit.device,
-  .spi_device_16_bit = s_spi_16_bit.device,
+    .spi_device_8_bit = s_spi_8_bit.device,
+    .spi_device_16_bit = s_spi_16_bit.device,
 #if USE_PIO
-  .pixel_pusher = &s_pixel_pusher,
+    .pixel_pusher = &s_pixel_pusher,
 #endif
 });
 Display s_display(s_display_driver, kDisplaySize, s_fb_pool);
