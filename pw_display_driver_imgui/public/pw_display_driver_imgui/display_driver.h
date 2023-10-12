@@ -13,9 +13,17 @@
 // the License.
 #pragma once
 
+#include <GLFW/glfw3.h>
+
 #include "pw_display_driver/display_driver.h"
 #include "pw_framebuffer_pool/framebuffer_pool.h"
 #include "pw_math/vector3.h"
+
+struct ImGuiMousePosition {
+  bool left_button_pressed = false;
+  int position_x = 0;
+  int position_y = 0;
+};
 
 namespace pw::display_driver {
 
@@ -23,8 +31,8 @@ class DisplayDriverImgUI : public DisplayDriver {
  public:
   DisplayDriverImgUI();
 
-  bool NewTouchEvent();
-  pw::math::Vector3<int> GetTouchPoint();
+  GLFWwindow* GetGlfwWindow();
+  ImGuiMousePosition GetImGuiMousePosition();
 
   // pw::display_driver::DisplayDriver implementation:
   Status Init() override;

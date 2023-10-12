@@ -59,9 +59,7 @@ int old_lcd_texture_display_scale = 0;
 bool lcd_texture_display_mode_nearest = true;
 bool old_lcd_texture_display_mode_nearest = true;
 
-bool left_mouse_pressed = false;
-int texture_mouse_x = 0;
-int texture_mouse_y = 0;
+ImGuiMousePosition touchscreen_mouse_position;
 
 void CleanupAndExit() {
   ImGui_ImplOpenGL3_Shutdown();
@@ -243,11 +241,11 @@ void DisplayDriverImgUI::Render() {
   // Poll and handle events (inputs, window resize, etc.)
   glfwPollEvents();
 
-  left_mouse_pressed = false;
+  touchscreen_mouse_position.left_button_pressed = false;
   double mouse_xpos = 0, mouse_ypos = 0;
   glfwGetCursorPos(window, &mouse_xpos, &mouse_ypos);
   if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-    left_mouse_pressed = true;
+    touchscreen_mouse_position.left_button_pressed = true;
   }
 
   // Start the Dear ImGui frame
@@ -362,10 +360,13 @@ void DisplayDriverImgUI::Render() {
   ImGui::Checkbox("Nearest neighbor", &lcd_texture_display_mode_nearest);
 
   ImGui::Separator();
-  texture_mouse_x = mouse_coordinates_of_base_image.x;
-  texture_mouse_y = mouse_coordinates_of_base_image.y;
-  ImGui::Text("Mouse position = %d, %d", texture_mouse_x, texture_mouse_y);
-  ImGui::Text("Mouse Left button pressed: %d", left_mouse_pressed);
+  touchscreen_mouse_position.position_x = mouse_coordinates_of_base_image.x;
+  touchscreen_mouse_position.position_y = mouse_coordinates_of_base_image.y;
+  ImGui::Text("Mouse position = %d, %d",
+              touchscreen_mouse_position.position_x,
+              touchscreen_mouse_position.position_y);
+  ImGui::Text("Mouse Left button pressed: %d",
+              touchscreen_mouse_position.left_button_pressed);
 
   // Demo Window toggle
   ImGui::Separator();
@@ -430,15 +431,10 @@ uint16_t DisplayDriverImgUI::GetWidth() const { return kDisplayWidth; }
 
 uint16_t DisplayDriverImgUI::GetHeight() const { return kDisplayHeight; }
 
-bool DisplayDriverImgUI::NewTouchEvent() { return left_mouse_pressed; }
+GLFWwindow* DisplayDriverImgUI::GetGlfwWindow() { return window; }
 
-pw::math::Vector3<int> DisplayDriverImgUI::GetTouchPoint() {
-  if (left_mouse_pressed && texture_mouse_x >= 0 &&
-      texture_mouse_x < kDisplayWidth && texture_mouse_y >= 0 &&
-      texture_mouse_y < kDisplayHeight) {
-    return {texture_mouse_x, texture_mouse_y, 1};
-  }
-  return {0, 0, 0};
+ImGuiMousePosition DisplayDriverImgUI::GetImGuiMousePosition() {
+  return touchscreen_mouse_position;
 }
 
 }  // namespace pw::display_driver
