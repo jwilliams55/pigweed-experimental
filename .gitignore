@@ -1,4 +1,5 @@
 # Build
+bazel-*
 out/
 .presubmit/
 compile_commands.json

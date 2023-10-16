@@ -1,4 +1,4 @@
-# Copyright 2021 The Pigweed Authors
+# Copyright 2023 The Pigweed Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -11,28 +11,23 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
+load("@pigweed//pw_build:pigweed.bzl", "pw_cc_library", "pw_cc_test")
 
-load(
-    "@pigweed//pw_build:pigweed.bzl",
-    "pw_cc_library",
+pw_cc_library(
+    name = "pw_color",
+    hdrs = [
+        "public/pw_color/color.h",
+        "public/pw_color/colors_endesga32.h",
+        "public/pw_color/colors_pico8.h",
+    ],
+    includes = ["public"],
 )
 
-package(default_visibility = ["//visibility:public"])
-
-licenses(["notice"])
-
-# TODO(pwbug/545): These just list sources files to pass presubmit and aren't
-# expected to actually work.
-pw_cc_library(
-    name = "boot",
-    srcs = [
-        "boot.cc",
-        "vector_table.c",
-    ],
+pw_cc_test(
+    name = "color_test",
+    srcs = ["color_test.cc"],
     deps = [
-        "@pigweed//pw_boot",
-        "@pigweed//pw_boot_cortex_m",
-        "@pigweed//pw_preprocessor",
-        "@pigweed//pw_sys_io_mcuxpresso",
+        ":pw_color",
+        "@pigweed//pw_log",
     ],
 )

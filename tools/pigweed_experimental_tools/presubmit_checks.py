@@ -145,6 +145,10 @@ pw_graphics_host = build.GnGenNinja(
 )
 
 
+def bazel_test(ctx: PresubmitContext):
+    build.bazel(ctx, 'test', '//...')
+
+
 def check_for_git_changes(_: PresubmitContext):
     """Checks that repositories have all changes commited."""
     checked_repos = (PIGWEED_ROOT, *REPOS)
@@ -201,7 +205,7 @@ FULL = (
     stm32cube_f4_build,
 )
 
-CI_CQ = (default_build, pico_build, stm32cube_f4_build)
+CI_CQ = (default_build, pico_build, stm32cube_f4_build, bazel_test)
 
 PROGRAMS = pw_presubmit.Programs(
     # keep-sorted: start

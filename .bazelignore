@@ -1,0 +1,4 @@
+# Don't attempt to build targets under or //environment or //third_party when
+# building everything. These are not part of the project's workspace.
+environment
+third_party

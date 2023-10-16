@@ -11,27 +11,10 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
+#
+# Do not attempt to configure an autodetected (local) toolchain. We vendor all
+# our toolchains, and CI VMs may not have any local toolchain to detect.
+common --repo_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
 
-load(
-    "@pigweed//pw_build:pigweed.bzl",
-    "pw_cc_library",
-)
-
-package(default_visibility = ["//visibility:public"])
-
-licenses(["notice"])
-
-pw_cc_library(
-    name = "pw_sys_io_baremetal_stm32f769",
-    srcs = ["sys_io_baremetal.cc"],
-    hdrs = ["public/pw_sys_io_baremetal_stm32f769/init.h"],
-    includes = ["public"],
-    target_compatible_with = [
-        "@platforms//os:none",
-    ],
-    deps = [
-        "@pigweed//pw_preprocessor",
-        "@pigweed//pw_sys_io:default_putget_bytes",
-        "@pigweed//pw_sys_io:facade",
-    ],
-)
+# Required for new toolchain resolution API.
+build --incompatible_enable_cc_toolchain_resolution
