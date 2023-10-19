@@ -283,6 +283,7 @@ group("applications") {
   # Host applications steps.
   deps += [
     ":applications_tests(//targets/host:host_debug_tests)",
+    "$dir_pw_data_link:sample_app(//targets/host:host_debug)",
     "//applications/blinky:blinky(//targets/host:host_debug)",
     "//applications/strings:all(//targets/host:host_debug)",
   ]
