@@ -79,6 +79,5 @@ declare_args() {
   dir_pw_pixel_pusher = get_path_info("pw_pixel_pusher", "abspath")
   dir_pw_pixel_pusher_rp2040_pio =
       get_path_info("pw_pixel_pusher_rp2040_pio", "abspath")
-  dir_pw_ft6236 = get_path_info("pw_ft6236", "abspath")
   pw_dir_third_party_32blit = get_path_info("third_party/32blit", "abspath")
 }

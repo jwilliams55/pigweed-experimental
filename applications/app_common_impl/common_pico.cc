@@ -23,7 +23,6 @@
 #include "hardware/vreg.h"
 #include "pico/stdlib.h"
 #include "pw_digital_io_rp2040/digital_io.h"
-#include "pw_ft6236/device.h"
 #include "pw_i2c_rp2040/initiator.h"
 #include "pw_log/log.h"
 #include "pw_pixel_pusher_rp2040_pio/pixel_pusher.h"
@@ -220,10 +219,6 @@ Status Common::Init() {
 #endif
 
   i2c_bus.Enable();
-
-  pw::ft6236::Device touch_screen(i2c_bus);
-  touch_screen.Enable();
-  touch_screen.LogControllerInfo();
 
 #if BACKLIGHT_GPIO != -1
   SetBacklight(0xffff);  // Full brightness.

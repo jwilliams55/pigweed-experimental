@@ -136,7 +136,6 @@ _pico_common_deps = [
   "$dir_pw_digital_io_rp2040",
   "$dir_pw_display",
   "$dir_pw_framebuffer_pool",
-  "$dir_pw_ft6236",
   "$dir_pw_i2c_rp2040",
   "$dir_pw_log",
   "$dir_pw_spi_rp2040",
