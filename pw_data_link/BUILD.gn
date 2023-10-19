@@ -60,6 +60,17 @@ pw_source_set("data_link_thread") {
   ]
 }
 
+pw_source_set("server_socket") {
+  public_configs = [ ":default_config" ]
+  public = [ "public/pw_data_link/server_socket.h" ]
+  sources = [ "server_socket.cc" ]
+  public_deps = [
+    "$dir_pw_assert",
+    "$dir_pw_result",
+    "$dir_pw_status",
+  ]
+}
+
 pw_test("data_link_test") {
   sources = [ "data_link_test.cc" ]
   deps = [
