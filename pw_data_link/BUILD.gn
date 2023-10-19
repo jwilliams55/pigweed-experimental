@@ -30,6 +30,23 @@ pw_source_set("data_link") {
   ]
 }
 
+pw_source_set("socket_data_link") {
+  public_configs = [ ":default_config" ]
+  public = [ "public/pw_data_link/socket_data_link.h" ]
+  public_deps = [
+    ":data_link",
+    "$dir_pw_assert",
+    "$dir_pw_bytes",
+    "$dir_pw_function",
+    "$dir_pw_status",
+    "$dir_pw_string:to_string",
+    "$dir_pw_sync:lock_annotations",
+    "$dir_pw_sync:mutex",
+  ]
+  deps = [ "$dir_pw_log" ]
+  sources = [ "socket_data_link.cc" ]
+}
+
 pw_test("data_link_test") {
   sources = [ "data_link_test.cc" ]
   deps = [
@@ -39,6 +56,18 @@ pw_test("data_link_test") {
   ]
 }
 
+pw_test("socket_data_link_test") {
+  sources = [ "socket_data_link_test.cc" ]
+  deps = [
+    ":socket_data_link",
+    "$dir_pw_bytes",
+    "$dir_pw_status",
+  ]
+}
+
 pw_test_group("tests") {
-  tests = [ ":data_link_test" ]
+  tests = [
+    ":data_link_test",
+    ":socket_data_link_test",
+  ]
 }
