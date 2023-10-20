@@ -51,6 +51,7 @@ SocketDataLink::SocketDataLink(const char* host, uint16_t port) : host_(host) {
 SocketDataLink::SocketDataLink(int connection_fd,
                                EventHandlerCallback&& event_handler)
     : connection_fd_(connection_fd) {
+  PW_DCHECK(connection_fd > 0);
   std::lock_guard lock(lock_);
   event_handler_ = std::move(event_handler);
   set_link_state(LinkState::kOpen);
