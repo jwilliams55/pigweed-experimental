@@ -1,0 +1,152 @@
+# Copyright 2023 The Pigweed Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
+import("//build_overrides/pigweed.gni")
+
+import("$dir_pw_toolchain/generate_toolchain.gni")
+import("$dir_pw_toolchain/rbe.gni")
+import("$dir_pw_toolchain/static_analysis_toolchain.gni")
+import("$dir_pw_toolchain/universal_tools.gni")
+
+# A Pigweed target toolchain.
+#
+# Args:
+#   ar: (required) String indicating the archive tool to use.
+#   cc: (required) String indicating the C compiler to use.
+#   cxx: (required) String indicating the C++ compiler to use.
+#   ld: (optional) String indicating the linking binary to use.
+#   is_host_toolchain: (optional) Boolean indicating if the outputs are meant
+#     for the $host_os. Defaults to false.
+#   final_binary_extension: (optional) The extension to apply to final linked
+#     binaries.
+#   link_whole_archive: (optional) Boolean indicating if the linker should load
+#     all object files when resolving symbols.
+#   link_group: (optional) Boolean indicating if the linker should use
+#     a group to resolve circular dependencies between artifacts.
+#   generate_from: (optional) The full target name of the toolchain that can
+#     trigger this toolchain to be generated. GN only allows one toolchain to
+#     be generated at a given target path, so if multiple toolchains parse the
+#     same generate_toolchain target only one should declare a toolchain. This
+#     is primarily to allow generating sub-toolchains. Defaults to
+#     default_toolchain.
+#   default_configs (optional): TODO
+#   remove_default_configs (optional): TODO
+#   default_public_deps (optional): TODO
+#   toolchain_args: (required) A scope setting GN build arg values to use when
+#     evaluating the build graph with this toolchain. These take precedence
+#     over user-specified values (whether via the command line or in the
+#     args.gn file).
+#   rbe_config (optional): TODO
+#   rbe_input_dir (optional): TODO
+#
+# The defaults scope should contain values for builtin GN arguments:
+#   current_cpu: The CPU of the toolchain.
+#     Well known values include "arm", "arm64", "x64", "x86", and "mips".
+#   current_os: The OS of the toolchain. Defaults to "".
+#     Well known values include "win", "mac", "linux", "android", and "ios".
+template("pw_toolchain") {
+  # On the default toolchain invocation, you typically need to generate all
+  # toolchains you encounter. For sub-toolchains, they must be generated from
+  # the context of their parent.
+  #
+  # This is duplicated from `generate_toolchain` because of GN evaluation
+  # behavior. Ideally pw_toolchain is merged into `generate_toolchain`,
+  # eliminating the need for this to be duplicated.
+  if (defined(invoker.generate_from)) {
+    _generate_toolchain =
+        get_label_info(invoker.generate_from, "label_no_toolchain") ==
+        current_toolchain
+  } else {
+    _generate_toolchain = default_toolchain == current_toolchain
+  }
+
+  if (_generate_toolchain) {
+    generate_toolchain(target_name) {
+      # All of the RBE support logic is housed here.
+      if (pw_toolchain_USE_RBE && defined(invoker.rbe_config)) {
+        # It might make sense to expose these as optional arguments later.
+        _rewrapper_binary = "rewrapper"
+        _exec_root = rebase_path("//")
+
+        _rbe_args = [
+          _rewrapper_binary,
+          "--labels=type=compile,lang=cpp,compiler=clang",
+          "--cfg=" + invoker.rbe_config,
+          "--exec_root=" + _exec_root,
+        ]
+
+        if (defined(rbe_input_dir)) {
+          _rbe_args += [ "--inputs=" +
+                         rebase_path(invoker.rbe_input_dir, _exec_root) + "/" ]
+        }
+
+        _rbe_args += [ "--" ]
+
+        _rbe_toolchain_prefix = string_join(" ", _rbe_args)
+
+        # Assemble the final command.
+        _cc_cmd = _rbe_args + [ cc ]
+        _cxx_cmd = _rbe_args + [ cxx ]
+        if (pw_toolchain_RBE_DEBUG) {
+          _rbe_debug_flag = "-v"
+          _cc_cmd += [ _rbe_debug_flag ]
+          _cxx_cmd += [ _rbe_debug_flag ]
+        }
+
+        cc = string_join(" ", _cc_cmd)
+        cxx = string_join(" ", _cxx_cmd)
+      }
+
+      # This is still called `defaults` for backwards compatibility.
+      defaults = {
+        forward_variables_from(invoker.toolchain_args, "*")
+        if (defined(default_configs)) {
+          _this = get_label_info(target_name, "label_with_toolchain")
+          print("$default_configs when evaluating $_this")
+        }
+
+        if (defined(invoker.default_configs)) {
+          default_configs = invoker.default_configs
+        }
+        if (defined(invoker.remove_default_configs)) {
+          remove_default_configs = invoker.remove_default_configs
+        }
+        if (defined(invoker.default_public_deps)) {
+          default_public_deps = invoker.default_public_deps
+        }
+        if (defined(invoker.remove_default_public_deps)) {
+          remove_default_public_deps = invoker.remove_default_public_deps
+        }
+      }
+
+      assert(!defined(invoker.defaults),
+             "`defaults` is the old way, use toolchain_args")
+
+      # Arguments that are consumed by this template and shouldn't be directly
+      # forwarded to the underlying template.
+      _args_used = [
+        "toolchain_args",
+        "default_configs",
+        "remove_default_configs",
+        "default_public_deps",
+        "remove_default_public_deps",
+      ]
+      forward_variables_from(invoker, "*", _args_used)
+    }
+  } else {
+    not_needed(invoker, "*")
+    group(target_name) {
+    }
+  }
+}

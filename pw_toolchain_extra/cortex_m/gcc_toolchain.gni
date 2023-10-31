@@ -1,0 +1,118 @@
+# Copyright 2023 The Pigweed Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
+import("//build_overrides/pigweed.gni")
+import("//build_overrides/pigweed_environment.gni")
+
+import("$dir_pw_build/defaults.gni")
+import("$dir_pw_toolchain/rbe.gni")
+import("$dir_pw_toolchain_extra/generate_toolchain.gni")
+
+pw_toolchain_CORTEX_M_CPU = {
+  M0 = "m0"
+  M0_SMALL_MULTIPLY = "m0_small_multiply"
+  M0PLUS = "m0plus"
+  M0PLUS_SMALL_MULTIPLY = "m0plus_small_multiply"
+  M1 = "m1"
+  M1_SMALL_MULTIPLY = "m1_small_multiply"
+  M3 = "m3"
+  M4 = "m4"
+  M7 = "m7"
+  M23 = "m23"
+  M33 = "m33"
+  M35P = "m35p"
+  M55 = "m55"
+}
+
+pw_toolchain_CORTEX_M_FPU = {
+  SOFTWARE = "soft"
+  FPV4_SP = "fpv4_sp"
+  FP_V5 = "fpv5"
+  FP_V5_SP = "fpv5_sp"
+}
+
+declare_args() {
+  pw_toolchain_ARM_NONE_EABI_ROOT =
+      rebase_path(pw_env_setup_CIPD_ARM + "/bin/", root_build_dir)
+}
+
+# In addition to all the arguments supported by pw_toolchain, this template
+# adds the following arguments:
+#   cpu (required): Which Cortex-M CPU to build for.
+#   fpu (optional): Which Cortex-M FPU architecture to build for. Defaults to
+#       emulated (software) FPU.
+#   use_newlib_nano (optional): Whether or not to use newlib-nano. Defaults to
+#       true.
+#   use_nosys (optional): Whether or not to use nosys implementation stubs for
+#       syscalls. Defaults to true.
+template("pw_cortex_m_gcc_toolchain") {
+  pw_toolchain(target_name) {
+    _tool_prefix = "arm-none-eabi-"
+    _toolchain_root = pw_toolchain_ARM_NONE_EABI_ROOT
+
+    cc = _toolchain_root + _tool_prefix + "gcc"
+    cxx = _toolchain_root + _tool_prefix + "g++"
+    ar = _toolchain_root + _tool_prefix + "ar"
+    ld = _toolchain_root + _tool_prefix + "g++"
+
+    rbe_config = pw_rbe_arm_gcc_config
+    rbe_input_dir = _toolchain_root
+
+    # Default to enabling link_whole_archive for Cortex-M builds.
+    if (!defined(invoker.link_whole_archive)) {
+      link_whole_archive = true
+    }
+
+    # TODO(amontanez): Add check for supported options. Also CPU.
+    if (defined(invoker.fpu)) {
+      _fpu = invoker.fpu
+    } else {
+      _fpu = pw_toolchain_CORTEX_M_FPU.SOFTWARE
+    }
+
+    default_configs = [
+      "$dir_pw_toolchain_extra/cortex_m:disable_psabi_warning",
+      "$dir_pw_toolchain_extra/cortex_m:thumb",
+      "$dir_pw_toolchain_extra/cortex_m:cortex_${invoker.cpu}",
+      "$dir_pw_toolchain_extra/cortex_m:fpu_${_fpu}",
+    ]
+    default_configs += pigweed_default_configs
+
+    if (!defined(invoker.use_newlib_nano) || invoker.use_newlib_nano) {
+      default_configs += [ "$dir_pw_toolchain_extra/cortex_m:newlib_nano" ]
+    }
+    if (!defined(invoker.use_nosys) || invoker.use_nosys) {
+      default_configs += [ "$dir_pw_toolchain_extra/cortex_m:nosys" ]
+    }
+
+    if (defined(invoker.default_configs)) {
+      default_configs += invoker.default_configs
+    }
+
+    if (!defined(invoker.current_cpu)) {
+      current_cpu = "arm"
+    }
+
+    # Arguments that are consumed by this template and shouldn't be directly
+    # forwarded to the underlying template.
+    _args_used = [
+      "cpu",
+      "fpu",
+      "use_newlib_nano",
+      "use_nosys",
+      "default_configs",
+    ]
+    forward_variables_from(invoker, "*", _args_used)
+  }
+}

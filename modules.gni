@@ -77,6 +77,7 @@ declare_args() {
       get_path_info("pw_spin_delay_stm32f769i_disc0", "abspath")
   dir_pw_sys_io_baremetal_stm32f769 =
       get_path_info("pw_sys_io_baremetal_stm32f769", "abspath")
+  dir_pw_toolchain_extra = get_path_info("pw_toolchain_extra", "abspath")
   dir_pw_pixel_pusher = get_path_info("pw_pixel_pusher", "abspath")
   dir_pw_pixel_pusher_rp2040_pio =
       get_path_info("pw_pixel_pusher_rp2040_pio", "abspath")

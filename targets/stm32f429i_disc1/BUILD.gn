@@ -14,9 +14,50 @@
 
 import("//build_overrides/pigweed.gni")
 
-import("$dir_pw_toolchain/generate_toolchain.gni")
-import("target_toolchains.gni")
+import("$dir_pigweed/targets/stm32f429i_disc1/target_toolchains.gni")
+import("$dir_pigweed_experimental/targets/common_backends.gni")
+import("$dir_pw_toolchain_extra/cortex_m/gcc_toolchain.gni")
 
-generate_toolchains("toolchains") {
-  toolchains = toolchains_list
+_toolchain_base = pw_target_toolchain_stm32f429i_disc1.debug
+_excluded_defaults = [
+  "pw_cpu_exception_ENTRY_BACKEND",
+  "pw_cpu_exception_HANDLER_BACKEND",
+  "pw_cpu_exception_SUPPORT_BACKEND",
+  "default_configs",
+]
+
+pw_cortex_m_gcc_toolchain("stm32f429i_disc1_debug") {
+  cpu = pw_toolchain_CORTEX_M_CPU.M4
+  fpu = pw_toolchain_CORTEX_M_FPU.FPV4_SP
+  final_binary_extension = ".elf"
+  default_configs = [
+    "$dir_pw_build:extra_strict_warnings",
+    "$dir_pw_toolchain/arm_gcc:enable_float_printf",
+    "$dir_pw_build:optimize_debugging",
+  ]
+  toolchain_args = {
+    forward_variables_from(_toolchain_base.defaults, "*", _excluded_defaults)
+    app_common_BACKEND =
+        "$dir_pigweed_experimental/applications/app_common_impl:stm32"
+    pw_board_led_BACKEND = "$dir_pw_board_led_stm32f429i_disc1"
+    pw_spin_delay_BACKEND = "$dir_pw_spin_delay_stm32f429i_disc1"
+  }
+}
+
+pw_cortex_m_gcc_toolchain("stm32f429i_disc1_debug_tests") {
+  cpu = pw_toolchain_CORTEX_M_CPU.M4
+  fpu = pw_toolchain_CORTEX_M_FPU.FPV4_SP
+  final_binary_extension = ".elf"
+  default_configs = [
+    "$dir_pw_build:extra_strict_warnings",
+    "$dir_pw_toolchain/arm_gcc:enable_float_printf",
+    "$dir_pw_build:optimize_size",
+  ]
+  toolchain_args = {
+    forward_variables_from(_toolchain_base.defaults, "*", _excluded_defaults)
+
+    # Force tests to use basic log backend to avoid generating and loading its
+    # own tokenized database.
+    pw_log_BACKEND = dir_pw_log_basic
+  }
 }
