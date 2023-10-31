@@ -180,7 +180,8 @@ void SocketDataLink::DoOpen() {
   // Use SO_NOSIGPIPE to avoid getting a SIGPIPE signal when the remote peer
   // drops the connection. This is supported on macOS only.
   constexpr int value = 1;
-  if (setsockopt(socket, SOL_SOCKET, SO_NOSIGPIPE, &value, sizeof(int)) < 0) {
+  if (setsockopt(
+          connection_fd_, SOL_SOCKET, SO_NOSIGPIPE, &value, sizeof(int)) < 0) {
     PW_LOG_WARN("Failed to set SO_NOSIGPIPE: %s", std::strerror(errno));
   }
 #endif  // defined(__APPLE__)
