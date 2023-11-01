@@ -409,9 +409,7 @@ void SocketDataLink::DoWrite() {
                       tx_buffer_.size_bytes(),
                       send_flags);
   }
-  PW_LOG_DEBUG("Wrote %d/%d bytes",
-               static_cast<int>(bytes_sent),
-               static_cast<int>(tx_buffer_.size_bytes()));
+
   if (static_cast<size_t>(bytes_sent) == tx_buffer_.size_bytes()) {
     write_state_ = WriteState::kIdle;
     write_lock_.unlock();
