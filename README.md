@@ -2,7 +2,18 @@
 
 [TOC]
 
-This repository contains experimental pigweed modules.
+This repository contains a variety experiments to help inform various Pigweed
+policies, designs, and implementation behaviors.
+
+Code in this repository is not reviewed to the standard of
+[the main Pigweed repository](https://pigweed.googlesource.com/pigweed/pigweed),
+and generally speaking is untested and maintained on a best-effort basis. This
+is not a repository of "early access" Pigweed modules, but more so a sandbox for
+Pigweed contributors to collaborate on investigations. For more information, see
+the contribution guidelines for the
+[experimental repository and where to land code](https://pigweed.dev/docs/contributing.html#experimental-repository-and-where-to-land-code).
+
+**DO NOT DEPEND ON THIS REPOSITORY IN ANY PRODUCTION PROJECT!**
 
 ## Repository setup
 
