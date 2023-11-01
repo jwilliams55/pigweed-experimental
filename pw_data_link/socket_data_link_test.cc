@@ -44,13 +44,7 @@ TEST(DataLinkTest, CompileTest) {
 
   data_link.WaitAndConsumeEvents();
 
-  ASSERT_EQ(callback_tracker.call_count, 1u);
-  EXPECT_EQ(callback_tracker.last_event, DataLink::Event::kOpen);
-  ASSERT_NE(callback_tracker.last_event_status.status(), OkStatus());
-
-  // std::array<std::byte, 2> buffer{};
-  // EXPECT_EQ(data_link.Write(buffer), Status::Unknown());
-  // EXPECT_EQ(data_link.Read(buffer), Status::Unknown());
+  ASSERT_EQ(callback_tracker.call_count, 0u);
 }
 
 }  // namespace

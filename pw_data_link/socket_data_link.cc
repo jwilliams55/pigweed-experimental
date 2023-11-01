@@ -18,13 +18,16 @@
 #error Windows not supported yet!
 #else
 #include <arpa/inet.h>
+#include <fcntl.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <sys/epoll.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
 #endif  // defined(_WIN32) && _WIN32
 
+#include <chrono>
 #include <optional>
 
 #include "pw_assert/check.h"
@@ -37,9 +40,25 @@ namespace pw::data_link {
 namespace {
 
 const char* kLinkStateNameOpen = "Open";
-const char* kLinkStateNameOpenRequest = "kOpenRequest";
+const char* kLinkStateNameOpenRequest = "Open Request";
 const char* kLinkStateNameClosed = "Closed";
+const char* kLinkStateNameWaitingForOpen = "Waiting For Open";
 const char* kLinkStateNameUnknown = "Unknown";
+const auto kEpollTimeout = std::chrono::seconds(1);
+
+// Configures the file descriptor as non blocking. Returns true when successful.
+bool MakeSocketNonBlocking(int fd) {
+  int flags = fcntl(fd, F_GETFL, 0);
+  if (flags == -1) {
+    return false;
+  }
+  flags += O_NONBLOCK;
+  if (fcntl(fd, F_SETFL, flags) == -1) {
+    PW_LOG_ERROR("Failed to create a socket: %s", std::strerror(errno));
+    return false;
+  }
+  return true;
+}
 
 }  // namespace
 
@@ -52,15 +71,19 @@ SocketDataLink::SocketDataLink(int connection_fd,
                                EventHandlerCallback&& event_handler)
     : connection_fd_(connection_fd) {
   PW_DCHECK(connection_fd > 0);
-  std::lock_guard lock(lock_);
+  PW_CHECK(MakeSocketNonBlocking(connection_fd_));
+  PW_CHECK(ConfigureEpoll());
   event_handler_ = std::move(event_handler);
   set_link_state(LinkState::kOpen);
+  write_state_ = WriteState::kIdle;
+  read_state_ = ReadState::kIdle;
+  event_handler_(DataLink::Event::kOpen, StatusWithSize());
 }
 
 SocketDataLink::~SocketDataLink() {
   lock_.lock();
   if (link_state_ != LinkState::kClosed) {
-    DoClose();
+    DoClose(/*notify_closed=*/true);
     return;
   }
   lock_.unlock();
@@ -78,6 +101,9 @@ void SocketDataLink::set_link_state(LinkState new_state) {
     case LinkState::kClosed:
       link_name = kLinkStateNameClosed;
       break;
+    case LinkState::kWaitingForOpen:
+      link_name = kLinkStateNameWaitingForOpen;
+      break;
     default:
       link_name = kLinkStateNameUnknown;
   };
@@ -92,6 +118,9 @@ void SocketDataLink::set_link_state(LinkState new_state) {
       break;
     case LinkState::kClosed:
       new_link_name = kLinkStateNameClosed;
+      break;
+    case LinkState::kWaitingForOpen:
+      new_link_name = kLinkStateNameWaitingForOpen;
       break;
     default:
       new_link_name = kLinkStateNameUnknown;
@@ -111,37 +140,105 @@ void SocketDataLink::Open(EventHandlerCallback&& event_handler) {
 void SocketDataLink::WaitAndConsumeEvents() {
   // Manually lock and unlock, since some functions may perform unlocking before
   // calling the user's event callback, when locks cannot be held.
+
   lock_.lock();
   switch (link_state_) {
     case LinkState::kOpen:
       break;
+    case LinkState::kWaitingForOpen: {
+      // Copy the epoll file descriptor to reduce the critical section.
+      const int fd = epoll_fd_;
+      lock_.unlock();
+      epoll_event event;
+      const int count = epoll_wait(
+          fd, &event, 1, std::chrono::milliseconds(kEpollTimeout).count());
+      if (count == 0) {
+        return;
+      }
+      if (event.events & EPOLLERR || event.events & EPOLLHUP) {
+        lock_.lock();
+        // Check if link was closed on another thread.
+        if (link_state_ != LinkState::kClosed) {
+          DoClose(/*notify_closed=*/false);
+        } else {
+          lock_.unlock();
+        }
+        event_handler_(DataLink::Event::kOpen, StatusWithSize::Unknown());
+        return;
+      }
+      if (event.events == EPOLLOUT) {
+        {
+          std::lock_guard lock(lock_);
+          set_link_state(LinkState::kOpen);
+        }
+        {
+          std::lock_guard lock(write_lock_);
+          write_state_ = WriteState::kIdle;
+        }
+        {
+          std::lock_guard lock(read_lock_);
+          read_state_ = ReadState::kIdle;
+        }
+        event_handler_(DataLink::Event::kOpen, StatusWithSize());
+        return;
+      }
+      PW_LOG_ERROR("Unhandled event %d while waiting to open link",
+                   static_cast<int>(event.events));
+    }
+      return;
     case LinkState::kClosed:
-      break;
+      lock_.unlock();
+      return;
     case LinkState::kOpenRequest:
       DoOpen();
       return;
   }
-
-  // Read and Write procedures should be on their own thread, so they don't
-  // block each other. For now keep them in a single thread.
-  switch (write_state_) {
-    case WriteState::kIdle:
-      break;
-    case WriteState::kWaitingForWrite:
-      break;
-    case WriteState::kPending:
-      DoWrite();
-      lock_.lock();
-  }
-
-  switch (read_state_) {
-    case ReadState::kIdle:
-      break;
-    case ReadState::kReadRequested:
-      DoRead();
-      return;
-  }
+  // Copy the epoll file descriptor to reduce the critical section.
+  const int fd = epoll_fd_;
   lock_.unlock();
+
+  epoll_event event;
+  const int count = epoll_wait(
+      fd, &event, 1, std::chrono::milliseconds(kEpollTimeout).count());
+  if (count == 0) {
+    return;
+  }
+
+  if (event.events & EPOLLERR || event.events & EPOLLHUP) {
+    lock_.lock();
+    // Check if link was closed on another thread.
+    if (link_state_ != LinkState::kClosed) {
+      DoClose(/*notify_closed=*/true);
+    } else {
+      lock_.unlock();
+    }
+    return;
+  }
+
+  if (event.events & EPOLLIN) {
+    // Can read!
+    read_lock_.lock();
+    if (read_state_ == ReadState::kReadRequested) {
+      DoRead();
+    } else if (read_state_ == ReadState::kIdle) {
+      read_lock_.unlock();
+      event_handler_(DataLink::Event::kDataReceived, StatusWithSize());
+    } else {
+      read_lock_.unlock();
+    }
+  }
+  if (event.events & EPOLLOUT) {
+    // Can Write!
+    write_lock_.lock();
+    if (write_state_ == WriteState::kPending) {
+      DoWrite();
+    } else {
+      write_lock_.unlock();
+    }
+  }
+  if ((event.events & EPOLLIN) == 0 && (event.events & EPOLLOUT) == 0) {
+    PW_LOG_WARN("Unhandled event %d", static_cast<int>(event.events));
+  }
 }
 
 void SocketDataLink::DoOpen() {
@@ -152,76 +249,130 @@ void SocketDataLink::DoOpen() {
   addrinfo* res;
   if (getaddrinfo(host_, port_, &hints, &res) != 0) {
     PW_LOG_ERROR("Failed to configure connection address for socket");
-    set_link_state(LinkState::kClosed);
-    lock_.unlock();
-    event_handler_(DataLink::Event::kOpen, StatusWithSize::InvalidArgument());
+    HandleOpenFailure(/*info=*/nullptr);
     return;
   }
 
   addrinfo* rp;
   for (rp = res; rp != nullptr; rp = rp->ai_next) {
+    PW_LOG_DEBUG("Opening socket");
     connection_fd_ = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
     if (connection_fd_ != kInvalidFd) {
       break;
     }
   }
-
   if (connection_fd_ == kInvalidFd) {
-    PW_LOG_ERROR("Failed to create a socket: %s", std::strerror(errno));
-    set_link_state(LinkState::kClosed);
-    lock_.unlock();
-    freeaddrinfo(res);
-    event_handler_(DataLink::Event::kOpen, StatusWithSize::Unknown());
+    HandleOpenFailure(res);
     return;
   }
-
-// Set necessary options on a socket file descriptor.
-#if defined(__APPLE__)
-  // Use SO_NOSIGPIPE to avoid getting a SIGPIPE signal when the remote peer
-  // drops the connection. This is supported on macOS only.
-  constexpr int value = 1;
-  if (setsockopt(
-          connection_fd_, SOL_SOCKET, SO_NOSIGPIPE, &value, sizeof(int)) < 0) {
-    PW_LOG_WARN("Failed to set SO_NOSIGPIPE: %s", std::strerror(errno));
+  // Set necessary options on a socket file descriptor.
+  PW_LOG_DEBUG("Configuring socket");
+  if (!MakeSocketNonBlocking(connection_fd_)) {
+    HandleOpenFailure(res);
+    return;
   }
-#endif  // defined(__APPLE__)
-
+  PW_LOG_DEBUG("Connecting socket");
   if (connect(connection_fd_, rp->ai_addr, rp->ai_addrlen) == -1) {
-    close(connection_fd_);
-    connection_fd_ = kInvalidFd;
-    set_link_state(LinkState::kClosed);
-    lock_.unlock();
-    PW_LOG_ERROR(
-        "Failed to connect to %s:%s: %s", host_, port_, std::strerror(errno));
-    freeaddrinfo(res);
-    event_handler_(DataLink::Event::kOpen, StatusWithSize::Unknown());
+    if (errno != EINPROGRESS) {
+      HandleOpenFailure(res);
+      return;
+    }
+    set_link_state(LinkState::kWaitingForOpen);
+  } else {
+    set_link_state(LinkState::kOpen);
+  }
+
+  PW_LOG_DEBUG("Configuring Epoll");
+  if (!ConfigureEpoll()) {
+    HandleOpenFailure(res);
     return;
   }
-  set_link_state(LinkState::kOpen);
+  const bool open_completed = link_state_ == LinkState::kOpen;
   lock_.unlock();
   freeaddrinfo(res);
-  event_handler_(DataLink::Event::kOpen, StatusWithSize());
+  if (open_completed) {
+    {
+      std::lock_guard lock(write_lock_);
+      write_state_ = WriteState::kIdle;
+    }
+    {
+      std::lock_guard lock(read_lock_);
+      read_state_ = ReadState::kIdle;
+    }
+    event_handler_(DataLink::Event::kOpen, StatusWithSize());
+  }
+}
+
+void SocketDataLink::HandleOpenFailure(addrinfo* info) {
+  if (connection_fd_ != kInvalidFd) {
+    close(connection_fd_);
+    connection_fd_ = kInvalidFd;
+  }
+  if (epoll_fd_ != kInvalidFd) {
+    close(epoll_fd_);
+    epoll_fd_ = kInvalidFd;
+  }
+  set_link_state(LinkState::kClosed);
+  lock_.unlock();
+  PW_LOG_ERROR(
+      "Failed to connect to %s:%s: %s", host_, port_, std::strerror(errno));
+  if (info != nullptr) {
+    freeaddrinfo(info);
+  }
+  event_handler_(DataLink::Event::kOpen, StatusWithSize::Unknown());
+}
+
+bool SocketDataLink::ConfigureEpoll() {
+  epoll_fd_ = epoll_create1(0);
+  if (epoll_fd_ == kInvalidFd) {
+    return false;
+  }
+  epoll_event_.events = EPOLLOUT | EPOLLIN;
+  epoll_event_.data.fd = connection_fd_;
+  if (epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, connection_fd_, &epoll_event_) ==
+      -1) {
+    return false;
+  }
+  return true;
 }
 
 void SocketDataLink::Close() {
   lock_.lock();
   PW_DCHECK(link_state_ != LinkState::kClosed);
-  DoClose();
+  DoClose(/*notify_closed=*/true);
 }
 
-void SocketDataLink::DoClose() {
+void SocketDataLink::DoClose(bool notify_closed) {
   set_link_state(LinkState::kClosed);
-  if (connection_fd_ != kInvalidFd) {
-    close(connection_fd_);
-    connection_fd_ = kInvalidFd;
-  }
+  // Copy file descriptors and unlock to minimize the critical section.
+  const int connection_fd = connection_fd_;
+  connection_fd_ = kInvalidFd;
+  const int epoll_fd = epoll_fd_;
+  epoll_fd_ = kInvalidFd;
   lock_.unlock();
-  event_handler_(DataLink::Event::kClosed, StatusWithSize());
+  {
+    std::lock_guard lock(write_lock_);
+    write_state_ = WriteState::kClosed;
+  }
+  {
+    std::lock_guard lock(read_lock_);
+    read_state_ = ReadState::kClosed;
+  }
+
+  // Close file descriptors if valid.
+  if (connection_fd != kInvalidFd) {
+    close(connection_fd);
+  }
+  if (epoll_fd != kInvalidFd) {
+    close(epoll_fd);
+  }
+  if (notify_closed) {
+    event_handler_(DataLink::Event::kClosed, StatusWithSize());
+  }
 }
 
 std::optional<ByteSpan> SocketDataLink::GetWriteBuffer() {
-  std::lock_guard lock(lock_);
-  PW_CHECK(link_state_ == LinkState::kOpen);
+  std::lock_guard lock(write_lock_);
   if (write_state_ != WriteState::kIdle) {
     return std::nullopt;
   }
@@ -231,8 +382,7 @@ std::optional<ByteSpan> SocketDataLink::GetWriteBuffer() {
 
 Status SocketDataLink::Write(ByteSpan buffer) {
   PW_DCHECK(buffer.size() > 0);
-  std::lock_guard lock(lock_);
-  PW_DCHECK(link_state_ == LinkState::kOpen);
+  std::lock_guard lock(write_lock_);
   if (write_state_ != WriteState::kWaitingForWrite) {
     return pw::Status::FailedPrecondition();
   }
@@ -251,13 +401,20 @@ void SocketDataLink::DoWrite() {
   send_flags |= MSG_NOSIGNAL;
 #endif  // defined(__linux__)
 
-  ssize_t bytes_sent = send(connection_fd_,
-                            reinterpret_cast<const char*>(tx_buffer_.data()),
-                            tx_buffer_.size_bytes(),
-                            send_flags);
+  ssize_t bytes_sent;
+  {
+    std::lock_guard lock(lock_);
+    bytes_sent = send(connection_fd_,
+                      reinterpret_cast<const char*>(tx_buffer_.data()),
+                      tx_buffer_.size_bytes(),
+                      send_flags);
+  }
+  PW_LOG_DEBUG("Wrote %d/%d bytes",
+               static_cast<int>(bytes_sent),
+               static_cast<int>(tx_buffer_.size_bytes()));
   if (static_cast<size_t>(bytes_sent) == tx_buffer_.size_bytes()) {
     write_state_ = WriteState::kIdle;
-    lock_.unlock();
+    write_lock_.unlock();
     event_handler_(DataLink::Event::kDataSent,
                    StatusWithSize(num_bytes_to_send_));
     return;
@@ -266,25 +423,24 @@ void SocketDataLink::DoWrite() {
   if (bytes_sent < 0) {
     if (errno == EPIPE) {
       // An EPIPE indicates that the connection is closed.
-      lock_.unlock();
+      write_lock_.unlock();
       event_handler_(DataLink::Event::kDataSent, StatusWithSize::OutOfRange());
       Close();
       return;
     }
-    lock_.unlock();
+    write_lock_.unlock();
     event_handler_(DataLink::Event::kDataSent, StatusWithSize::Unknown());
     return;
   }
 
   // Partial send.
   tx_buffer_ = tx_buffer_.subspan(static_cast<size_t>(bytes_sent));
-  lock_.unlock();
+  write_lock_.unlock();
 }
 
 Status SocketDataLink::Read(ByteSpan buffer) {
   PW_DCHECK(buffer.size() > 0);
-  std::lock_guard lock(lock_);
-  PW_DCHECK(link_state_ == LinkState::kOpen);
+  std::lock_guard lock(read_lock_);
   if (read_state_ != ReadState::kIdle) {
     return Status::FailedPrecondition();
   }
@@ -294,14 +450,19 @@ Status SocketDataLink::Read(ByteSpan buffer) {
 }
 
 void SocketDataLink::DoRead() {
-  ssize_t bytes_rcvd = recv(connection_fd_,
-                            reinterpret_cast<char*>(rx_buffer_.data()),
-                            rx_buffer_.size_bytes(),
-                            0);
+  ssize_t bytes_rcvd;
+  {
+    std::lock_guard lock(lock_);
+    bytes_rcvd = recv(connection_fd_,
+                      reinterpret_cast<char*>(rx_buffer_.data()),
+                      rx_buffer_.size_bytes(),
+                      0);
+  }
 
   if (bytes_rcvd == 0) {
     // Remote peer has closed the connection.
-    lock_.unlock();
+    read_state_ = ReadState::kClosed;
+    read_lock_.unlock();
     event_handler_(DataLink::Event::kDataRead, StatusWithSize::Internal());
     Close();
     return;
@@ -311,16 +472,19 @@ void SocketDataLink::DoRead() {
       // This should only occur if SO_RCVTIMEO was configured to be nonzero, or
       // if the socket was opened with the O_NONBLOCK flag to prevent any
       // blocking when performing reads or writes.
-      lock_.unlock();
+      read_state_ = ReadState::kIdle;
+      read_lock_.unlock();
       event_handler_(DataLink::Event::kDataRead,
                      StatusWithSize::ResourceExhausted());
       return;
     }
-    lock_.unlock();
+    read_state_ = ReadState::kIdle;
+    read_lock_.unlock();
     event_handler_(DataLink::Event::kDataRead, StatusWithSize::Unknown());
     return;
   }
-  lock_.unlock();
+  read_state_ = ReadState::kIdle;
+  read_lock_.unlock();
   event_handler_(DataLink::Event::kDataRead, StatusWithSize(bytes_rcvd));
 }
 

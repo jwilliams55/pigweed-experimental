@@ -79,10 +79,12 @@ class Writer : public pw::thread::ThreadCore {
 
   void Run() override {
     while (link_signals_.run) {
+      PW_LOG_DEBUG("Waiting to write");
       link_signals_.ready_to_write.acquire();
       if (!link_signals_.run) {
         break;
       }
+      PW_LOG_DEBUG("Waiting for write buffer");
       std::optional<pw::ByteSpan> buffer = link_.GetWriteBuffer();
       if (!buffer.has_value()) {
         continue;
@@ -91,6 +93,7 @@ class Writer : public pw::thread::ThreadCore {
         buffer.value()[i] = std::byte('C');
       }
       buffer.value()[buffer->size() - 1] = std::byte(0);
+      PW_LOG_DEBUG("Writing");
       const pw::Status status = link_.Write(*buffer);
       if (!status.ok()) {
         PW_LOG_ERROR("Write failed. Error: %s", status.str());
@@ -154,6 +157,8 @@ int main(int argc, char** argv) {
           PW_LOG_ERROR("Link failed to open: %s",
                        link_signals.last_status.status().str());
           link_signals.run = false;
+        } else {
+          PW_LOG_DEBUG("Link open");
         }
         link_signals.ready_to_write.release();
         link_signals.ready_to_read.release();
@@ -185,7 +190,7 @@ int main(int argc, char** argv) {
     const pw::Result<int> connection_fd = server.Accept();
     PW_CHECK_OK(connection_fd.status());
 
-    PW_LOG_INFO("Creating Link");
+    PW_LOG_INFO("New Connection! Creating Link");
     link = std::make_unique<pw::data_link::SocketDataLink>(*connection_fd,
                                                            event_callback);
   } else {
@@ -194,7 +199,7 @@ int main(int argc, char** argv) {
     link->Open(event_callback);
   }
 
-  pw::data_link::SocketDataLinkThread<kMaxLinks> links_thread{};
+  pw::data_link::SocketDataLinkThreadWithContainer<kMaxLinks> links_thread{};
   PW_CHECK_OK(links_thread.RegisterLink(*link));
 
   PW_LOG_INFO("Starting links thread");
@@ -210,9 +215,11 @@ int main(int argc, char** argv) {
     pw::thread::DetachedThread(pw::thread::stl::Options(), writer_thread);
   }
 
-  PW_LOG_INFO("Running for some time");
-  for (int i = 0; i < 30 && link_signals.run; ++i) {
-    sleep(1);
+  if (link_signals.run) {
+    PW_LOG_INFO("Running for some time");
+    for (int i = 0; i < 30 && link_signals.run; ++i) {
+      sleep(1);
+    }
   }
 
   PW_LOG_INFO("Closing link");

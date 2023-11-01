@@ -10,13 +10,14 @@
 #include "pw_sync/mutex.h"
 #include "pw_sync/thread_notification.h"
 #include "pw_thread/thread_core.h"
+#include "pw_thread/yield.h"
 
 namespace pw::data_link {
 
-template <size_t kMaxLinks>
 class SocketDataLinkThread : public pw::thread::ThreadCore {
  public:
-  SocketDataLinkThread() : active_links_{} {}
+  explicit SocketDataLinkThread(span<SocketDataLink*> active_links)
+      : active_links_(active_links) {}
 
   pw::Status RegisterLink(SocketDataLink& link) PW_LOCKS_EXCLUDED(lock_) {
     std::lock_guard lock(lock_);
@@ -47,6 +48,7 @@ class SocketDataLinkThread : public pw::thread::ThreadCore {
           link->WaitAndConsumeEvents();
         }
       }
+      this_thread::yield();
     }
   }
 
@@ -54,8 +56,18 @@ class SocketDataLinkThread : public pw::thread::ThreadCore {
 
  private:
   pw::sync::Mutex lock_;
-  std::array<SocketDataLink*, kMaxLinks> active_links_ PW_GUARDED_BY(lock_);
+  span<SocketDataLink*> active_links_ PW_GUARDED_BY(lock_);
   bool run_ = false;
+};
+
+template <size_t max_links>
+class SocketDataLinkThreadWithContainer : public SocketDataLinkThread {
+ public:
+  SocketDataLinkThreadWithContainer()
+      : SocketDataLinkThread(active_links_), active_links_{} {}
+
+ private:
+  std::array<SocketDataLink*, max_links> active_links_;
 };
 
 }  // namespace pw::data_link

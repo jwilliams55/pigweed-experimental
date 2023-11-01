@@ -13,6 +13,9 @@
 // the License.
 #pragma once
 
+#include <netdb.h>
+#include <sys/epoll.h>
+
 #include <array>
 #include <cstdint>
 #include <optional>
@@ -54,37 +57,55 @@ class SocketDataLink : public DataLink {
   enum class LinkState {
     kOpen,
     kOpenRequest,
+    kWaitingForOpen,
     kClosed,
   } link_state_ PW_GUARDED_BY(lock_) = LinkState::kClosed;
 
   enum class ReadState {
     kIdle,
     kReadRequested,
-  } read_state_ PW_GUARDED_BY(lock_) = ReadState::kIdle;
+    kClosed,
+  } read_state_ PW_GUARDED_BY(read_lock_) = ReadState::kClosed;
 
   enum class WriteState {
     kIdle,
     kWaitingForWrite,  // Buffer was provided.
     kPending,          // Write operation will occur.
-  } write_state_ PW_GUARDED_BY(lock_) = WriteState::kIdle;
+    kClosed,
+  } write_state_ PW_GUARDED_BY(write_lock_) = WriteState::kClosed;
 
   void set_link_state(LinkState new_state) PW_EXCLUSIVE_LOCKS_REQUIRED(lock_);
 
-  void DoOpen() PW_UNLOCK_FUNCTION(lock_);
-  void DoClose() PW_UNLOCK_FUNCTION(lock_);
-  void DoRead() PW_UNLOCK_FUNCTION(lock_);
-  void DoWrite() PW_UNLOCK_FUNCTION(lock_);
+  void HandleOpenFailure(addrinfo* info) PW_UNLOCK_FUNCTION(lock_);
+  bool ConfigureEpoll() PW_EXCLUSIVE_LOCKS_REQUIRED(lock_);
+
+  void DoOpen() PW_UNLOCK_FUNCTION(lock_)
+      PW_LOCKS_EXCLUDED(read_lock_, write_lock_);
+  void DoClose(bool notify_closed) PW_UNLOCK_FUNCTION(lock_)
+      PW_LOCKS_EXCLUDED(read_lock_, write_lock_);
+  void DoRead() PW_LOCKS_EXCLUDED(lock_) PW_UNLOCK_FUNCTION(read_lock_);
+  void DoWrite() PW_LOCKS_EXCLUDED(lock_) PW_UNLOCK_FUNCTION(write_lock_);
 
   const char* host_;
   char port_[6];
   int connection_fd_ PW_GUARDED_BY(lock_) = kInvalidFd;
+  int epoll_fd_ PW_GUARDED_BY(lock_) = kInvalidFd;
+  epoll_event epoll_event_;
 
-  std::array<std::byte, kMtu> tx_buffer_storage_{};
-  pw::ByteSpan tx_buffer_{};
+  std::array<std::byte, kMtu> tx_buffer_storage_ PW_GUARDED_BY(write_lock_);
+  pw::ByteSpan tx_buffer_ PW_GUARDED_BY(write_lock_);
   size_t num_bytes_to_send_ = 0;
-  pw::ByteSpan rx_buffer_{};
+  pw::ByteSpan rx_buffer_ PW_GUARDED_BY(read_lock_);
   EventHandlerCallback event_handler_;
-  pw::sync::Mutex lock_;
+
+  // These internal locks must not be acquired when the event handler is called.
+  // The main lock cannot be held when acquiring either the read or write locks.
+  // However, the main lock can be acquired when one of the read or write locks
+  // is held.
+  // The read and write locks are held independently and should not overlap.
+  pw::sync::Mutex lock_;  // Main lock.
+  pw::sync::Mutex read_lock_;
+  pw::sync::Mutex write_lock_;
 };
 
 }  // namespace pw::data_link
