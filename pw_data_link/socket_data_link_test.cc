@@ -27,16 +27,16 @@ namespace {
 
 struct EventCallbackTracker {
   size_t call_count = 0;
-  DataLink::Event last_event;
-  pw::StatusWithSize last_event_status;
+  DataLink::Event last_event = DataLink::Event::kClosed;
+  StatusWithSize last_event_status = StatusWithSize();
 };
 
 TEST(DataLinkTest, CompileTest) {
   SocketDataLink data_link{"localhost", 123};
 
-  EventCallbackTracker callback_tracker;
+  EventCallbackTracker callback_tracker{};
   data_link.Open(
-      [&callback_tracker](DataLink::Event event, pw::StatusWithSize status) {
+      [&callback_tracker](DataLink::Event event, StatusWithSize status) {
         callback_tracker.last_event = event;
         callback_tracker.last_event_status = status;
         ++callback_tracker.call_count;
@@ -45,6 +45,7 @@ TEST(DataLinkTest, CompileTest) {
   data_link.WaitAndConsumeEvents();
 
   ASSERT_EQ(callback_tracker.call_count, 0u);
+  data_link.Close();
 }
 
 }  // namespace
