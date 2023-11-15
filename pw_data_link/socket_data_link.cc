@@ -32,6 +32,7 @@
 
 #include "pw_assert/check.h"
 #include "pw_bytes/span.h"
+#include "pw_data_link/simple_allocator.h"
 #include "pw_log/log.h"
 #include "pw_status/status.h"
 #include "pw_status/status_with_size.h"
@@ -68,8 +69,10 @@ SocketDataLink::SocketDataLink(const char* host, uint16_t port) : host_(host) {
 }
 
 SocketDataLink::SocketDataLink(int connection_fd,
-                               EventHandlerCallback&& event_handler)
-    : connection_fd_(connection_fd) {
+                               EventHandlerCallback&& event_handler,
+                               allocator::Allocator& write_buffer_allocator)
+    : connection_fd_(connection_fd),
+      write_buffer_allocator_(&write_buffer_allocator) {
   PW_DCHECK(connection_fd > 0);
   PW_CHECK(MakeSocketNonBlocking(connection_fd_));
   PW_CHECK(ConfigureEpoll());
@@ -129,10 +132,12 @@ void SocketDataLink::set_link_state(LinkState new_state) {
   link_state_ = new_state;
 }
 
-void SocketDataLink::Open(EventHandlerCallback&& event_handler) {
+void SocketDataLink::Open(EventHandlerCallback&& event_handler,
+                          allocator::Allocator& write_buffer_allocator) {
   std::lock_guard lock(lock_);
   PW_CHECK(link_state_ == LinkState::kClosed);
 
+  write_buffer_allocator_ = &write_buffer_allocator;
   event_handler_ = std::move(event_handler);
   set_link_state(LinkState::kOpenRequest);
 }
@@ -371,24 +376,39 @@ void SocketDataLink::DoClose(bool notify_closed) {
   }
 }
 
-std::optional<ByteSpan> SocketDataLink::GetWriteBuffer() {
-  std::lock_guard lock(write_lock_);
-  if (write_state_ != WriteState::kIdle) {
+std::optional<multibuf::MultiBuf> SocketDataLink::GetWriteBuffer(size_t size) {
+  if (size == 0) {
+    return multibuf::MultiBuf();
+  }
+  {
+    std::lock_guard lock(write_lock_);
+    if (write_state_ != WriteState::kIdle) {
+      return std::nullopt;
+    }
+  }
+  multibuf::MultiBuf buffer;
+  std::optional<multibuf::OwnedChunk> chunk =
+      multibuf::HeaderChunkRegionTracker::AllocateRegionAsChunk(
+          write_buffer_allocator_, size);
+  if (!chunk) {
     return std::nullopt;
   }
-  write_state_ = WriteState::kWaitingForWrite;
-  return tx_buffer_storage_;
+  buffer.PushFrontChunk(std::move(*chunk));
+  return buffer;
 }
 
-Status SocketDataLink::Write(ByteSpan buffer) {
-  PW_DCHECK(buffer.size() > 0);
+Status SocketDataLink::Write(multibuf::MultiBuf&& buffer) {
+  if (buffer.size() == 0) {
+    return Status::InvalidArgument();
+  }
   std::lock_guard lock(write_lock_);
-  if (write_state_ != WriteState::kWaitingForWrite) {
-    return pw::Status::FailedPrecondition();
+  if (write_state_ != WriteState::kIdle) {
+    return Status::FailedPrecondition();
   }
 
-  tx_buffer_ = buffer;
-  num_bytes_to_send_ = tx_buffer_.size_bytes();
+  tx_multibuf_ = std::move(buffer);
+  num_bytes_to_send_ = tx_multibuf_.size();
+  num_bytes_sent_ = 0;
   write_state_ = WriteState::kPending;
   return OkStatus();
 }
@@ -401,38 +421,53 @@ void SocketDataLink::DoWrite() {
   send_flags |= MSG_NOSIGNAL;
 #endif  // defined(__linux__)
 
+  auto [chunk_iter, chunk] =
+      tx_multibuf_.TakeChunk(tx_multibuf_.Chunks().begin());
   ssize_t bytes_sent;
   {
     std::lock_guard lock(lock_);
+    // TODO: Send one chunk at a time.
     bytes_sent = send(connection_fd_,
-                      reinterpret_cast<const char*>(tx_buffer_.data()),
-                      tx_buffer_.size_bytes(),
+                      reinterpret_cast<const char*>(chunk.data()),
+                      chunk.size(),
                       send_flags);
   }
 
-  if (static_cast<size_t>(bytes_sent) == tx_buffer_.size_bytes()) {
+  // Check for errors.
+  if (bytes_sent < 0) {
+    if (errno == EPIPE) {
+      // An EPIPE indicates that the connection is closed.
+      tx_multibuf_.Release();
+      write_lock_.unlock();
+      event_handler_(DataLink::Event::kDataSent, StatusWithSize::OutOfRange());
+      Close();
+      return;
+    }
+    tx_multibuf_.Release();
+    write_lock_.unlock();
+    event_handler_(DataLink::Event::kDataSent, StatusWithSize::Unknown());
+    return;
+  }
+  num_bytes_sent_ += bytes_sent;
+
+  // Resize chunk if it was a partial write.
+  if (static_cast<size_t>(bytes_sent) < chunk.size()) {
+    chunk->DiscardFront(static_cast<size_t>(bytes_sent));
+    tx_multibuf_.PushFrontChunk(std::move(chunk));
+    write_lock_.unlock();
+    return;
+  }
+
+  // Check if we are done with the MultiBuf.
+  if (num_bytes_sent_ >= num_bytes_to_send_) {
     write_state_ = WriteState::kIdle;
+    tx_multibuf_.Release();
     write_lock_.unlock();
     event_handler_(DataLink::Event::kDataSent,
                    StatusWithSize(num_bytes_to_send_));
     return;
   }
 
-  if (bytes_sent < 0) {
-    if (errno == EPIPE) {
-      // An EPIPE indicates that the connection is closed.
-      write_lock_.unlock();
-      event_handler_(DataLink::Event::kDataSent, StatusWithSize::OutOfRange());
-      Close();
-      return;
-    }
-    write_lock_.unlock();
-    event_handler_(DataLink::Event::kDataSent, StatusWithSize::Unknown());
-    return;
-  }
-
-  // Partial send.
-  tx_buffer_ = tx_buffer_.subspan(static_cast<size_t>(bytes_sent));
   write_lock_.unlock();
 }
 

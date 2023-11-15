@@ -9,6 +9,7 @@
 #include <memory>
 #include <optional>
 #include <thread>
+#include <utility>
 
 #include "pw_log/levels.h"
 #define PW_LOG_LEVEL PW_LOG_LEVEL_INFO
@@ -16,6 +17,7 @@
 #include "pw_assert/check.h"
 #include "pw_data_link/data_link.h"
 #include "pw_data_link/server_socket.h"
+#include "pw_data_link/simple_allocator.h"
 #include "pw_data_link/socket_data_link.h"
 #include "pw_data_link/socket_data_link_thread.h"
 #include "pw_log/log.h"
@@ -31,6 +33,10 @@ namespace {
 const char* kLocalHost = "localhost";
 constexpr int kDefaultPort = 33001;
 
+constexpr size_t kReadBufferSize = 1024;
+constexpr size_t kWriteBufferSize = 1024;
+constexpr size_t kAllocatorSize = 2 * kWriteBufferSize;
+
 struct LinkSignals {
   std::atomic<bool> run = true;
   pw::sync::ThreadNotification ready_to_read;
@@ -44,11 +50,12 @@ struct LinkSignals {
 
 class LinkThread : public pw::thread::ThreadCore {
  public:
-  LinkThread(pw::data_link::SocketDataLink& link, LinkSignals& link_signals)
+  LinkThread(std::shared_ptr<pw::data_link::SocketDataLink> link,
+             std::shared_ptr<LinkSignals> link_signals)
       : link_(link), link_signals_(link_signals), bytes_transferred_(0) {}
 
   void Run() override {
-    while (link_signals_.run) {
+    while (link_signals_->run) {
       Step();
     }
     end_time_ = std::chrono::high_resolution_clock::now();
@@ -63,16 +70,16 @@ class LinkThread : public pw::thread::ThreadCore {
   }
 
   void Stop() {
-    link_signals_.run = false;
-    link_signals_.ready_to_write.release();
-    link_signals_.ready_to_read.release();
+    link_signals_->run = false;
+    link_signals_->ready_to_write.release();
+    link_signals_->ready_to_read.release();
   }
 
  protected:
   virtual void Step() = 0;
 
-  pw::data_link::SocketDataLink& link_;
-  LinkSignals& link_signals_;
+  std::shared_ptr<pw::data_link::SocketDataLink> link_;
+  std::shared_ptr<LinkSignals> link_signals_;
   size_t bytes_transferred_ = 0;
   bool start_time_set_ = false;
   std::chrono::steady_clock::time_point start_time_;
@@ -81,17 +88,18 @@ class LinkThread : public pw::thread::ThreadCore {
 
 class Reader : public LinkThread {
  public:
-  Reader(pw::data_link::SocketDataLink& link, LinkSignals& link_signals)
-      : LinkThread(link, link_signals) {}
+  Reader(std::shared_ptr<pw::data_link::SocketDataLink> link,
+         std::shared_ptr<LinkSignals> link_signals)
+      : LinkThread(link, link_signals), buffer_() {}
 
   void Step() override {
     PW_LOG_DEBUG("Waiting to read");
-    link_signals_.ready_to_read.acquire();
-    if (!link_signals_.run) {
+    link_signals_->ready_to_read.acquire();
+    if (!link_signals_->run) {
       return;
     }
     PW_LOG_DEBUG("Reading");
-    if (const pw::Status status = link_.Read(buffer_); !status.ok()) {
+    if (const pw::Status status = link_->Read(buffer_); !status.ok()) {
       PW_LOG_ERROR("Failed to read. Error: %s", status.str());
       return;
     }
@@ -100,34 +108,36 @@ class Reader : public LinkThread {
       start_time_ = std::chrono::high_resolution_clock::now();
     }
     PW_LOG_DEBUG("Waiting for read to be done");
-    link_signals_.data_read.acquire();
-    const pw::StatusWithSize status = link_signals_.last_status;
+    link_signals_->data_read.acquire();
+    const pw::StatusWithSize status = link_signals_->last_status;
     PW_LOG_DEBUG("Read returned %s (%d bytes)",
                  status.status().str(),
                  static_cast<int>(status.size()));
     if (status.ok()) {
       bytes_transferred_ += status.size();
-      PW_LOG_DEBUG("%s", reinterpret_cast<char*>(buffer_.data()));
+      // PW_LOG_DEBUG("%s", reinterpret_cast<char*>(buffer_.data()));
     }
   }
 
  private:
-  std::array<std::byte, 1024> buffer_;
+  std::array<std::byte, kReadBufferSize> buffer_{};
 };
 
 class Writer : public LinkThread {
  public:
-  Writer(pw::data_link::SocketDataLink& link, LinkSignals& link_signals)
+  Writer(std::shared_ptr<pw::data_link::SocketDataLink> link,
+         std::shared_ptr<LinkSignals> link_signals)
       : LinkThread(link, link_signals) {}
 
   void Step() override {
     PW_LOG_DEBUG("Waiting to write");
-    link_signals_.ready_to_write.acquire();
-    if (!link_signals_.run) {
+    link_signals_->ready_to_write.acquire();
+    if (!link_signals_->run) {
       return;
     }
     PW_LOG_DEBUG("Waiting for write buffer");
-    std::optional<pw::ByteSpan> buffer = link_.GetWriteBuffer();
+    std::optional<pw::multibuf::MultiBuf> buffer =
+        link_->GetWriteBuffer(kWriteBufferSize);
     if (!buffer.has_value()) {
       return;
     }
@@ -135,14 +145,14 @@ class Writer : public LinkThread {
       start_time_set_ = true;
       start_time_ = std::chrono::high_resolution_clock::now();
     }
-    for (size_t i = 0; i < buffer->size(); ++i) {
-      buffer.value()[i] = std::byte('C');
+    for (auto& chunk_byte : *buffer) {
+      chunk_byte = std::byte('C');
     }
-    buffer.value()[buffer->size() - 1] = std::byte(0);
     PW_LOG_DEBUG("Writing");
-    const pw::Status status = link_.Write(*buffer);
+    const size_t bytes_written = buffer->size();
+    const pw::Status status = link_->Write(std::move(*buffer));
     if (status.ok()) {
-      bytes_transferred_ += buffer->size();
+      bytes_transferred_ += bytes_written;
     } else {
       PW_LOG_ERROR("Write failed. Error: %s", status.str());
     }
@@ -190,39 +200,41 @@ int main(int argc, char** argv) {
 
   PW_LOG_INFO("Started");
 
-  LinkSignals link_signals{};
+  std::shared_ptr<LinkSignals> link_signals = std::make_shared<LinkSignals>();
   auto event_callback = [&link_signals](pw::data_link::DataLink::Event event,
                                         pw::StatusWithSize status) {
-    link_signals.last_status = status;
+    link_signals->last_status = status;
     switch (event) {
       case pw::data_link::DataLink::Event::kOpen: {
         if (!status.ok()) {
           PW_LOG_ERROR("Link failed to open: %s", status.status().str());
-          link_signals.run = false;
+          link_signals->run = false;
         } else {
           PW_LOG_DEBUG("Link open");
         }
-        link_signals.ready_to_write.release();
-        link_signals.ready_to_read.release();
+        link_signals->ready_to_write.release();
+        link_signals->ready_to_read.release();
       } break;
       case pw::data_link::DataLink::Event::kClosed:
-        link_signals.run = false;
-        link_signals.ready_to_read.release();
-        link_signals.ready_to_write.release();
+        link_signals->run = false;
+        link_signals->ready_to_read.release();
+        link_signals->ready_to_write.release();
         break;
       case pw::data_link::DataLink::Event::kDataReceived:
-        link_signals.ready_to_read.release();
+        link_signals->ready_to_read.release();
         break;
       case pw::data_link::DataLink::Event::kDataRead:
-        link_signals.data_read.release();
+        link_signals->data_read.release();
         break;
       case pw::data_link::DataLink::Event::kDataSent:
-        link_signals.ready_to_write.release();
+        link_signals->ready_to_write.release();
         break;
     }
   };
 
-  std::unique_ptr<pw::data_link::SocketDataLink> link;
+  std::shared_ptr<pw::data_link::SocketDataLink> link;
+  pw::multibuf::TrackingAllocatorWithMemory<kAllocatorSize>
+      link_buffer_allocator{};
   if (is_server) {
     PW_LOG_INFO("Serving on port %d", static_cast<int>(port));
     pw::data_link::ServerSocket server{kMaxLinks};
@@ -233,12 +245,12 @@ int main(int argc, char** argv) {
     PW_CHECK_OK(connection_fd.status());
 
     PW_LOG_INFO("New Connection! Creating Link");
-    link = std::make_unique<pw::data_link::SocketDataLink>(*connection_fd,
-                                                           event_callback);
+    link = std::make_shared<pw::data_link::SocketDataLink>(
+        *connection_fd, std::move(event_callback), link_buffer_allocator);
   } else {
     PW_LOG_INFO("Openning Link");
-    link = std::make_unique<pw::data_link::SocketDataLink>(kLocalHost, port);
-    link->Open(event_callback);
+    link = std::make_shared<pw::data_link::SocketDataLink>(kLocalHost, port);
+    link->Open(std::move(event_callback), link_buffer_allocator);
   }
 
   pw::data_link::SocketDataLinkThreadWithContainer<kMaxLinks> links_thread{};
@@ -247,24 +259,24 @@ int main(int argc, char** argv) {
   PW_LOG_INFO("Starting links thread");
   pw::thread::DetachedThread(pw::thread::stl::Options(), links_thread);
 
-  LinkThread* link_thread = nullptr;
+  std::shared_ptr<LinkThread> link_thread;
   if (is_reader) {
     PW_LOG_INFO("Starting reader thread");
-    Reader reader_thread{*link, link_signals};
-    link_thread = &reader_thread;
-    pw::thread::DetachedThread(pw::thread::stl::Options(), reader_thread);
+    auto reader_thread = std::make_shared<Reader>(link, link_signals);
+    link_thread = reader_thread;
+    pw::thread::DetachedThread(pw::thread::stl::Options(), *reader_thread);
   } else {
     PW_LOG_INFO("Starting writer thread");
-    Writer writer_thread{*link, link_signals};
-    link_thread = &writer_thread;
-    pw::thread::DetachedThread(pw::thread::stl::Options(), writer_thread);
+    auto writer_thread = std::make_shared<Writer>(link, link_signals);
+    link_thread = writer_thread;
+    pw::thread::DetachedThread(pw::thread::stl::Options(), *writer_thread);
   }
 
-  if (link_signals.run) {
+  if (link_signals->run) {
     PW_LOG_INFO("Running for %lld seconds",
                 std::chrono::seconds(test_time).count());
     for (int i = 0;
-         link_signals.run && i < std::chrono::seconds(test_time).count();
+         link_signals->run && i < std::chrono::seconds(test_time).count();
          ++i) {
       sleep(1);
     }

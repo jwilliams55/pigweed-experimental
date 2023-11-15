@@ -19,6 +19,7 @@
 
 #include "gtest/gtest.h"
 #include "pw_bytes/span.h"
+#include "pw_data_link/simple_allocator.h"
 #include "pw_status/status.h"
 #include "pw_status/status_with_size.h"
 
@@ -33,14 +34,15 @@ struct EventCallbackTracker {
 
 TEST(DataLinkTest, CompileTest) {
   SocketDataLink data_link{"localhost", 123};
-
+  multibuf::TrackingAllocatorWithMemory<100> write_buffer_allocator;
   EventCallbackTracker callback_tracker{};
   data_link.Open(
       [&callback_tracker](DataLink::Event event, StatusWithSize status) {
         callback_tracker.last_event = event;
         callback_tracker.last_event_status = status;
         ++callback_tracker.call_count;
-      });
+      },
+      write_buffer_allocator);
 
   data_link.WaitAndConsumeEvents();
 

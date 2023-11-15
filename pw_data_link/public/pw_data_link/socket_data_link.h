@@ -20,8 +20,10 @@
 #include <cstdint>
 #include <optional>
 
+#include "pw_allocator/allocator.h"
 #include "pw_bytes/span.h"
 #include "pw_data_link/data_link.h"
+#include "pw_multibuf/multibuf.h"
 #include "pw_status/status.h"
 #include "pw_string/to_string.h"
 #include "pw_sync/lock_annotations.h"
@@ -32,22 +34,22 @@ namespace pw::data_link {
 class SocketDataLink : public DataLink {
  public:
   SocketDataLink(const char* host, uint16_t port);
-  SocketDataLink(int connection_fd, EventHandlerCallback&& event_handler);
+  SocketDataLink(int connection_fd,
+                 EventHandlerCallback&& event_handler,
+                 allocator::Allocator& write_buffer_allocator);
 
   ~SocketDataLink() override PW_LOCKS_EXCLUDED(lock_);
-
-  constexpr size_t mtu() { return kMtu; }
-  constexpr size_t max_payload_size() { return kMtu; }
 
   // Waits for link state changes or events.
   void WaitAndConsumeEvents() PW_LOCKS_EXCLUDED(lock_);
 
-  void Open(EventHandlerCallback&& event_handler) override
+  void Open(EventHandlerCallback&& event_handler,
+            allocator::Allocator& write_buffer_allocator) override
       PW_LOCKS_EXCLUDED(lock_);
   void Close() override PW_LOCKS_EXCLUDED(lock_);
 
-  std::optional<ByteSpan> GetWriteBuffer() override;
-  Status Write(ByteSpan buffer) override;
+  std::optional<multibuf::MultiBuf> GetWriteBuffer(size_t size) override;
+  Status Write(multibuf::MultiBuf&& buffer) override;
   Status Read(ByteSpan buffer) override;
 
  private:
@@ -69,8 +71,7 @@ class SocketDataLink : public DataLink {
 
   enum class WriteState {
     kIdle,
-    kWaitingForWrite,  // Buffer was provided.
-    kPending,          // Write operation will occur.
+    kPending,  // Write operation will occur.
     kClosed,
   } write_state_ PW_GUARDED_BY(write_lock_) = WriteState::kClosed;
 
@@ -92,10 +93,11 @@ class SocketDataLink : public DataLink {
   int epoll_fd_ PW_GUARDED_BY(lock_) = kInvalidFd;
   epoll_event epoll_event_;
 
-  std::array<std::byte, kMtu> tx_buffer_storage_ PW_GUARDED_BY(write_lock_);
-  pw::ByteSpan tx_buffer_ PW_GUARDED_BY(write_lock_);
+  allocator::Allocator* write_buffer_allocator_;
+  multibuf::MultiBuf tx_multibuf_ PW_GUARDED_BY(write_lock_);
   size_t num_bytes_to_send_ = 0;
-  pw::ByteSpan rx_buffer_ PW_GUARDED_BY(read_lock_);
+  size_t num_bytes_sent_ = 0;
+  ByteSpan rx_buffer_ PW_GUARDED_BY(read_lock_);
   EventHandlerCallback event_handler_;
 
   // These internal locks must not be acquired when the event handler is called.
@@ -103,9 +105,9 @@ class SocketDataLink : public DataLink {
   // However, the main lock can be acquired when one of the read or write locks
   // is held.
   // The read and write locks are held independently and should not overlap.
-  pw::sync::Mutex lock_;  // Main lock.
-  pw::sync::Mutex read_lock_;
-  pw::sync::Mutex write_lock_;
+  sync::Mutex lock_;  // Main lock.
+  sync::Mutex read_lock_;
+  sync::Mutex write_lock_;
 };
 
 }  // namespace pw::data_link

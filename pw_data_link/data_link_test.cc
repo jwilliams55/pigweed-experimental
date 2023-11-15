@@ -15,9 +15,12 @@
 #include "pw_data_link/data_link.h"
 
 #include <optional>
+#include <utility>
 
 #include "gtest/gtest.h"
+#include "pw_allocator/allocator.h"
 #include "pw_bytes/span.h"
+#include "pw_multibuf/multibuf.h"
 #include "pw_status/status.h"
 
 namespace pw::data_link {
@@ -28,17 +31,22 @@ class MockedDataLink : public DataLink {
   ~MockedDataLink() {}
   constexpr size_t mtu() { return 255; }
   constexpr size_t max_payload_size() { return 255; }
-  void Open(EventHandlerCallback&& /*event_handler*/) override {}
+  void Open(EventHandlerCallback&& /*event_handler*/,
+            allocator::Allocator& /*write_buffer_allocator*/) override {}
   void Close() override {}
-  std::optional<ByteSpan> GetWriteBuffer() override { return std::nullopt; }
-  Status Write(ByteSpan /*buffer*/) override { return Status::Unimplemented(); }
+  std::optional<multibuf::MultiBuf> GetWriteBuffer(size_t /*size*/) override {
+    return std::nullopt;
+  }
+  Status Write(multibuf::MultiBuf&& /*buffer*/) override {
+    return Status::Unimplemented();
+  }
   Status Read(ByteSpan /*buffer*/) override { return Status::Unimplemented(); }
 };
 
 TEST(DataLinkTest, CompileTest) {
   MockedDataLink data_link{};
-  ByteSpan buffer;
-  EXPECT_EQ(data_link.Write(buffer), Status::Unimplemented());
+  multibuf::MultiBuf buffer;
+  EXPECT_EQ(data_link.Write(std::move(buffer)), Status::Unimplemented());
 }
 
 }  // namespace

@@ -24,8 +24,10 @@ pw_source_set("data_link") {
   public_configs = [ ":default_config" ]
   public = [ "public/pw_data_link/data_link.h" ]
   public_deps = [
+    "$dir_pw_allocator",
     "$dir_pw_bytes",
     "$dir_pw_function",
+    "$dir_pw_multibuf",
     "$dir_pw_status",
   ]
 }
@@ -35,9 +37,12 @@ pw_source_set("socket_data_link") {
   public = [ "public/pw_data_link/socket_data_link.h" ]
   public_deps = [
     ":data_link",
+    ":simple_allocator",
+    "$dir_pw_allocator",
     "$dir_pw_assert",
     "$dir_pw_bytes",
     "$dir_pw_function",
+    "$dir_pw_multibuf",
     "$dir_pw_status",
     "$dir_pw_string:to_string",
     "$dir_pw_sync:lock_annotations",
@@ -103,7 +108,9 @@ pw_test("data_link_test") {
   sources = [ "data_link_test.cc" ]
   deps = [
     ":data_link",
+    "$dir_pw_allocator",
     "$dir_pw_bytes",
+    "$dir_pw_multibuf",
     "$dir_pw_status",
   ]
 }
@@ -111,6 +118,7 @@ pw_test("data_link_test") {
 pw_test("socket_data_link_test") {
   sources = [ "socket_data_link_test.cc" ]
   deps = [
+    ":simple_allocator",
     ":socket_data_link",
     "$dir_pw_bytes",
     "$dir_pw_status",

@@ -15,8 +15,10 @@
 
 #include <optional>
 
+#include "pw_allocator/allocator.h"
 #include "pw_bytes/span.h"
 #include "pw_function/function.h"
+#include "pw_multibuf/multibuf.h"
 #include "pw_status/status.h"
 #include "pw_status/status_with_size.h"
 
@@ -53,18 +55,14 @@ class DataLink {
   // This should only be used to size receive buffers to enable zero copying.
   constexpr size_t mtu() { return 0; }
 
-  // The byte size of the payload in the packet, MTU minus header(s).
-  //
-  // This should only be used to limit the size of outgoing data.
-  constexpr size_t max_payload_size() { return 0; }
-
   // Initializes the link peripherals if necessary, and the working thread or
   // threads depending on the implementation.
   // The event handler callback will be called in the working thread.
   // Wait for a kConnected event and check its status.
   //
   // Precondition: link is closed.
-  virtual void Open(EventHandlerCallback&& event_handler) = 0;
+  virtual void Open(EventHandlerCallback&& event_handler,
+                    allocator::Allocator& write_buffer_allocator) = 0;
 
   // Closes the underlying link, cancelling any pending operations.
   //
@@ -72,27 +70,30 @@ class DataLink {
   virtual void Close() = 0;
 
   // Gets the location where the outgoing data can be written to if there is no
-  // ongoing write process. Otherwise, wait for the next kDataSent event. The
-  // buffer size will always be max_payload_size().
+  // ongoing write process. Otherwise, wait for the next kDataSent event.
   //
   // Precondition:
   //   Link is open.
-  virtual std::optional<pw::ByteSpan> GetWriteBuffer() = 0;
+  virtual std::optional<multibuf::MultiBuf> GetWriteBuffer(size_t size) = 0;
 
-  // Tells the link the buffer can be sent. The user cannot modify the buffer
-  // anymore. The send operation finishes when the kDataSent event is emitted.
-  // The event has the operation status and how many bytes were sent, which must
-  // be the size of the provided buffer, since no partial writes are supported.
+  // Writes the entire MultiBuf. The send operation finishes when the kDataSent
+  // event is emitted. The event has the operation status and how many bytes
+  // were sent, which must be the size of the provided buffer, since no partial
+  // writes are supported.
+  //
+  // Note: If the caller has a MultiBuf partially filled with data to send, they
+  // must remove any unused ``MultiBuf::Chunk``s and truncate any partially
+  // filled ones to avoid writing the empty ``MultiBuf::Chunk``s.
   //
   // Precondition:
   //   Link is open.
   //   No write operation is in progress.
-  //   A buffer has been granted already.
   //
   // Returns:
   //   OK: The buffer is successfully in the send process.
   //   FAILED_PRECONDITION: A write operation is in process. Wait for the next
   //    kDataSent event.
+  //   INVALID_ARGUMENT: The write buffer is empty.
   //
   // To send data:
   // 1. Get a buffer to write to with GetWriteBuffer().
@@ -100,7 +101,7 @@ class DataLink {
   // 3. Call write with the buffer written to.
   // 4. Wait for kDataSent.
   // 5. Another buffer can be requested.
-  virtual pw::Status Write(pw::ByteSpan buffer) = 0;
+  virtual Status Write(multibuf::MultiBuf&& buffer) = 0;
 
   // Reads a packet into the provided buffer without blocking. The user cannot
   // modify the buffer when Read() is called until the read operation is done
@@ -122,7 +123,7 @@ class DataLink {
   // 2. Pass in the input buffer with the amount of bytes to read.
   // 3. Wait for the kDataRead event.
   // 4. The buffer can be reused now.
-  virtual pw::Status Read(pw::ByteSpan buffer) = 0;
+  virtual Status Read(pw::ByteSpan buffer) = 0;
 };
 
 inline DataLink::~DataLink() {}
