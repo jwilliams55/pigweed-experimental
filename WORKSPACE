@@ -87,35 +87,6 @@ cipd_init()
 
 cipd_client_repository()
 
-# Setup xcode on mac.
-load("@pw_toolchain//features/macos:generate_xcode_repository.bzl", "pw_xcode_command_line_tools_repository")
+load("@pigweed//pw_toolchain:register_toolchains.bzl", "register_pigweed_cxx_toolchains")
 
-pw_xcode_command_line_tools_repository()
-
-# Fetch llvm toolchain.
-cipd_repository(
-    name = "llvm_toolchain",
-    path = "fuchsia/third_party/clang/${os}-${arch}",
-    tag = "git_revision:8475d0a2b853f6184948b428ec679edf84ed2688",
-)
-
-# Fetch linux sysroot for host builds.
-cipd_repository(
-    name = "linux_sysroot",
-    path = "fuchsia/third_party/sysroot/linux",
-    tag = "git_revision:d342388843734b6c5c50fb7e18cd3a76476b93aa",
-)
-
-# Fetch gcc-arm-none-eabi toolchain.
-cipd_repository(
-    name = "gcc_arm_none_eabi_toolchain",
-    path = "fuchsia/third_party/armgcc/${os}-${arch}",
-    tag = "version:2@12.2.mpacbti-rel1.1",
-)
-
-# Use upstream Pigweed toolchain configurations.
-register_toolchains(
-    "@pigweed//pw_toolchain/host_clang:host_cc_toolchain_linux",
-    "@pigweed//pw_toolchain/host_clang:host_cc_toolchain_macos",
-    "@pigweed//pw_toolchain/arm_gcc:arm_gcc_cc_toolchain_cortex-m4+nofp",
-)
+register_pigweed_cxx_toolchains()
