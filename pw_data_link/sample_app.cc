@@ -14,10 +14,10 @@
 #include "pw_log/levels.h"
 #define PW_LOG_LEVEL PW_LOG_LEVEL_INFO
 
+#include "pw_allocator/simple_allocator.h"
 #include "pw_assert/check.h"
 #include "pw_data_link/data_link.h"
 #include "pw_data_link/server_socket.h"
-#include "pw_data_link/simple_allocator.h"
 #include "pw_data_link/socket_data_link.h"
 #include "pw_data_link/socket_data_link_thread.h"
 #include "pw_log/log.h"
@@ -233,8 +233,9 @@ int main(int argc, char** argv) {
   };
 
   std::shared_ptr<pw::data_link::SocketDataLink> link;
-  pw::multibuf::TrackingAllocatorWithMemory<kAllocatorSize>
-      link_buffer_allocator{};
+  pw::allocator::SimpleAllocator link_buffer_allocator{};
+  std::array<std::byte, kAllocatorSize> allocator_storage{};
+  PW_CHECK_OK(link_buffer_allocator.Init(allocator_storage));
   if (is_server) {
     PW_LOG_INFO("Serving on port %d", static_cast<int>(port));
     pw::data_link::ServerSocket server{kMaxLinks};
