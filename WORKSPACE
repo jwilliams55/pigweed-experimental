@@ -79,12 +79,6 @@ load(
     "pigweed_deps",
 )
 
-pigweed_deps()
-
-load("@cipd_deps//:cipd_init.bzl", "cipd_init")
-
-cipd_init()
-
 cipd_client_repository()
 
 load("@pigweed//pw_toolchain:register_toolchains.bzl", "register_pigweed_cxx_toolchains")
