@@ -11,9 +11,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
-load("@pigweed//pw_build:pigweed.bzl", "pw_cc_library", "pw_cc_test")
+load("@pigweed//pw_build:pigweed.bzl", "pw_cc_test")
 
-pw_cc_library(
+cc_library(
     name = "pw_color",
     hdrs = [
         "public/pw_color/color.h",
