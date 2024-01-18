@@ -35,7 +35,8 @@ pw_executable("rpc") {
     dir_pw_span,
 
     # RPC related dependencies.
-    "$dir_pw_hdlc:pw_rpc",
+    "$dir_pw_hdlc",
+    "$dir_pw_hdlc:default_addresses",
     "$dir_pw_hdlc:rpc_channel_output",
     "$dir_pw_rpc:server",
     "$dir_pw_stream:sys_io_stream",
