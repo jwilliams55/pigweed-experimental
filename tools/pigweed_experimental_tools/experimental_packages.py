@@ -16,24 +16,31 @@
 import sys
 
 from pw_package import package_manager
+
 # These modules register themselves so must be imported despite appearing
 # unused.
-from pw_package.packages import arduino_core  # pylint: disable=unused-import
-from pw_package.packages import boringssl  # pylint: disable=unused-import
-from pw_package.packages import chromium_verifier  # pylint: disable=unused-import
-from pw_package.packages import crlset  # pylint: disable=unused-import
-from pw_package.packages import freertos  # pylint: disable=unused-import
-from pw_package.packages import googletest  # pylint: disable=unused-import
-from pw_package.packages import mbedtls  # pylint: disable=unused-import
-from pw_package.packages import micro_ecc  # pylint: disable=unused-import
-from pw_package.packages import nanopb
-from pw_package.packages import pico_sdk  # pylint: disable=unused-import
-from pw_package.packages import protobuf  # pylint: disable=unused-import
-from pw_package.packages import smartfusion_mss  # pylint: disable=unused-import
-from pw_package.packages import stm32cube  # pylint: disable=unused-import
-from pigweed_experimental_tools.packages import imgui  # pylint: disable=unused-import
-from pigweed_experimental_tools.packages import glfw  # pylint: disable=unused-import
-from pigweed_experimental_tools.packages import pico_tool  # pylint: disable=unused-import
+# pylint: disable=unused-import
+from pw_package.packages import (
+    arduino_core,
+    boringssl,
+    chromium_verifier,
+    crlset,
+    freertos,
+    googletest,
+    mbedtls,
+    micro_ecc,
+    nanopb,
+    pico_sdk,
+    protobuf,
+    smartfusion_mss,
+    stm32cube,
+)
+
+from pigweed_experimental_tools.packages import (
+    imgui,
+    glfw,
+    pico_tool,
+)
 
 
 def initialize():

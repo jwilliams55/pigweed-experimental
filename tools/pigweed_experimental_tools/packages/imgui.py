@@ -22,12 +22,15 @@ import pw_package.package_manager
 
 class Imgui(pw_package.git_repo.GitRepo):
     """Install and check status of Imgui."""
+
     def __init__(self, *args, **kwargs):
-        super().__init__(*args,
-                         name='imgui',
-                         url='https://github.com/ocornut/imgui.git',
-                         commit='ced92d9c52398f10fa152f78f52d0ca51d5d1d5b',
-                         **kwargs)
+        super().__init__(
+            *args,
+            name='imgui',
+            url='https://github.com/ocornut/imgui.git',
+            commit='ced92d9c52398f10fa152f78f52d0ca51d5d1d5b',
+            **kwargs,
+        )
         self._allow_use_in_downstream = True
 
     def info(self, path: pathlib.Path) -> Sequence[str]:

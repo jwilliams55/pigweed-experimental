@@ -41,6 +41,7 @@ def change_working_dir(directory: Path):
 
 class PicoTool(pw_package.package_manager.Package):
     """Install and check status of PicoTool."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, name='picotool', **kwargs)
 
@@ -65,10 +66,12 @@ class PicoTool(pw_package.package_manager.Package):
         with change_working_dir(path) as _picotool_repo:
             for command in commands:
                 _LOG.info('==> %s', command)
-                subprocess.run(shlex.split(command),
-                               env=env,
-                               capture_output=True,
-                               check=True)
+                subprocess.run(
+                    shlex.split(command),
+                    env=env,
+                    capture_output=True,
+                    check=True,
+                )
 
         picotool_bin = path / 'out/picotool'
         _LOG.info('Done! picotool binary located at:')

@@ -33,7 +33,9 @@ jinja_env = Environment(
     # Load templates automatically from pw_graphics/templates
     loader=DictLoader(jinja_templates),
     # Raise errors if variables are undefined in templates
-    undefined=make_logging_undefined(logger=logging.getLogger(__package__), ),
+    undefined=make_logging_undefined(
+        logger=logging.getLogger(__package__),
+    ),
     # Trim whitespace in templates
     trim_blocks=True,
     lstrip_blocks=True,
@@ -44,31 +46,27 @@ def _arg_parser():
     """Setup argparse."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('IMAGE', type=Path, help="Input image. ")
-    parser.add_argument('-W',
-                        '--sprite-width',
-                        type=int,
-                        required=True,
-                        help='Sprite width.')
-    parser.add_argument('-H',
-                        '--sprite-height',
-                        type=int,
-                        required=True,
-                        help='Sprite height.')
-    parser.add_argument('--output-mode',
-                        default='rgb565',
-                        choices=['rgb565', 'font'],
-                        help='')
+    parser.add_argument(
+        '-W', '--sprite-width', type=int, required=True, help='Sprite width.'
+    )
+    parser.add_argument(
+        '-H', '--sprite-height', type=int, required=True, help='Sprite height.'
+    )
+    parser.add_argument(
+        '--output-mode', default='rgb565', choices=['rgb565', 'font'], help=''
+    )
     parser.add_argument(
         '--transparent-color',
         default='255,0,255',
-        help='Comma separated r,g,b values to use as transparent.')
+        help='Comma separated r,g,b values to use as transparent.',
+    )
     return parser.parse_args()
 
 
 def rgb8888to565(rgba8888):
-    red = ((rgba8888 & 0xFF0000) >> 16)
-    green = ((rgba8888 & 0xFF00) >> 8)
-    blue = ((rgba8888 & 0xFF))
+    red = (rgba8888 & 0xFF0000) >> 16
+    green = (rgba8888 & 0xFF00) >> 8
+    blue = rgba8888 & 0xFF
     return rgb565(red, green, blue)
 
 
@@ -98,7 +96,8 @@ def render_rgb565_header(
                     hex_g = f"{pix[1]:02x}"
                     hex_b = f"{pix[2]:02x}"
                     sprite_data[-1].append(
-                        f"{hex_rgb565:#04x},  // #{hex_r}{hex_g}{hex_b}\n")
+                        f"{hex_rgb565:#04x},  // #{hex_r}{hex_g}{hex_b}\n"
+                    )
     return sprite_data
 
 
@@ -160,13 +159,21 @@ def main() -> None:
     tile_height = max(tile_height, 1)
 
     if args.output_mode == 'rgb565':
-        sprite_data = render_rgb565_header(alpha_composite, tile_width,
-                                           tile_height, sprite_width,
-                                           sprite_height)
+        sprite_data = render_rgb565_header(
+            alpha_composite,
+            tile_width,
+            tile_height,
+            sprite_width,
+            sprite_height,
+        )
     elif args.output_mode == 'font':
-        sprite_data = render_font_header(alpha_composite, tile_width,
-                                         tile_height, sprite_width,
-                                         sprite_height)
+        sprite_data = render_font_header(
+            alpha_composite,
+            tile_width,
+            tile_height,
+            sprite_width,
+            sprite_height,
+        )
 
     template = jinja_env.get_template(args.output_mode + '.jinja')
     out_path.write_text(
@@ -177,7 +184,8 @@ def main() -> None:
             sprite_height=sprite_height,
             transparent_color=f"{transparent_color_int:#04x}",
             count=len(sprite_data),
-        ))
+        )
+    )
 
 
 if __name__ == '__main__':

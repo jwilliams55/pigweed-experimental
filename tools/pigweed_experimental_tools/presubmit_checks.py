@@ -25,8 +25,10 @@ from typing import Callable
 try:
     import pw_cli.log
 except ImportError:
-    print('ERROR: Activate the environment before running presubmits!',
-          file=sys.stderr)
+    print(
+        'ERROR: Activate the environment before running presubmits!',
+        file=sys.stderr,
+    )
     sys.exit(2)
 
 import pw_presubmit
@@ -52,7 +54,8 @@ except KeyError:
     print(
         'ERROR: The presubmit checks must be run in the sample project\'s root'
         ' directory',
-        file=sys.stderr)
+        file=sys.stderr,
+    )
     sys.exit(2)
 
 PIGWEED_ROOT = PROJECT_ROOT / 'third_party' / 'pigweed'
@@ -64,7 +67,8 @@ REPOS = (
 
 # Rerun the build if files with these extensions change.
 _BUILD_EXTENSIONS = frozenset(
-    ['.rst', '.gn', '.gni', *format_code.C_FORMAT.extensions])
+    ['.rst', '.gn', '.gni', *format_code.C_FORMAT.extensions]
+)
 
 
 #
@@ -85,21 +89,23 @@ def _package_root_arg(name: str) -> Callable[[PresubmitContext], str]:
 
 teensy_build = build.GnGenNinja(
     name='teensy_build',
-    packages=('teensy', ),
+    packages=('teensy',),
     gn_args=dict(
         pw_arduino_build_CORE_PATH=lambda ctx: '"{}"'.format(
-            str(ctx.package_root)),
+            str(ctx.package_root)
+        ),
         pw_arduino_build_CORE_NAME='"teensy"',
         pw_arduino_build_PACKAGE_NAME='"avr/1.58.1"',
         pw_arduino_build_BOARD='"teensy41"',
         pw_arduino_build_MENU_OPTIONS=(
-            '["menu.usb.serial", "menu.keys.en-us", "menu.opt.o2std"]'),
+            '["menu.usb.serial", "menu.keys.en-us", "menu.opt.o2std"]'
+        ),
     ),
 )
 
 pico_build = build.GnGenNinja(
     name='pico_build',
-    packages=('pico_sdk', ),
+    packages=('pico_sdk',),
     gn_args=dict(
         PICO_SRC_DIR=_package_root_arg('pico_sdk'),
         dir_pw_third_party_freertos='"//third_party/freertos/Source"',
@@ -108,7 +114,7 @@ pico_build = build.GnGenNinja(
 
 stm32cube_f4_build = build.GnGenNinja(
     name='stm32cube_f4_build',
-    packages=('stm32cube_f4', ),
+    packages=('stm32cube_f4',),
     gn_args=dict(
         dir_pw_third_party_stm32cube_f4=_package_root_arg('stm32cube_f4'),
         dir_pw_third_party_freertos='"//third_party/freertos/Source"',
@@ -117,7 +123,7 @@ stm32cube_f4_build = build.GnGenNinja(
 
 stm32cube_f7_build = build.GnGenNinja(
     name='stm32cube_f7_build',
-    packages=('stm32cube_f7', ),
+    packages=('stm32cube_f7',),
     gn_args=dict(
         dir_pw_third_party_stm32cube_f7=_package_root_arg('stm32cube_f7'),
         dir_pw_third_party_freertos='"//third_party/freertos/Source"',
@@ -130,7 +136,8 @@ mimxrt595_evk_build = build.GnGenNinja(
         dir_pw_third_party_freertos='"//third_party/freertos/Source"',
         pw_MIMXRT595_EVK_SDK=_package_root_arg("SDK_2_12_1_EVK-MIMXRT595"),
         pw_target_mimxrt595_evk_MANIFEST=_package_root_arg(
-            "SDK_2_12_1_EVK-MIMXRT595/EVK-MIMXRT595_manifest_v3_10.xml"),
+            "SDK_2_12_1_EVK-MIMXRT595/EVK-MIMXRT595_manifest_v3_10.xml"
+        ),
         pw_third_party_mcuxpresso_SDK="//targets/mimxrt595_evk:mimxrt595_sdk",
     ),
 )
@@ -157,7 +164,8 @@ def check_for_git_changes(_: PresubmitContext):
         _LOG.error('There are uncommitted changes in the %s repo!', repo.name)
     if changes:
         _LOG.warning(
-            'Commit or stash pending changes before running the presubmit.')
+            'Commit or stash pending changes before running the presubmit.'
+        )
         raise PresubmitFailure
 
 
@@ -250,7 +258,8 @@ def main() -> int:
     parser.add_argument(
         '--install',
         action='store_true',
-        help='Install the presubmit as a Git pre-push hook and exit.')
+        help='Install the presubmit as a Git pre-push hook and exit.',
+    )
 
     return run(**vars(parser.parse_args()))
 

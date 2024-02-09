@@ -88,8 +88,11 @@ if __name__ == "__main__":
         header.write(FUNCTION)
         header.write("\n")
 
-    subprocess.run([
-        "clang-format",
-        "-i",
-        args.out,
-    ], check=True)
+    subprocess.run(
+        [
+            "clang-format",
+            "-i",
+            args.out,
+        ],
+        check=True,
+    )

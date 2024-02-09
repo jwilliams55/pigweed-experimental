@@ -24,6 +24,7 @@ import pw_package.package_manager
 
 class Glfw(pw_package.package_manager.Package):
     """Install and check status of Glfw."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, name='glfw', **kwargs)
 
@@ -38,23 +39,35 @@ class Glfw(pw_package.package_manager.Package):
 
         downloads = {
             'Linux': {
-                'url': ('https://github.com/glfw/glfw/releases/download/3.3.8/'
-                        'glfw-3.3.8.zip'),
-                'sha256sum': ('4d025083cc4a3dd1f91ab9b9ba4f5807'
-                              '193823e565a5bcf4be202669d9911ea6'),
+                'url': (
+                    'https://github.com/glfw/glfw/releases/download/3.3.8/'
+                    'glfw-3.3.8.zip'
+                ),
+                'sha256sum': (
+                    '4d025083cc4a3dd1f91ab9b9ba4f5807'
+                    '193823e565a5bcf4be202669d9911ea6'
+                ),
             },
             'Darwin': {
-                'url': ('https://github.com/glfw/glfw/releases/download/3.3.8/'
-                        'glfw-3.3.8.bin.MACOS.zip'),
-                'sha256sum': ('dc1fc3d3e7763b9de66f7cbb86c4ba3a'
-                              '82118441a15f64045a61cfcdedda88d2'),
+                'url': (
+                    'https://github.com/glfw/glfw/releases/download/3.3.8/'
+                    'glfw-3.3.8.bin.MACOS.zip'
+                ),
+                'sha256sum': (
+                    'dc1fc3d3e7763b9de66f7cbb86c4ba3a'
+                    '82118441a15f64045a61cfcdedda88d2'
+                ),
             },
             'Windows': {
-                'url': ('https://github.com/glfw/glfw/releases/download/3.3.8/'
-                        'glfw-3.3.8.bin.WIN64.zip'),
-                'sha256sum': ('7851c068b63c3cebf11a3b52c9e7dbdb'
-                              '6159afe32666b0aad268e4a258a9bdd1'),
-            }
+                'url': (
+                    'https://github.com/glfw/glfw/releases/download/3.3.8/'
+                    'glfw-3.3.8.bin.WIN64.zip'
+                ),
+                'sha256sum': (
+                    '7851c068b63c3cebf11a3b52c9e7dbdb'
+                    '6159afe32666b0aad268e4a258a9bdd1'
+                ),
+            },
         }
 
         host_os = platform.system()
@@ -62,13 +75,15 @@ class Glfw(pw_package.package_manager.Package):
         sha256sum = downloads[host_os]['sha256sum']
 
         glfw_zip = file_operations.download_to_cache(
-            url=url, expected_sha256sum=sha256sum, cache_directory=path)
+            url=url, expected_sha256sum=sha256sum, cache_directory=path
+        )
 
         _extracted_files = file_operations.extract_archive(
             glfw_zip,
             dest_dir=str(path),
             cache_dir=str(path),
-            remove_single_toplevel_folder=True)
+            remove_single_toplevel_folder=True,
+        )
 
     def info(self, path: Path) -> Sequence[str]:
         return (

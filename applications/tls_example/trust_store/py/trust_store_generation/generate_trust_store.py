@@ -72,19 +72,21 @@ def parse_args():
     """Setup argparse."""
     parser = argparse.ArgumentParser()
     parser.add_argument("out", help="output header")
-    parser.add_argument("--root_cert",
-                        "-r",
-                        help="root CA certificate",
-                        action="append")
+    parser.add_argument(
+        "--root_cert", "-r", help="root CA certificate", action="append"
+    )
     return parser.parse_args()
 
 
 def generate_c_array_declaration(data, var_name):
     """Generate a C array declaration for a byte data"""
-    return "".join([
-        f'const unsigned char {var_name}[] = {{',
-        " ".join([f'0x{b:x},' for b in data]), "};"
-    ])
+    return "".join(
+        [
+            f'const unsigned char {var_name}[] = {{',
+            " ".join([f'0x{b:x},' for b in data]),
+            "};",
+        ]
+    )
 
 
 def load_certificate_file(file):
@@ -114,11 +116,13 @@ def main():
         header.write(LICENSE_HEADER)
         header.write('#include "pw_span/span.h"\n\n')
         certs = args.root_cert if args.root_cert else []
-        cert_collection_array = "".join([
-            "const ",
-            "pw::span<const unsigned char>",
-            "kRootCerts[] = {",
-        ])
+        cert_collection_array = "".join(
+            [
+                "const ",
+                "pw::span<const unsigned char>",
+                "kRootCerts[] = {",
+            ]
+        )
         header.write("namespace {\n\n")
         for i, cert in enumerate(certs):
             var_name = f'kRootCACert_{i}'
@@ -136,11 +140,14 @@ def main():
         header.write(ROOT_CERT_API_FUNC)
         header.write("\n\n")
 
-    subprocess.run([
-        "clang-format",
-        "-i",
-        args.out,
-    ], check=True)
+    subprocess.run(
+        [
+            "clang-format",
+            "-i",
+            args.out,
+        ],
+        check=True,
+    )
 
 
 if __name__ == "__main__":

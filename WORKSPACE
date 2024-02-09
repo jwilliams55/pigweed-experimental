@@ -75,8 +75,6 @@ protobuf_deps()
 load(
     "@pigweed//pw_env_setup/bazel/cipd_setup:cipd_rules.bzl",
     "cipd_client_repository",
-    "cipd_repository",
-    "pigweed_deps",
 )
 
 cipd_client_repository()
