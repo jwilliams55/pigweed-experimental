@@ -31,6 +31,7 @@ from pw_package.packages import (
     micro_ecc,
     nanopb,
     pico_sdk,
+    picotool,
     protobuf,
     smartfusion_mss,
     stm32cube,
@@ -39,7 +40,6 @@ from pw_package.packages import (
 from pigweed_experimental_tools.packages import (
     imgui,
     glfw,
-    pico_tool,
 )
 
 
