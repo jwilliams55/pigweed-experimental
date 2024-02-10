@@ -49,6 +49,7 @@ using DisplayDriver = pw::display_driver::DisplayDriverST7789;
 #endif
 
 using pw::Status;
+using pw::digital_io::Rp2040Config;
 using pw::digital_io::Rp2040DigitalIn;
 using pw::digital_io::Rp2040DigitalInOut;
 using pw::display::Display;
@@ -105,14 +106,26 @@ constexpr pw::spi::Config kSpiConfig16Bit{
     .bit_order = pw::spi::BitOrder::kMsbFirst,
 };
 
-Rp2040DigitalInOut s_display_dc_pin(DISPLAY_DC_GPIO);
+Rp2040DigitalInOut s_display_dc_pin({
+    .pin = DISPLAY_DC_GPIO,
+    .polarity = pw::digital_io::Polarity::kActiveLow,
+});
 #if DISPLAY_RESET_GPIO != -1
-Rp2040DigitalInOut s_display_reset_pin(DISPLAY_RESET_GPIO);
+Rp2040DigitalInOut s_display_reset_pin({
+    .pin = DISPLAY_RESET_GPIO,
+    .polarity = pw::digital_io::Polarity::kActiveHigh,
+});
 #endif
 #if DISPLAY_TE_GPIO != -1
-Rp2040DigitalIn s_display_tear_effect_pin(DISPLAY_TE_GPIO);
+Rp2040DigitalIn s_display_tear_effect_pin({
+    .pin = DISPLAY_TE_GPIO,
+    .polarity = pw::digital_io::Polarity::kActiveHigh,
+});
 #endif
-Rp2040DigitalInOut s_display_cs_pin(DISPLAY_CS_GPIO);
+Rp2040DigitalInOut s_display_cs_pin({
+    .pin = DISPLAY_CS_GPIO,
+    .polarity = pw::digital_io::Polarity::kActiveLow,
+});
 PicoChipSelector s_spi_chip_selector(s_display_cs_pin);
 PicoInitiator s_spi_initiator(SPI_PORT);
 VirtualMutex s_spi_initiator_mutex;
