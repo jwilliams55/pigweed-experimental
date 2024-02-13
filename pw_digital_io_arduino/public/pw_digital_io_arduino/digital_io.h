@@ -17,19 +17,36 @@
 #include <cstdint>
 
 #include "pw_digital_io/digital_io.h"
+#include "pw_digital_io/polarity.h"
 
 namespace pw::digital_io {
 
+struct ArduinoConfig {
+  uint16_t pin;
+  Polarity polarity;
+
+  bool operator==(const ArduinoConfig& rhs) const {
+    return polarity == rhs.polarity && pin == rhs.pin;
+  }
+  State PhysicalToLogical(const bool hal_value) const {
+    return polarity == Polarity::kActiveHigh ? State(hal_value)
+                                             : State(!hal_value);
+  }
+  bool LogicalToPhysical(const State state) const {
+    return polarity == Polarity::kActiveHigh ? (bool)state : !(bool)state;
+  }
+};
+
 class ArduinoDigitalOut : public DigitalOut {
  public:
-  ArduinoDigitalOut(uint32_t pin);
+  ArduinoDigitalOut(ArduinoConfig config);
 
   // pw::digital_io::DigitalOut implementation:
   Status DoEnable(bool enable) override;
   Status DoSetState(State level) override;
 
  private:
-  uint32_t pin_;
+  ArduinoConfig config_;
 };
 
 }  // namespace pw::digital_io

@@ -17,22 +17,39 @@
 #include <cstddef>
 
 #include "pw_digital_io/digital_io.h"
+#include "pw_digital_io/polarity.h"
 #include "stm32cube/stm32cube.h"
 #include "stm32f4xx_hal_gpio.h"
 
 namespace pw::digital_io {
 
+struct Stm32CubeConfig {
+  GPIO_TypeDef* port;
+  uint16_t pin;
+  Polarity polarity;
+
+  bool operator==(const Stm32CubeConfig& rhs) const {
+    return polarity == rhs.polarity && pin == rhs.pin && port == rhs.port;
+  }
+  State PhysicalToLogical(const bool hal_value) const {
+    return polarity == Polarity::kActiveHigh ? State(hal_value)
+                                             : State(!hal_value);
+  }
+  bool LogicalToPhysical(const State state) const {
+    return polarity == Polarity::kActiveHigh ? (bool)state : !(bool)state;
+  }
+};
+
 class Stm32CubeDigitalOut : public DigitalOut {
  public:
-  Stm32CubeDigitalOut(GPIO_TypeDef* port, uint16_t pin);
+  Stm32CubeDigitalOut(Stm32CubeConfig config);
 
   // pw::digital_io::DigitalOut implementation:
   Status DoEnable(bool enable) override;
   Status DoSetState(State level) override;
 
  private:
-  GPIO_TypeDef* port_;
-  uint16_t pin_;
+  Stm32CubeConfig config_;
 };
 
 }  // namespace pw::digital_io

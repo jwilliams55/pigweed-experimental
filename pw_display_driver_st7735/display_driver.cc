@@ -340,11 +340,11 @@ Status DisplayDriverST7735::WriteRow(span<uint16_t> row_pixels,
 Status DisplayDriverST7735::Reset() {
   if (!config_.reset_gpio)
     return Status::Unavailable();
-  PW_TRY(config_.reset_gpio->SetStateActive());
-  pw::spin_delay::WaitMillis(100);
   PW_TRY(config_.reset_gpio->SetStateInactive());
   pw::spin_delay::WaitMillis(100);
   PW_TRY(config_.reset_gpio->SetStateActive());
+  pw::spin_delay::WaitMillis(100);
+  PW_TRY(config_.reset_gpio->SetStateInactive());
   pw::spin_delay::WaitMillis(100);
   return OkStatus();
 }

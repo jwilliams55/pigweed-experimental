@@ -79,8 +79,16 @@ constexpr pw::spi::Config kSpiConfig16Bit{
     .bit_order = pw::spi::BitOrder::kMsbFirst,
 };
 
-Stm32CubeDigitalOut s_display_dc_pin(LCD_DC_PORT, LCD_DC_PIN);
-Stm32CubeDigitalOut s_display_cs_pin(LCD_CS_PORT, LCD_CS_PIN);
+Stm32CubeDigitalOut s_display_dc_pin({
+    .port = LCD_DC_PORT,
+    .pin = LCD_DC_PIN,
+    .polarity = pw::digital_io::Polarity::kActiveHigh,
+});
+Stm32CubeDigitalOut s_display_cs_pin({
+    .port = LCD_CS_PORT,
+    .pin = LCD_CS_PIN,
+    .polarity = pw::digital_io::Polarity::kActiveLow,
+});
 Stm32CubeChipSelector s_spi_chip_selector(s_display_cs_pin);
 Stm32CubeInitiator s_spi_initiator;
 VirtualMutex s_spi_initiator_mutex;

@@ -108,12 +108,12 @@ constexpr pw::spi::Config kSpiConfig16Bit{
 
 Rp2040DigitalInOut s_display_dc_pin({
     .pin = DISPLAY_DC_GPIO,
-    .polarity = pw::digital_io::Polarity::kActiveLow,
+    .polarity = pw::digital_io::Polarity::kActiveHigh,
 });
 #if DISPLAY_RESET_GPIO != -1
 Rp2040DigitalInOut s_display_reset_pin({
     .pin = DISPLAY_RESET_GPIO,
-    .polarity = pw::digital_io::Polarity::kActiveHigh,
+    .polarity = pw::digital_io::Polarity::kActiveLow,
 });
 #endif
 #if DISPLAY_TE_GPIO != -1

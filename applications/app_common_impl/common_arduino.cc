@@ -69,11 +69,20 @@ constexpr pw::spi::Config kSpiConfig16Bit{
     .bit_order = pw::spi::BitOrder::kMsbFirst,
 };
 
-DigitalOut s_display_dc_pin(DISPLAY_DC_GPIO);
+DigitalOut s_display_dc_pin({
+    .pin = DISPLAY_DC_GPIO,
+    .polarity = pw::digital_io::Polarity::kActiveHigh,
+});
 #if DISPLAY_RESET_GPIO != -1
-DigitalOut s_display_reset_pin(DISPLAY_RESET_GPIO);
+DigitalOut s_display_reset_pin({
+    .pin = DISPLAY_RESET_GPIO,
+    .polarity = pw::digital_io::Polarity::kActiveLow,
+});
 #endif
-DigitalOut s_display_cs_pin(DISPLAY_CS_GPIO);
+DigitalOut s_display_cs_pin({
+    .pin = DISPLAY_CS_GPIO,
+    .polarity = pw::digital_io::Polarity::kActiveLow,
+});
 SpiChipSelector s_spi_chip_selector(s_display_cs_pin);
 SpiInitiator s_spi_initiator;
 VirtualMutex s_spi_initiator_mutex;

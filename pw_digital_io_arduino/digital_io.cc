@@ -18,17 +18,17 @@
 
 namespace pw::digital_io {
 
-ArduinoDigitalOut::ArduinoDigitalOut(uint32_t pin) : pin_(pin) {}
+ArduinoDigitalOut::ArduinoDigitalOut(ArduinoConfig config) : config_(config) {}
 
 Status ArduinoDigitalOut::DoEnable(bool enable) {
   // No way to disable pin in Arduino, but setting disabled pin mode to
   // input should cause failures which should help trigger program bugs.
-  pinMode(pin_, enable ? OUTPUT : INPUT);
+  pinMode(config_.pin, enable ? OUTPUT : INPUT);
   return OkStatus();
 }
 
 Status ArduinoDigitalOut::DoSetState(State level) {
-  digitalWrite(pin_, level == State::kActive ? HIGH : LOW);
+  digitalWrite(config_.pin, config_.LogicalToPhysical(level) ? HIGH : LOW);
   return OkStatus();
 }
 

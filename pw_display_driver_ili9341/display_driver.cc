@@ -518,11 +518,11 @@ uint16_t DisplayDriverILI9341::GetHeight() const { return kDisplayHeight; }
 Status DisplayDriverILI9341::Reset() {
   if (!config_.reset_gpio)
     return Status::Unavailable();
-  auto s = config_.reset_gpio->SetStateInactive();
+  auto s = config_.reset_gpio->SetStateActive();
   if (!s.ok())
     return s;
   pw::spin_delay::WaitMillis(100);
-  s = config_.reset_gpio->SetStateActive();
+  s = config_.reset_gpio->SetStateInactive();
   pw::spin_delay::WaitMillis(100);
   return s;
 }

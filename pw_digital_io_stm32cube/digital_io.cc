@@ -21,21 +21,21 @@ namespace pw::digital_io {
 
 namespace {
 
-void InitGpio(GPIO_TypeDef* port, uint16_t pin) {
+void InitGpio(Stm32CubeConfig config) {
   GPIO_InitTypeDef init_data = {
-      .Pin = pin,
+      .Pin = config.pin,
       .Mode = GPIO_MODE_OUTPUT_PP,
       .Pull = GPIO_NOPULL,
       .Speed = GPIO_SPEED_FREQ_LOW,
   };
-  HAL_GPIO_WritePin(port, pin, GPIO_PIN_RESET);
-  HAL_GPIO_Init(port, &init_data);
+  HAL_GPIO_WritePin(config.port, config.pin, GPIO_PIN_RESET);
+  HAL_GPIO_Init(config.port, &init_data);
 }
 
 }  // namespace
 
-Stm32CubeDigitalOut::Stm32CubeDigitalOut(GPIO_TypeDef* port, uint16_t pin)
-    : port_(port), pin_(pin) {}
+Stm32CubeDigitalOut::Stm32CubeDigitalOut(Stm32CubeConfig config)
+    : config_(config) {}
 
 // pw::digital_io::DigitalOut implementation:
 Status Stm32CubeDigitalOut::DoEnable(bool enable) {
@@ -43,13 +43,15 @@ Status Stm32CubeDigitalOut::DoEnable(bool enable) {
     // Doesn't seem to be supported by the SDK.
     return Status::Unavailable();
   }
-  InitGpio(port_, pin_);
+  InitGpio(config_);
   return OkStatus();
 }
 
 Status Stm32CubeDigitalOut::DoSetState(State level) {
   HAL_GPIO_WritePin(
-      port_, pin_, level == State::kActive ? GPIO_PIN_SET : GPIO_PIN_RESET);
+      config_.port,
+      config_.pin,
+      config_.LogicalToPhysical(level) ? GPIO_PIN_SET : GPIO_PIN_RESET);
   return OkStatus();
 }
 

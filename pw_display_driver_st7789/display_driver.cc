@@ -84,8 +84,10 @@ DisplayDriverST7789::DisplayDriverST7789(const Config& config)
 void DisplayDriverST7789::SetMode(Mode mode) {
   // Set the D/CX pin to indicate data or command values.
   if (mode == Mode::kData) {
+    // Set data command pin to 1
     config_.data_cmd_gpio.SetState(State::kActive);
   } else {
+    // Set data command pin to 0
     config_.data_cmd_gpio.SetState(State::kInactive);
   }
 }
@@ -259,11 +261,11 @@ Status DisplayDriverST7789::WriteRow(span<uint16_t> row_pixels,
 Status DisplayDriverST7789::Reset() {
   if (!config_.reset_gpio)
     return Status::Unavailable();
-  auto s = config_.reset_gpio->SetStateInactive();
+  auto s = config_.reset_gpio->SetStateActive();
   if (!s.ok())
     return s;
   pw::spin_delay::WaitMillis(100);
-  s = config_.reset_gpio->SetStateActive();
+  s = config_.reset_gpio->SetStateInactive();
   pw::spin_delay::WaitMillis(100);
   return s;
 }

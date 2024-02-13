@@ -22,7 +22,7 @@ Stm32CubeChipSelector::Stm32CubeChipSelector(pw::digital_io::DigitalOut& cs_pin)
     : cs_pin_(cs_pin) {}
 
 Status Stm32CubeChipSelector::SetActive(bool active) {
-  return cs_pin_.SetState(active ? State::kInactive : State::kActive);
+  return cs_pin_.SetState(active ? State::kActive : State::kInactive);
 }
 
 }  // namespace pw::spi
