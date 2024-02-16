@@ -25,8 +25,10 @@
 #include "pw_digital_io_rp2040/digital_io.h"
 #include "pw_i2c_rp2040/initiator.h"
 #include "pw_log/log.h"
+#if USE_PIO
 #include "pw_pixel_pusher_rp2040_pio/pixel_pusher.h"
-#include "pw_spi_rp2040/chip_selector.h"
+#endif
+#include "pw_spi/chip_selector_digital_out.h"
 #include "pw_spi_rp2040/initiator.h"
 #include "pw_status/status.h"
 #include "pw_sync/borrow.h"
@@ -56,11 +58,10 @@ using pw::display::Display;
 using pw::framebuffer::Framebuffer;
 using pw::framebuffer::PixelFormat;
 using pw::framebuffer_pool::FramebufferPool;
-using pw::pixel_pusher::PixelPusherRp2040Pio;
 using pw::spi::Device;
+using pw::spi::DigitalOutChipSelector;
 using pw::spi::Initiator;
-using pw::spi::PicoChipSelector;
-using pw::spi::PicoInitiator;
+using pw::spi::Rp2040Initiator;
 using pw::sync::Borrowable;
 using pw::sync::VirtualMutex;
 
@@ -74,7 +75,7 @@ struct SpiValues {
             pw::spi::ChipSelector& selector,
             pw::sync::VirtualMutex& initiator_mutex);
 
-  pw::spi::PicoInitiator initiator;
+  pw::spi::Rp2040Initiator initiator;
   pw::sync::Borrowable<pw::spi::Initiator> borrowable_initiator;
   pw::spi::Device device;
 };
@@ -95,13 +96,13 @@ constexpr uint16_t kFramebufferRowBytes = sizeof(uint16_t) * kFramebufferWidth;
 constexpr uint32_t kBaudRate = 31'250'000;
 constexpr pw::spi::Config kSpiConfig8Bit{
     .polarity = pw::spi::ClockPolarity::kActiveHigh,
-    .phase = pw::spi::ClockPhase::kFallingEdge,
+    .phase = pw::spi::ClockPhase::kRisingEdge,
     .bits_per_word = pw::spi::BitsPerWord(8),
     .bit_order = pw::spi::BitOrder::kMsbFirst,
 };
 constexpr pw::spi::Config kSpiConfig16Bit{
     .polarity = pw::spi::ClockPolarity::kActiveHigh,
-    .phase = pw::spi::ClockPhase::kFallingEdge,
+    .phase = pw::spi::ClockPhase::kRisingEdge,
     .bits_per_word = pw::spi::BitsPerWord(16),
     .bit_order = pw::spi::BitOrder::kMsbFirst,
 };
@@ -126,8 +127,8 @@ Rp2040DigitalInOut s_display_cs_pin({
     .pin = DISPLAY_CS_GPIO,
     .polarity = pw::digital_io::Polarity::kActiveLow,
 });
-PicoChipSelector s_spi_chip_selector(s_display_cs_pin);
-PicoInitiator s_spi_initiator(SPI_PORT);
+DigitalOutChipSelector s_spi_chip_selector(s_display_cs_pin);
+Rp2040Initiator s_spi_initiator(SPI_PORT);
 VirtualMutex s_spi_initiator_mutex;
 Borrowable<Initiator> s_borrowable_spi_initiator(s_spi_initiator,
                                                  s_spi_initiator_mutex);
@@ -139,12 +140,12 @@ SpiValues s_spi_16_bit(kSpiConfig16Bit,
                        s_spi_initiator_mutex);
 
 #if USE_PIO
-PixelPusherRp2040Pio s_pixel_pusher(DISPLAY_DC_GPIO,
-                                    DISPLAY_CS_GPIO,
-                                    SPI_MOSI_GPIO,
-                                    SPI_CLOCK_GPIO,
-                                    DISPLAY_TE_GPIO,
-                                    pio0);
+pw::pixel_pusher::PixelPusherRp2040Pio s_pixel_pusher(DISPLAY_DC_GPIO,
+                                                      DISPLAY_CS_GPIO,
+                                                      SPI_MOSI_GPIO,
+                                                      SPI_CLOCK_GPIO,
+                                                      DISPLAY_TE_GPIO,
+                                                      pio0);
 #endif
 uint16_t s_pixel_data1[kNumPixels];
 uint16_t s_pixel_data2[kNumPixels];
