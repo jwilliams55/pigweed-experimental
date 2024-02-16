@@ -109,7 +109,8 @@ ninja -C out
 out/host_debug/obj/applications/terminal_display/bin/terminal_demo
 ```
 
-#### **[Raspberry Pi Pico](https://www.raspberrypi.com/products/raspberry-pi-pico/) Connected to an external SPI display**
+#### ***CURRENTLY NOT WORKING (https://pwbug.dev/325649415)*** - **[Raspberry Pi Pico](https://www.raspberrypi.com/products/raspberry-pi-pico/) Connected to an external SPI display**
+
 
 Working displays:
 

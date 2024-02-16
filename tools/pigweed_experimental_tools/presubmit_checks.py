@@ -209,11 +209,20 @@ FULL = (
     QUICK,  # Add all checks from the 'quick' program
     # Use the upstream Python checks, with custom path filters applied.
     python_checks.gn_python_check,
-    pico_build,
+    # TODO: https://pwbug.dev/325649415 - Re-enable when rp2040 targets are
+    # updated
+    # pico_build,
     stm32cube_f4_build,
 )
 
-CI_CQ = (default_build, pico_build, stm32cube_f4_build, bazel_test)
+CI_CQ = (
+    default_build,
+    # TODO: https://pwbug.dev/325649415 - Re-enable when rp2040 targets are
+    # updated
+    # pico_build,
+    stm32cube_f4_build,
+    bazel_test,
+)
 
 PROGRAMS = pw_presubmit.Programs(
     # keep-sorted: start
