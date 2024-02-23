@@ -20,17 +20,15 @@
 
 #include "pw_display_driver_imgui/display_driver.h"
 
-// To silence large number of warnings (at least on macOS).
-#define GL_SILENCE_DEPRECATION
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <GLES2/gl2.h>
 #endif
 #include <GLFW/glfw3.h>  // Will pull in system OpenGL headers
 
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
 #include "pw_framebuffer/reader.h"
 
 using pw::color::color_rgb565_t;
@@ -167,10 +165,11 @@ DisplayDriverImgUI::DisplayDriverImgUI() = default;
 Status DisplayDriverImgUI::Init() {
   // Setup window
   glfwSetErrorCallback(glfw_error_callback);
-  if (!glfwInit())
+  if (!glfwInit()) {
     return Status::Internal();
+  }
 
-    // Decide GL+GLSL versions
+  // Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
   // GL ES 2.0 + GLSL 100
   const char* glsl_version = "#version 100";
@@ -194,8 +193,8 @@ Status DisplayDriverImgUI::Init() {
 #endif
 
   // Create window with graphics context
-  window = glfwCreateWindow(1280, 800, "pw_display", NULL, NULL);
-  if (window == NULL)
+  window = glfwCreateWindow(1280, 800, "pw_display", nullptr, nullptr);
+  if (window == nullptr)
     return Status::Internal();
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1);  // Enable vsync

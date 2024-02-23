@@ -28,7 +28,9 @@ class Imgui(pw_package.git_repo.GitRepo):
             *args,
             name='imgui',
             url='https://github.com/ocornut/imgui.git',
-            commit='ced92d9c52398f10fa152f78f52d0ca51d5d1d5b',
+            # Branch: docking
+            # tag: v1.90.4-docking
+            commit='c6aa051629753f0ef0d26bf775a8b6a92aa213b2',
             **kwargs,
         )
         self._allow_use_in_downstream = True

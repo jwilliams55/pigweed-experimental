@@ -40,32 +40,32 @@ class Glfw(pw_package.package_manager.Package):
         downloads = {
             'Linux': {
                 'url': (
-                    'https://github.com/glfw/glfw/releases/download/3.3.8/'
-                    'glfw-3.3.8.zip'
+                    'https://github.com/glfw/glfw/releases/download/3.3.10/'
+                    'glfw-3.3.10.zip'
                 ),
                 'sha256sum': (
-                    '4d025083cc4a3dd1f91ab9b9ba4f5807'
-                    '193823e565a5bcf4be202669d9911ea6'
+                    'e8433ef817f7b8199aab486839063970'
+                    '1b6b26f535ec1a6598bcf82019d1bdb8'
                 ),
             },
             'Darwin': {
                 'url': (
-                    'https://github.com/glfw/glfw/releases/download/3.3.8/'
-                    'glfw-3.3.8.bin.MACOS.zip'
+                    'https://github.com/glfw/glfw/releases/download/3.3.10/'
+                    'glfw-3.3.10.bin.MACOS.zip'
                 ),
                 'sha256sum': (
-                    'dc1fc3d3e7763b9de66f7cbb86c4ba3a'
-                    '82118441a15f64045a61cfcdedda88d2'
+                    '09f1bab85b3d5ae0021da31477c51820'
+                    '4280c40ef524dc00826865333cbeb77f'
                 ),
             },
             'Windows': {
                 'url': (
-                    'https://github.com/glfw/glfw/releases/download/3.3.8/'
-                    'glfw-3.3.8.bin.WIN64.zip'
+                    'https://github.com/glfw/glfw/releases/download/3.3.10'
+                    'glfw-3.3.10.bin.WIN64.zip'
                 ),
                 'sha256sum': (
-                    '7851c068b63c3cebf11a3b52c9e7dbdb'
-                    '6159afe32666b0aad268e4a258a9bdd1'
+                    '9e89523999efefd1734e6646f8726fb3'
+                    '05e9cde771b3af71bb9f1ed8f522f6d7'
                 ),
             },
         }

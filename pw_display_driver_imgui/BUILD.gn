@@ -18,6 +18,9 @@ import("$dir_pw_build/target_types.gni")
 
 config("default_config") {
   include_dirs = [ "public" ]
+
+  # To silence OpenGL warnings on macOS.
+  defines = [ "GL_SILENCE_DEPRECATION" ]
 }
 
 pw_source_set("pw_display_driver_imgui") {
