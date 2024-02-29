@@ -453,7 +453,7 @@ void SocketDataLink::DoWrite() {
 
   // Resize chunk if it was a partial write.
   if (static_cast<size_t>(bytes_sent) < chunk.size()) {
-    chunk->DiscardFront(static_cast<size_t>(bytes_sent));
+    chunk->DiscardPrefix(static_cast<size_t>(bytes_sent));
     tx_multibuf_.PushFrontChunk(std::move(chunk));
     write_lock_.unlock();
     return;
