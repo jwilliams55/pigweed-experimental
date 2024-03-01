@@ -34,7 +34,7 @@
 #include "pw_assert/check.h"
 #include "pw_bytes/span.h"
 #include "pw_log/log.h"
-#include "pw_multibuf/chunk_region_tracker.h"
+#include "pw_multibuf/header_chunk_region_tracker.h"
 #include "pw_status/status.h"
 #include "pw_status/status_with_size.h"
 
