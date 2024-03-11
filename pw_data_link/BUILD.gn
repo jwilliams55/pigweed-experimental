@@ -88,7 +88,7 @@ if (host_os == "linux") {
       ":data_link_thread",
       ":server_socket",
       ":socket_data_link",
-      "$dir_pw_allocator:simple_allocator",
+      "$dir_pw_allocator:block_allocator",
       "$dir_pw_assert",
       "$dir_pw_log",
       "$dir_pw_sync:thread_notification",
@@ -116,7 +116,7 @@ pw_test("socket_data_link_test") {
   sources = [ "socket_data_link_test.cc" ]
   deps = [
     ":socket_data_link",
-    "$dir_pw_allocator:simple_allocator",
+    "$dir_pw_allocator:block_allocator",
     "$dir_pw_bytes",
     "$dir_pw_status",
   ]

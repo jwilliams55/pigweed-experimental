@@ -18,7 +18,7 @@
 #include <optional>
 
 #include "gtest/gtest.h"
-#include "pw_allocator/simple_allocator.h"
+#include "pw_allocator/block_allocator.h"
 #include "pw_bytes/span.h"
 #include "pw_status/status.h"
 #include "pw_status/status_with_size.h"
@@ -34,7 +34,7 @@ struct EventCallbackTracker {
 
 TEST(DataLinkTest, CompileTest) {
   SocketDataLink data_link{"localhost", 123};
-  allocator::SimpleAllocator write_buffer_allocator{};
+  allocator::FirstFitBlockAllocator<uint32_t> write_buffer_allocator{};
   std::array<std::byte, 100> allocator_storage{};
   ASSERT_EQ(write_buffer_allocator.Init(allocator_storage), OkStatus());
   EventCallbackTracker callback_tracker{};

@@ -14,7 +14,7 @@
 #include "pw_log/levels.h"
 #define PW_LOG_LEVEL PW_LOG_LEVEL_INFO
 
-#include "pw_allocator/simple_allocator.h"
+#include "pw_allocator/block_allocator.h"
 #include "pw_assert/check.h"
 #include "pw_data_link/data_link.h"
 #include "pw_data_link/server_socket.h"
@@ -233,7 +233,7 @@ int main(int argc, char** argv) {
   };
 
   std::shared_ptr<pw::data_link::SocketDataLink> link;
-  pw::allocator::SimpleAllocator link_buffer_allocator{};
+  pw::allocator::FirstFitBlockAllocator<uint32_t> link_buffer_allocator{};
   std::array<std::byte, kAllocatorSize> allocator_storage{};
   PW_CHECK_OK(link_buffer_allocator.Init(allocator_storage));
   if (is_server) {
