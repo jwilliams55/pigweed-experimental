@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 local_repository(
     name = "pigweed",
@@ -82,3 +83,17 @@ cipd_client_repository()
 load("@pigweed//pw_toolchain:register_toolchains.bzl", "register_pigweed_cxx_toolchains")
 
 register_pigweed_cxx_toolchains()
+
+git_repository(
+  name = "pico-sdk",
+  remote = "https://github.com/armandomontanez/pico-sdk.git",
+  commit = "07890a2af5d76a68a28d0c286d8c4a6611b904f0",
+)
+
+http_archive(
+    name = "arm_gcc_linux-x86_64",
+    url = "https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz",
+    strip_prefix = "arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi",
+    build_file = "@pw_toolchain//build_external:gcc_arm_none_eabi.BUILD",
+    sha256 = "6cd1bbc1d9ae57312bcd169ae283153a9572bd6a8e4eeae2fedfbc33b115fdbb",
+)
